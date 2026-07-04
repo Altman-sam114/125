@@ -541,9 +541,9 @@ backgroundImage
 
 ```text
 hexPainter         地块
-regionBuilder      省份
-theaterAssignment  战区
-unitPlanner        部队
+regionBuilder      州府
+theaterAssignment  方面
+unitPlanner        军队
 ```
 
 编辑动作：
@@ -565,7 +565,7 @@ extend  在已有 hex 邻位扩展稀疏地图
 
 - `MapEditorDocument.contains(_:)` 判断实际存在的 hex，支持稀疏地图。
 - `addHex(at:)` 只能在已有 hex 邻位扩展，避免凭空造孤岛。
-- `deleteHex(at:)` 会删除该 hex 上初始部队；如果某 region 已无 hex，会删除 region 和 theater assignment。
+- `deleteHex(at:)` 会删除该 hex 上初始军队；如果某 region 已无 hex，会删除 region 和 theater assignment。
 - `resize` 会裁剪外部 hex、清理无效 region assignment 和越界单位。
 - 底图 `backgroundImage` 只存在编辑器文档，不写入游戏 JSON。
 
@@ -602,7 +602,7 @@ extend  在已有 hex 邻位扩展稀疏地图
   - deleting：清除 region 的 theater assignment。
 
 - `unitPlanner`
-  - adding：点击 hex 放入 `pendingUnitHexes`，完成时按模板、阵营、朝向、HP 生成初始单位。
+  - adding：点击 hex 放入 `pendingUnitHexes`，完成时按唐宋军队模板、政权、朝向、兵力生成初始单位。
   - 同一 hex 新 stamp 会先删除原单位。
   - deleting / erase：删除该 hex 上初始单位。
 
@@ -669,15 +669,17 @@ supplySources / objectives:
 默认读写路径：
 
 ```text
-WWIIHexV0/Data/ardennes_v0_scenario.json
-WWIIHexV0/Data/ardennes_v02_regions.json
+WWIIHexV0/Data/tangsong_jianlong_960_scenario.json
+WWIIHexV0/Data/tangsong_jianlong_960_regions.json
 ```
+
+读取默认资源时，编辑器优先读取唐宋 960 文件；如果这两个文件不存在，才回退到 legacy 阿登 `ardennes_v0_scenario.json` / `ardennes_v02_regions.json`。覆盖保存始终写回唐宋默认文件名，不覆盖 legacy 阿登数据。
 
 流程：
 
 ```text
 loadDefaultDocument()
-  -> 读取默认 ScenarioDefinition + RegionDataSet
+  -> 优先读取唐宋 ScenarioDefinition + RegionDataSet
   -> makeDocument(...)
      - scenario tile -> MapEditorHex
      - regionData.toHexToRegion 优先填 regionId
@@ -686,9 +688,11 @@ loadDefaultDocument()
      - scenario initialUnits -> MapEditorUnitDraft
 
 overwriteDefaultGameResources(document:)
-  -> MapEditorExporter.export(... 固定默认文件名)
+  -> MapEditorExporter.export(... 固定唐宋默认文件名)
   -> 写回 WWIIHexV0/Data
 ```
+
+v5.2 当前编辑器可见术语已经迁到唐宋口径：地块、州府、方面、军队、粮仓、关隘、宋、割据诸政权。底层 `Faction.allies` / `Faction.germany`、`RegionId` / `TheaterId` 与 `Division` 类型名仍保留作兼容桥。
 
 相关测试确认：
 
@@ -809,6 +813,10 @@ WWIIHexV0Mac
 `WWIIHexV0Mac` 复用主游戏数据和规则，不新增一套 mac 专用规则。resource phase 包含：
 
 ```text
+tangsong_jianlong_960_scenario.json
+tangsong_jianlong_960_regions.json
+tangsong_unit_templates.json
+tangsong_characters.json
 ardennes_v0_scenario.json
 ardennes_v02_regions.json
 general_agents.json

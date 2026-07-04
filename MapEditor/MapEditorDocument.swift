@@ -13,11 +13,11 @@ enum MapEditorMode: String, Codable, CaseIterable, Identifiable {
         case .hexPainter:
             return "地块"
         case .regionBuilder:
-            return "省份"
+            return "州府"
         case .theaterAssignment:
-            return "战区"
+            return "方面"
         case .unitPlanner:
-            return "部队"
+            return "军队"
         }
     }
 }

@@ -1,6 +1,6 @@
 # WWIIHexV0 — 唐宋迁移中的 iOS / macOS AI 战略战棋
 
-> **当前状态：v5.2 唐宋首发剧本迁移首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
+> **当前状态：v5.2 唐宋首发剧本与 MapEditor 迁移阶段。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源，并显示为地块、州府、方面、军队、粮仓等唐宋工具术语；阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
 
 ---
 
@@ -23,12 +23,12 @@
 
 ## 地图 / 战区架构（核心决策）
 
-**分层叠加，不是替换。** 六角格保留作战术/战斗层，省份与战区负责战略聚合。
+**分层叠加，不是替换。** 六角格保留作战术/战斗层，州府/Region 与方面/Theater 负责战略聚合。
 
 ```
 Hex（战术层 / 真实占领与移动）
   ↓ hexToRegion
-Region（省份规则层 / 资源、人力、补给、胜利点聚合）
+Region（州府规则层 / 资源、丁口、粮草、胜利点聚合）
   ↓ regionToTheater（初始战区基本单位，只读基准）
 Initial Theater Layout（地图编辑器初始划分 / 只读 snapshot）
   ↓ hexToTheater
@@ -51,7 +51,7 @@ ZoneDirective / WarCommandExecutor / RuleEngine
   - `hexToTheater` = 运行时动态战区权威映射。单位占领一个 hex，只推进这个 hex 的动态战区归属，不能把整个 region 拉走。
   - 前线 = 我方动态战区与敌方动态战区的 hex 邻接接触，按 region 形成 `FrontSegment`。
 
-**v0.2 以来的长期原则**：省份作为战略层叠加，**不替换** hex 坐标系。现有 hex 规则全保留，省作为聚合视图 + 省级规则并行运行。
+**v0.2 以来的长期原则**：Region 作为战略层叠加，**不替换** hex 坐标系。现有 hex 规则全保留，州府/省级规则只作为聚合视图并行运行。
 
 ---
 

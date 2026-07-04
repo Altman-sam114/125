@@ -31,14 +31,14 @@
 
 ```mermaid
 flowchart TD
-    ME["地图编辑器<br/>MapEditor<br/>用来画格子、省份、战区、初始部队"]:::editor
-    JSON["游戏数据 JSON<br/>ScenarioDefinition + RegionDataSet<br/>保存地图、单位、省份、初始战区"]:::data
+    ME["地图编辑器<br/>MapEditor<br/>用来画地块、州府、方面、初始军队"]:::editor
+    JSON["游戏数据 JSON<br/>ScenarioDefinition + RegionDataSet<br/>保存地图、单位、州府、初始方面"]:::data
     DL["数据加载器<br/>DataLoader.loadGameState<br/>把 JSON 变成可运行 GameState"]:::loader
     GS["运行时总状态<br/>GameState<br/>一局游戏所有状态都在这里"]:::state
 
     HEX["战术权威：六角格和单位位置<br/>HexTile.controller + Division.coord<br/>谁占哪个格、单位在哪，先看这里"]:::authority
-    REGION["省份战略层<br/>RegionNode<br/>资源、补给、胜利点；控制权由 hex 聚合"]:::derived
-    INIT["开局战区快照<br/>TheaterInitialSnapshot<br/>记录地图编辑器给的初始战区"]:::snapshot
+    REGION["州府战略层<br/>RegionNode<br/>资源、补给、胜利点；控制权由 hex 聚合"]:::derived
+    INIT["开局方面快照<br/>TheaterInitialSnapshot<br/>记录地图编辑器给的初始方面"]:::snapshot
     R2T["基础战区映射<br/>regionToTheater<br/>只作初始/基准，不表示战线推进"]:::snapshot
     H2T["动态战区权威<br/>hexToTheater<br/>运行时推进只改具体 hex"]:::authority
     FRONT["前线层<br/>FrontLine / FrontSegment<br/>按双方动态战区的真实相邻 hex 生成"]:::derived
@@ -49,13 +49,13 @@ flowchart TD
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
     DEC["元帅 JSON 解码<br/>TheaterDirectiveDecoder<br/>提取 fenced JSON、校验 id 与 schema"]:::command
     COMP["元帅意图编译<br/>TheaterDirectiveCompiler<br/>把 TheaterDirective 降级成 ZoneDirective"]:::command
-    ZD["战争指令<br/>ZoneDirective<br/>战区级 attack/defend 意图"]:::command
-    WCE["指令翻译器<br/>WarCommandExecutor<br/>把战区意图翻成具体单位命令"]:::command
+    ZD["战争指令<br/>ZoneDirective<br/>方面级 attack/defend 意图"]:::command
+    WCE["指令翻译器<br/>WarCommandExecutor<br/>把方面意图翻成具体单位命令"]:::command
     CMD["底层命令<br/>Command<br/>move / attack / hold / resupply / queueProduction / endTurn"]:::command
     RE["规则引擎<br/>RuleEngine<br/>先校验，再真正修改 GameState"]:::rules
-    SYNC["战略同步器<br/>StrategicStateSynchronizer<br/>占领后刷新省份、战区、前线、部署"]:::rules
+    SYNC["战略同步器<br/>StrategicStateSynchronizer<br/>占领后刷新州府、方面、前线、部署"]:::rules
 
-    UI["地图和面板显示<br/>SpriteKit / SwiftUI Overlay<br/>显示 hex、省份、初始战区、动态战区、前线、部署"]:::ui
+    UI["地图和面板显示<br/>SpriteKit / SwiftUI Overlay<br/>显示 hex、州府、初始方面、动态战区、前线、部署"]:::ui
     LOG["日志和复盘记录<br/>EventLog / WarDirectiveRecord / AgentDecisionRecord / RulerDecisionRecord<br/>用于 UI 展示和后续调试"]:::ui
 
     ME --> JSON --> DL --> GS
@@ -225,7 +225,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     START["触发 AI 行动<br/>AppContainer.advanceOrRunAI / runAIIfNeeded<br/>玩家点下一回合，或命令后轮到 AI"]:::input
-    CHECK{"当前阵营该由 AI 控制吗?<br/>德军 AI 阶段一定可跑；盟军只有观察者模式才跑"}:::decision
+    CHECK{"当前势力该由 AI 控制吗?<br/>TurnOrderState / PowerProfile 判断控制权"}:::decision
     STOP["不运行 AI<br/>等待玩家操作或阶段切换"]:::stop
     REFRESH["行动前刷新运行时战略层<br/>StrategicStateBootstrapper.refreshRuntimeState<br/>避免 AI 读到旧前线/旧部署"]:::rules
     TM["AI 回合编排器<br/>TurnManager.runAITurn<br/>默认 pipelineMode = marshalDirective"]:::rules
@@ -272,17 +272,17 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    DOC["编辑器文档<br/>MapEditorDocument<br/>保存 hex、省份、战区分配、初始单位"]:::editor
-    MODE1["地块编辑<br/>hexPainter<br/>画地形、道路、控制方、补给点"]:::editor
-    MODE2["省份编辑<br/>regionBuilder<br/>把每个 hex 分配给一个 region"]:::editor
-    MODE3["初始战区编辑<br/>theaterAssignment<br/>把 region 分配给开局 theater"]:::editor
-    MODE4["初始部队编辑<br/>unitPlanner<br/>放置开局单位和模板"]:::editor
+    DOC["编辑器文档<br/>MapEditorDocument<br/>保存 hex、州府、方面分配、初始军队"]:::editor
+    MODE1["地块编辑<br/>hexPainter<br/>画地形、道路、控制政权、粮仓"]:::editor
+    MODE2["州府编辑<br/>regionBuilder<br/>把每个 hex 分配给一个 region"]:::editor
+    MODE3["初始方面编辑<br/>theaterAssignment<br/>把 region 分配给开局 theater"]:::editor
+    MODE4["初始军队编辑<br/>unitPlanner<br/>放置开局军队和模板"]:::editor
     EXPORT["导出器<br/>MapEditorExporter.export<br/>把编辑器文档转成游戏 JSON"]:::loader
     CHECK{"导出校验通过吗?<br/>每个 hex 必须有 region；region 不能为空"}:::decision
     ERR["导出失败<br/>unassignedHex / missingRegion / emptyRegion<br/>先回编辑器补数据"]:::stop
     SCEN["场景 JSON<br/>ScenarioDefinition<br/>保存 hex 地形、控制方、补给、目标、初始单位"]:::data
-    REG["省份 JSON<br/>RegionDataSet<br/>保存 hexToRegion、省份、边、初始 theaterId"]:::data
-    NEI["自动推导省份邻接<br/>真实 hex 邻接 -> Region.neighbors / RegionEdge<br/>避免手写邻接出错"]:::derived
+    REG["州府 JSON<br/>RegionDataSet<br/>保存 hexToRegion、州府、边、初始 theaterId"]:::data
+    NEI["自动推导州府邻接<br/>真实 hex 邻接 -> Region.neighbors / RegionEdge<br/>避免手写邻接出错"]:::derived
     BRIDGE["默认资源桥<br/>MapEditorGameResourceBridge<br/>读取或覆盖项目默认地图资源"]:::loader
     FILES["项目默认数据文件<br/>WWIIHexV0/Data<br/>tangsong_jianlong_960_scenario.json + tangsong_jianlong_960_regions.json<br/>阿登数据保留为 legacy fallback"]:::data
     LOAD["游戏启动加载<br/>DataLoader.loadGameState<br/>DEBUG 下优先读源码 JSON"]:::loader
@@ -400,7 +400,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     GJSON["将军数据<br/>generals.json<br/>六位历史将军、倾向、技能、忠诚/满意度"]:::data
-    RJSON["Region 种子<br/>ardennes_v02_regions.assignedGeneralId<br/>开局指定某 region 所属将军"]:::data
+    RJSON["Region 种子<br/>唐宋/legacy region JSON assignedGeneralId<br/>开局指定某 region 所属将军"]:::data
     DL["加载器<br/>DataLoader.loadGeneralRegistry<br/>读取 GeneralRegistry"]:::loader
     DISP["将军指派器<br/>GeneralDispatcher.assignGenerals<br/>种子 -> 偏好 -> 同阵营后备池"]:::rules
     FZ["战区部署<br/>FrontZone.generalAssignment<br/>generalId、HQ region、辖下 division、忠诚/满意度"]:::state

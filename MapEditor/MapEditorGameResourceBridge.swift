@@ -15,8 +15,10 @@ enum MapEditorGameResourceBridgeError: Error, CustomStringConvertible {
 }
 
 enum MapEditorGameResourceBridge {
-    static let scenarioResourceName = "ardennes_v0_scenario"
-    static let regionResourceName = "ardennes_v02_regions"
+    static let scenarioResourceName = "tangsong_jianlong_960_scenario"
+    static let regionResourceName = "tangsong_jianlong_960_regions"
+    private static let legacyScenarioResourceName = "ardennes_v0_scenario"
+    private static let legacyRegionResourceName = "ardennes_v02_regions"
 
     static var gameDataDirectory: URL {
         URL(fileURLWithPath: #filePath)
@@ -27,18 +29,11 @@ enum MapEditorGameResourceBridge {
     }
 
     static func loadDefaultDocument() throws -> MapEditorDocument {
-        let scenarioURL = gameDataDirectory.appending(path: scenarioResourceName).appendingPathExtension("json")
-        let regionURL = gameDataDirectory.appending(path: regionResourceName).appendingPathExtension("json")
-        guard FileManager.default.fileExists(atPath: scenarioURL.path) else {
-            throw MapEditorGameResourceBridgeError.missingResource(scenarioURL)
-        }
-        guard FileManager.default.fileExists(atPath: regionURL.path) else {
-            throw MapEditorGameResourceBridgeError.missingResource(regionURL)
-        }
+        let urls = try defaultResourceURLs()
 
         let decoder = JSONDecoder()
-        let scenario = try decoder.decode(ScenarioDefinition.self, from: Data(contentsOf: scenarioURL))
-        let regionData = try decoder.decode(RegionDataSet.self, from: Data(contentsOf: regionURL))
+        let scenario = try decoder.decode(ScenarioDefinition.self, from: Data(contentsOf: urls.scenario))
+        let regionData = try decoder.decode(RegionDataSet.self, from: Data(contentsOf: urls.region))
         return try makeDocument(scenario: scenario, regionData: regionData)
     }
 
@@ -125,5 +120,23 @@ enum MapEditorGameResourceBridge {
             regionTheaterAssignments: regionTheaterAssignments,
             initialUnits: units
         )
+    }
+
+    private static func defaultResourceURLs() throws -> (scenario: URL, region: URL) {
+        let primaryScenarioURL = gameDataDirectory.appending(path: scenarioResourceName).appendingPathExtension("json")
+        let primaryRegionURL = gameDataDirectory.appending(path: regionResourceName).appendingPathExtension("json")
+        if FileManager.default.fileExists(atPath: primaryScenarioURL.path),
+           FileManager.default.fileExists(atPath: primaryRegionURL.path) {
+            return (primaryScenarioURL, primaryRegionURL)
+        }
+
+        let legacyScenarioURL = gameDataDirectory.appending(path: legacyScenarioResourceName).appendingPathExtension("json")
+        let legacyRegionURL = gameDataDirectory.appending(path: legacyRegionResourceName).appendingPathExtension("json")
+        if FileManager.default.fileExists(atPath: legacyScenarioURL.path),
+           FileManager.default.fileExists(atPath: legacyRegionURL.path) {
+            return (legacyScenarioURL, legacyRegionURL)
+        }
+
+        throw MapEditorGameResourceBridgeError.missingResource(primaryScenarioURL)
     }
 }

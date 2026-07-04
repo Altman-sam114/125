@@ -10,12 +10,12 @@ final class MapEditorViewModel: ObservableObject {
     @Published var paintRoad: Bool = false
     @Published var paintController: Faction? = nil
     @Published var paintSupply: Bool = false
-    @Published var supplyFaction: Faction = .germany
+    @Published var supplyFaction: Faction = .allies
     @Published var selectedRegionId: RegionId?
     @Published var selectedTheaterId: TheaterId?
     @Published var eraseRegionMembership: Bool = false
-    @Published var selectedUnitTemplateId: String = "infantry_division"
-    @Published var selectedUnitFaction: Faction = .germany
+    @Published var selectedUnitTemplateId: String = "tangsong_prefecture_army"
+    @Published var selectedUnitFaction: Faction = .allies
     @Published var selectedUnitHP: Int = 10
     @Published var selectedUnitFacing: HexDirection = .west
     @Published var eraseUnits: Bool = false
@@ -34,9 +34,9 @@ final class MapEditorViewModel: ObservableObject {
     @Published var backgroundOffsetX: Double = 0
     @Published var backgroundOffsetY: Double = 0
 
-    @Published var newRegionText: String = "新省份"
-    @Published var newTheaterText: String = "新战区"
-    @Published var newUnitNameText: String = "师"
+    @Published var newRegionText: String = "新州府"
+    @Published var newTheaterText: String = "新方面"
+    @Published var newUnitNameText: String = "军"
 
     init(document: MapEditorDocument = .new(width: 8, height: 6)) {
         self.document = document
@@ -67,11 +67,11 @@ final class MapEditorViewModel: ObservableObject {
             let nextIndex = nextRegionIndex()
             id = RegionId("region_\(nextIndex)")
             let rawName = newRegionText.trimmingCharacters(in: .whitespacesAndNewlines)
-            name = rawName.isEmpty ? "省份 \(nextIndex)" : rawName
+            name = rawName.isEmpty ? "州府 \(nextIndex)" : rawName
         }
         document.createRegion(id: id, name: name)
         selectedRegionId = id
-        lastStatusMessage = "已创建省份：\(name)（\(id.rawValue)）。"
+        lastStatusMessage = "已创建州府：\(name)（\(id.rawValue)）。"
         markChanged()
     }
 
@@ -87,25 +87,25 @@ final class MapEditorViewModel: ObservableObject {
             let nextIndex = nextTheaterIndex()
             id = TheaterId("theater_\(nextIndex)")
             let rawName = newTheaterText.trimmingCharacters(in: .whitespacesAndNewlines)
-            name = rawName.isEmpty ? "战区 \(nextIndex)" : rawName
+            name = rawName.isEmpty ? "方面 \(nextIndex)" : rawName
         }
         document.createTheater(id: id, name: name)
         selectedTheaterId = id
-        lastStatusMessage = "已创建战区：\(name)（\(id.rawValue)）。"
+        lastStatusMessage = "已创建方面：\(name)（\(id.rawValue)）。"
         markChanged()
     }
 
     func prepareNewRegion() {
         selectedRegionId = nil
         pendingRegionHexes.removeAll()
-        lastStatusMessage = "将创建新省份，ID 会自动递增。"
+        lastStatusMessage = "将创建新州府，ID 会自动递增。"
         markChanged()
     }
 
     func prepareNewTheater() {
         selectedTheaterId = nil
         pendingTheaterRegions.removeAll()
-        lastStatusMessage = "将创建新战区，ID 会自动递增。"
+        lastStatusMessage = "将创建新方面，ID 会自动递增。"
         markChanged()
     }
 
@@ -224,7 +224,7 @@ final class MapEditorViewModel: ObservableObject {
         guard let inspectedCoord,
               let hex = document.hexes[inspectedCoord],
               let regionId = hex.regionId else {
-            lastStatusMessage = "当前选中地块没有省份信息可保存。"
+            lastStatusMessage = "当前选中地块没有州府信息可保存。"
             markChanged()
             return
         }
@@ -310,7 +310,7 @@ final class MapEditorViewModel: ObservableObject {
             selectedTheaterId = document.theaters.keys.sorted { $0.rawValue < $1.rawValue }.first
             syncBackgroundControlsFromDocument()
             lastErrorMessage = nil
-            lastStatusMessage = "已读取默认游戏资源。"
+            lastStatusMessage = "已读取唐宋默认游戏资源。"
             markChanged()
         } catch {
             lastErrorMessage = String(describing: error)
@@ -435,7 +435,7 @@ final class MapEditorViewModel: ObservableObject {
     private func stampUnit(at coord: HexCoord) {
         document.initialUnits.removeAll { $0.coord == coord }
         let nextIndex = document.initialUnits.count + 1
-        let factionPrefix = selectedUnitFaction == .germany ? "ger" : "all"
+        let factionPrefix = selectedUnitFaction == .germany ? "anti_song" : "song"
         let id = "\(factionPrefix)_editor_\(nextIndex)"
         document.initialUnits.append(
             MapEditorUnitDraft(
