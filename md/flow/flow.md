@@ -384,6 +384,16 @@ industry
 supplies
 ```
 
+v5.3 开始，唐宋默认场景在显示层和经济日志中把这三项映射为：
+
+```text
+manpower -> 丁口
+industry -> 钱帛
+supplies -> 粮草
+```
+
+源码字段名仍保留 legacy 英文，避免大规模 schema 迁移；`EconomyResources.summary(isTangSongScenario:)` 和 `ProductionKind.displayName(isTangSongScenario:)` 是当前显示桥。
+
 收入算法：
 
 ```text
@@ -417,6 +427,18 @@ EconomyPanelView
 
 排产时预付资源，完成时才部署单位或发放 supply stockpile。完成单位只能放到本方控制、passable、空置、非敌邻，且位于首都、城镇/大都会、工厂、高基建、高补给 region 或 supply source 的后方 hex。找不到安全部署点时订单保留到下回合继续尝试。
 
+v5.3 当前唐宋生产显示桥：
+
+```text
+infantryDivision   -> 募厢军，完成后命名为厢军
+panzerDivision     -> 募禁军，完成后命名为禁军
+motorizedDivision  -> 募骑军，完成后命名为骑军
+artilleryDivision  -> 造器械，完成后命名为攻城器械营
+supplyStockpile    -> 整备粮草，完成后增加粮草
+```
+
+这些仍是 `ProductionKind` 的兼容显示，不代表底层 enum 已重命名。`Command.displayName(isTangSongScenario:)`、`RuleEngine`、`AppContainer`、`EconomyRules` 和 `EconomyPanelView` 已读取该显示桥，唐宋默认路径的排产、部署、补员、缺粮和结束回合日志不再直接输出 `Panzer Division`、`Germany`、`MP/IC/SUP`。
+
 自动补员在 active faction 结束回合时发生，只处理：
 
 ```text
@@ -428,7 +450,7 @@ strength < maxStrength
 不与敌军相邻
 ```
 
-每个单位每回合最多恢复 2 strength，并按装甲、摩托化、火炮权重扣 manpower / industry / supplies。v0.8 不恢复 organization。
+每个单位每回合最多恢复 2 strength，并按装甲、摩托化、火炮权重扣 manpower / industry / supplies；唐宋显示为丁口、钱帛、粮草。v0.8/v5.3 均不恢复 organization。
 
 ---
 

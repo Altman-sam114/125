@@ -135,7 +135,7 @@ md/prompt/v5.0-唐宋迁移/
 ├── v5.0_audit_and_contract.md              # 已创建：当前二战残留审计与 v5.1 合同
 ├── v5.1_powers_turn_order_record.md        # 已创建：Power/TurnOrder/Relation 兼容地基
 ├── v5.2_scenario_mapeditor_record.md       # 已创建：唐宋默认剧本数据、MapEditor 资源桥与术语迁移
-├── v5.3_rules_siege_grain_record.md
+├── v5.3_rules_siege_grain_record.md       # 已创建：生产/府库显示桥首轮，围城和粮道待续
 ├── v5.4_agent_schema_record.md
 ├── v5.5_ui_visual_record.md
 ├── v5.6_diplomacy_mandate_record.md

@@ -13,7 +13,9 @@ struct RuleEngine {
                 command: command,
                 validation: validation,
                 state: preparedState,
-                message: "Command rejected: \(errorMessage)."
+                message: preparedState.isTangSongScenario
+                    ? "军令被拒：\(errorMessage)。"
+                    : "Command rejected: \(errorMessage)."
             )
         }
 
@@ -22,7 +24,9 @@ struct RuleEngine {
             command: command,
             validation: validation,
             state: nextState,
-            message: "Command executed: \(command.displayName)."
+            message: preparedState.isTangSongScenario
+                ? "军令已执行：\(command.displayName(isTangSongScenario: true))。"
+                : "Command executed: \(command.displayName)."
         )
     }
 

@@ -97,8 +97,12 @@ final class AppContainer: ObservableObject {
         gameState = refreshGeneralAssignments(in: nextState)
         lastCommandMessage = result.message
 
+        let commandName = command.displayName(isTangSongScenario: gameState.isTangSongScenario)
         let status = result.succeeded ? "accepted" : "rejected"
-        appendInteractionEvent("Command \(status): \(command.displayName). \(result.message)")
+        let statusText = gameState.isTangSongScenario
+            ? (result.succeeded ? "军令接受" : "军令驳回")
+            : "Command \(status)"
+        appendInteractionEvent("\(statusText): \(commandName). \(result.message)")
         refreshSelectionAfterStateChange()
         runAIIfNeeded()
     }

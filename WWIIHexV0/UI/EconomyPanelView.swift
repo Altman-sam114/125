@@ -64,7 +64,7 @@ struct EconomyPanelView: View {
                 .buttonStyle(.bordered)
                 .disabled(!canQueue(kind))
 
-                Text("Cost \(resourceSummary(kind.cost)) | \(kind.buildTurns) turn(s)")
+                Text(productionCostLine(for: kind))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -87,7 +87,7 @@ struct EconomyPanelView: View {
                         Text(productionName(for: order.kind))
                             .lineLimit(1)
                         Spacer()
-                        Text(order.isReady ? "Ready" : "\(order.remainingTurns)")
+                        Text(order.isReady ? readyLabel : "\(order.remainingTurns)")
                             .foregroundStyle(order.isReady ? .green : .secondary)
                     }
                     .font(.caption)
@@ -117,26 +117,19 @@ struct EconomyPanelView: View {
     }
 
     private func resourceSummary(_ resources: EconomyResources) -> String {
-        "\(manpowerLabel) \(resources.manpower), \(industryLabel) \(resources.industry), \(suppliesLabel) \(resources.supplies)"
+        resources.summary(isTangSongScenario: gameState.isTangSongScenario)
     }
 
     private func productionName(for kind: ProductionKind) -> String {
-        guard gameState.isTangSongScenario else {
-            return kind.displayName
+        kind.displayName(isTangSongScenario: gameState.isTangSongScenario)
+    }
+
+    private func productionCostLine(for kind: ProductionKind) -> String {
+        if gameState.isTangSongScenario {
+            return "耗 \(resourceSummary(kind.cost)) | \(kind.buildTurns) 回合"
         }
 
-        switch kind {
-        case .infantryDivision:
-            return "募厢军"
-        case .panzerDivision:
-            return "募禁军"
-        case .motorizedDivision:
-            return "募骑军"
-        case .artilleryDivision:
-            return "造器械"
-        case .supplyStockpile:
-            return "整备粮草"
-        }
+        return "Cost \(resourceSummary(kind.cost)) | \(kind.buildTurns) turn(s)"
     }
 
     private func iconName(for kind: ProductionKind) -> String {
@@ -176,5 +169,9 @@ struct EconomyPanelView: View {
 
     private var upkeepLabel: String {
         gameState.isTangSongScenario ? "耗粮" : "Upkeep"
+    }
+
+    private var readyLabel: String {
+        gameState.isTangSongScenario ? "就绪" : "Ready"
     }
 }

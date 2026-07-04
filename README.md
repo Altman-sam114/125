@@ -1,6 +1,6 @@
 # WWIIHexV0 — 唐宋迁移中的 iOS / macOS AI 战略战棋
 
-> **当前状态：v5.2 唐宋首发剧本与 MapEditor 迁移阶段。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源，并显示为地块、州府、方面、军队、粮仓等唐宋工具术语；阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
+> **当前状态：v5.3 唐宋生产/府库显示桥首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源；生产、府库和经济规则日志在唐宋路径下显示为军备、丁口、钱帛、粮草、禁军/厢军/骑军/攻城器械营。阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
 
 ---
 

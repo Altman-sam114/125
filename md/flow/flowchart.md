@@ -169,13 +169,13 @@ flowchart TD
     BOOT["经济启动补账<br/>EconomyRules.bootstrapIfNeeded<br/>旧状态缺 economyState 时从地图推导账本"]:::economy
     HEX["真实控制权<br/>HexTile.controller<br/>经济收入必须有己方控制 hex 证据"]:::authority
     REGION["战略聚合<br/>RegionNode<br/>city / factories / infrastructure / supplyValue"]:::derived
-    INCOME["收入计算<br/>EconomyRules.income<br/>manpower / industry / supplies"]:::economy
-    LEDGER["阵营总账<br/>FactionEconomyLedger<br/>库存、上回合收入、维护费、补员消耗、队列"]:::economy
+    INCOME["收入计算<br/>EconomyRules.income<br/>manpower / industry / supplies<br/>唐宋显示为丁口 / 钱帛 / 粮草"]:::economy
+    LEDGER["政权府库总账<br/>FactionEconomyLedger<br/>库存、上回合收入、维护费、补员消耗、队列"]:::economy
 
-    UI["经济面板<br/>EconomyPanelView<br/>展示资源和生产按钮"]:::ui
+    UI["府库面板<br/>EconomyPanelView<br/>展示资源和军备按钮"]:::ui
     QUEUE["生产命令<br/>Command.queueProduction<br/>玩家/未来 AI 共用底层命令"]:::command
     VALIDATE["生产校验<br/>CommandValidator.validateProduction<br/>检查 phase 与资源是否足够"]:::rules
-    PAY["预付成本并入队<br/>EconomyRules.queueProduction<br/>扣 MP/IC/SUP，追加 ProductionOrder"]:::economy
+    PAY["预付成本并入队<br/>EconomyRules.queueProduction<br/>扣资源，追加 ProductionOrder<br/>唐宋日志使用军备/粮草口径"]:::economy
 
     END["结束当前阵营回合<br/>Command.endTurn<br/>CommandExecutor.executeEndTurn<br/>按 TurnOrderState 推进 active power"]:::command
     SUPPLY["补给状态刷新<br/>SupplyRules.updateSupplyStates"]:::rules
@@ -183,7 +183,7 @@ flowchart TD
     SHORT{"补给库存够吗?"}:::decision
     LOW["战略补给短缺<br/>supplied 单位降为 lowSupply"]:::rules
     REINF["自动补员<br/>安全后方 supplied 非敌邻单位<br/>每回合最多 +2 strength"]:::rules
-    PROD["推进生产队列<br/>remainingTurns - 1<br/>ready 后部署或发补给箱"]:::economy
+    PROD["推进生产队列<br/>remainingTurns - 1<br/>ready 后部署军队或整备粮草"]:::economy
     DEPLOY{"有合格后方部署点吗?"}:::decision
     SPAWN["部署新单位<br/>首都/城镇/工厂/高基建/高补给或 supply source<br/>必须己控、空置、非敌邻"]:::rules
     WAIT["保留订单<br/>本回合无安全 hex，等待后续回合"]:::economy

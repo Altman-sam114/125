@@ -36,6 +36,14 @@ struct EconomyResources: Codable, Equatable {
         industry = max(0, industry - resources.industry)
         supplies = max(0, supplies - resources.supplies)
     }
+
+    func summary(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            return "丁口 \(manpower), 钱帛 \(industry), 粮草 \(supplies)"
+        }
+
+        return "MP \(manpower), IC \(industry), SUP \(supplies)"
+    }
 }
 
 enum CityLevel: String, Codable, Equatable, CaseIterable {
@@ -96,6 +104,25 @@ enum ProductionKind: String, Codable, Equatable, CaseIterable, Identifiable {
     }
 
     var displayName: String {
+        displayName(isTangSongScenario: false)
+    }
+
+    func displayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .infantryDivision:
+                return "募厢军"
+            case .panzerDivision:
+                return "募禁军"
+            case .motorizedDivision:
+                return "募骑军"
+            case .artilleryDivision:
+                return "造器械"
+            case .supplyStockpile:
+                return "整备粮草"
+            }
+        }
+
         switch self {
         case .infantryDivision:
             return "Infantry Division"
@@ -108,6 +135,25 @@ enum ProductionKind: String, Codable, Equatable, CaseIterable, Identifiable {
         case .supplyStockpile:
             return "Supply Stockpile"
         }
+    }
+
+    func producedUnitBaseName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .infantryDivision:
+                return "厢军"
+            case .panzerDivision:
+                return "禁军"
+            case .motorizedDivision:
+                return "骑军"
+            case .artilleryDivision:
+                return "攻城器械营"
+            case .supplyStockpile:
+                return "粮草转运"
+            }
+        }
+
+        return displayName
     }
 
     var cost: EconomyResources {

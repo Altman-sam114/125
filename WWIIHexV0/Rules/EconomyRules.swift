@@ -38,7 +38,9 @@ struct EconomyRules {
         let factions = next.divisions.map(\.faction) + Faction.allCases
         next.economyState = makeInitialState(map: next.map, factions: factions, turn: next.turn)
         next.appendEvent(
-            "Economy state bootstrapped from controlled cities, factories, supply hubs, and regions.",
+            next.isTangSongScenario
+                ? "府库状态已根据受控州府、工坊、粮仓和控制区补齐。"
+                : "Economy state bootstrapped from controlled cities, factories, supply hubs, and regions.",
             category: .supply
         )
         return next
@@ -50,9 +52,13 @@ struct EconomyRules {
 
     func queueProduction(kind: ProductionKind, faction: Faction, in state: inout GameState) -> Bool {
         var ledger = state.economyState.ledger(for: faction)
+        let factionName = state.displayName(for: faction)
+        let productionName = productionDisplayName(kind, in: state)
         guard ledger.stockpile.canAfford(kind.cost) else {
             state.appendEvent(
-                "\(faction.displayName) lacks resources for \(kind.displayName).",
+                state.isTangSongScenario
+                    ? "\(factionName)府库不足，无法\(productionName)。"
+                    : "\(factionName) lacks resources for \(productionName).",
                 category: .supply
             )
             return false
@@ -69,7 +75,9 @@ struct EconomyRules {
         ledger.lastUpdatedTurn = state.turn
         state.economyState.updateLedger(ledger)
         state.appendEvent(
-            "\(faction.displayName) queued \(kind.displayName): cost \(resourceSummary(kind.cost)), \(kind.buildTurns) turn(s).",
+            state.isTangSongScenario
+                ? "\(factionName)下达\(productionName)令：耗 \(resourceSummary(kind.cost, in: state))，\(kind.buildTurns) 回合。"
+                : "\(factionName) queued \(productionName): cost \(resourceSummary(kind.cost, in: state)), \(kind.buildTurns) turn(s).",
             category: .supply
         )
         return true
@@ -102,7 +110,9 @@ struct EconomyRules {
         state.economyState.updateLedger(ledger)
         state.economyState.lastResolvedTurn = state.turn
         state.appendEvent(
-            "\(faction.displayName) economy: +\(resourceSummary(turnIncome)); upkeep \(resourceSummary(upkeep)); reinforcement \(resourceSummary(reinforcementSpend)); stockpile \(resourceSummary(ledger.stockpile)).",
+            state.isTangSongScenario
+                ? "\(state.displayName(for: faction))府库：收入 \(resourceSummary(turnIncome, in: state))；耗粮 \(resourceSummary(upkeep, in: state))；补员 \(resourceSummary(reinforcementSpend, in: state))；余 \(resourceSummary(ledger.stockpile, in: state))。"
+                : "\(state.displayName(for: faction)) economy: +\(resourceSummary(turnIncome, in: state)); upkeep \(resourceSummary(upkeep, in: state)); reinforcement \(resourceSummary(reinforcementSpend, in: state)); stockpile \(resourceSummary(ledger.stockpile, in: state)).",
             category: .supply
         )
     }
@@ -206,7 +216,9 @@ struct EconomyRules {
         }
 
         state.appendEvent(
-            "\(faction.displayName) strategic supply stockpile is depleted; supplied units degrade to Low Supply this turn.",
+            state.isTangSongScenario
+                ? "\(state.displayName(for: faction))粮草见底，已补给军队本回合降为缺粮。"
+                : "\(state.displayName(for: faction)) strategic supply stockpile is depleted; supplied units degrade to Low Supply this turn.",
             category: .supply
         )
     }
@@ -255,7 +267,9 @@ struct EconomyRules {
             if restored > 0 {
                 state.divisions[index].reinforceStrength(restored)
                 state.appendEvent(
-                    "\(state.divisions[index].name) received automatic replacements: +\(restored) strength.",
+                    state.isTangSongScenario
+                        ? "\(state.divisions[index].name)自动补员：+\(restored) 兵力。"
+                        : "\(state.divisions[index].name) received automatic replacements: +\(restored) strength.",
                     category: .reinforce
                 )
             }
@@ -307,7 +321,9 @@ struct EconomyRules {
             if order.kind == .supplyStockpile {
                 ledger.stockpile.add(EconomyResources(supplies: order.kind.supplyOutput))
                 state.appendEvent(
-                    "\(faction.displayName) completed \(order.kind.displayName): +\(order.kind.supplyOutput) supplies.",
+                    state.isTangSongScenario
+                        ? "\(state.displayName(for: faction))完成\(productionDisplayName(order.kind, in: state))：+\(order.kind.supplyOutput) 粮草。"
+                        : "\(state.displayName(for: faction)) completed \(productionDisplayName(order.kind, in: state)): +\(order.kind.supplyOutput) supplies.",
                     category: .supply
                 )
                 continue
@@ -318,18 +334,23 @@ struct EconomyRules {
                     order: order,
                     faction: faction,
                     coord: deployment.coord,
-                    index: state.divisions.count
+                    index: state.divisions.count,
+                    isTangSongScenario: state.isTangSongScenario
                 )
                 state.divisions.append(division)
                 order.deploymentRegionId = deployment.regionId
                 state.appendEvent(
-                    "\(faction.displayName) deployed \(division.name) at \(deployment.coord.q),\(deployment.coord.r).",
+                    state.isTangSongScenario
+                        ? "\(state.displayName(for: faction))部署\(division.name)于 \(deployment.coord.q),\(deployment.coord.r)。"
+                        : "\(state.displayName(for: faction)) deployed \(division.name) at \(deployment.coord.q),\(deployment.coord.r).",
                     category: .reinforce
                 )
             } else {
                 remainingOrders.append(order)
                 state.appendEvent(
-                    "\(order.kind.displayName) is ready, but no safe rear deployment hex is available.",
+                    state.isTangSongScenario
+                        ? "\(productionDisplayName(order.kind, in: state))已就绪，但没有安全后方部署地块。"
+                        : "\(productionDisplayName(order.kind, in: state)) is ready, but no safe rear deployment hex is available.",
                     category: .reinforce
                 )
             }
@@ -438,10 +459,11 @@ struct EconomyRules {
         order: ProductionOrder,
         faction: Faction,
         coord: HexCoord,
-        index: Int
+        index: Int,
+        isTangSongScenario: Bool
     ) -> Division {
         let id = "prod_\(faction.rawValue)_\(order.kind.rawValue)_\(order.createdTurn)_\(index)"
-        let name = "\(order.kind.displayName) \(order.createdTurn)-\(index)"
+        let name = "\(order.kind.producedUnitBaseName(isTangSongScenario: isTangSongScenario)) \(order.createdTurn)-\(index)"
 
         switch order.kind {
         case .infantryDivision:
@@ -471,7 +493,11 @@ struct EconomyRules {
         "order_\(faction.rawValue)_\(kind.rawValue)_\(turn)_\(index)"
     }
 
-    private func resourceSummary(_ resources: EconomyResources) -> String {
-        "MP \(resources.manpower), IC \(resources.industry), SUP \(resources.supplies)"
+    private func productionDisplayName(_ kind: ProductionKind, in state: GameState) -> String {
+        kind.displayName(isTangSongScenario: state.isTangSongScenario)
+    }
+
+    private func resourceSummary(_ resources: EconomyResources, in state: GameState) -> String {
+        resources.summary(isTangSongScenario: state.isTangSongScenario)
     }
 }

@@ -18,6 +18,29 @@ enum Command: Codable, Equatable {
     }
 
     var displayName: String {
+        displayName(isTangSongScenario: false)
+    }
+
+    func displayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .move(let divisionId, let destination):
+                return "行军(\(divisionId) -> \(destination.q),\(destination.r))"
+            case .attack(let attackerId, let targetId):
+                return "进攻(\(attackerId) -> \(targetId))"
+            case .hold(let divisionId):
+                return "固守(\(divisionId))"
+            case .allowRetreat(let divisionId):
+                return "准退(\(divisionId))"
+            case .resupply(let divisionId):
+                return "休整(\(divisionId))"
+            case .queueProduction(let kind):
+                return "军备(\(kind.displayName(isTangSongScenario: true)))"
+            case .endTurn:
+                return "结束回合"
+            }
+        }
+
         switch self {
         case .move(let divisionId, let destination):
             return "Move(\(divisionId) -> \(destination.q),\(destination.r))"

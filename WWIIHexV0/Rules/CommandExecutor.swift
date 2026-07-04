@@ -133,7 +133,11 @@ struct CommandExecutor {
 
         state.divisions[index].retreatMode = .hold
         state.divisions[index].hasActed = true
-        state.appendEvent("\(state.divisions[index].name) set stance to HOLD: no retreat, +20% defense, +20% losses.")
+        state.appendEvent(
+            state.isTangSongScenario
+                ? "\(state.divisions[index].name)转为固守：不主动退却，防御提升，损失略增。"
+                : "\(state.divisions[index].name) set stance to HOLD: no retreat, +20% defense, +20% losses."
+        )
     }
 
     private func executeAllowRetreat(divisionId: String, in state: inout GameState) {
@@ -143,7 +147,11 @@ struct CommandExecutor {
 
         state.divisions[index].retreatMode = .retreatable
         state.divisions[index].hasActed = true
-        state.appendEvent("\(state.divisions[index].name) set stance to RETREATABLE: auto-retreat after severe losses.")
+        state.appendEvent(
+            state.isTangSongScenario
+                ? "\(state.divisions[index].name)改为准退：重创后可自动退却。"
+                : "\(state.divisions[index].name) set stance to RETREATABLE: auto-retreat after severe losses."
+        )
     }
 
     private func executeResupply(divisionId: String, in state: inout GameState) {
@@ -180,7 +188,11 @@ struct CommandExecutor {
 
         resetActionsForActiveFaction(in: &state)
         state = StrategicStateBootstrapper().refreshRuntimeState(state)
-        state.appendEvent("Turn advanced to \(state.turn), \(state.activeFaction.displayName) active.")
+        state.appendEvent(
+            state.isTangSongScenario
+                ? "回合推进至 \(state.turn)，\(state.displayName(for: state.activeFaction))行动。"
+                : "Turn advanced to \(state.turn), \(state.activeFaction.displayName) active."
+        )
     }
 
     private func resetActionsForActiveFaction(in state: inout GameState) {
