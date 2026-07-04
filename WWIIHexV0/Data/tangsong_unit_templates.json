@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "templates": [
+    {
+      "id": "tangsong_imperial_guard",
+      "displayName": "禁军",
+      "maxHP": 10,
+      "components": [
+        {
+          "type": "infantry",
+          "weight": 0.55
+        },
+        {
+          "type": "motorizedInfantry",
+          "weight": 0.2
+        },
+        {
+          "type": "artillery",
+          "weight": 0.25
+        }
+      ]
+    },
+    {
+      "id": "tangsong_prefecture_army",
+      "displayName": "厢军",
+      "maxHP": 9,
+      "components": [
+        {
+          "type": "infantry",
+          "weight": 0.75
+        },
+        {
+          "type": "artillery",
+          "weight": 0.15
+        },
+        {
+          "type": "motorizedInfantry",
+          "weight": 0.1
+        }
+      ]
+    },
+    {
+      "id": "tangsong_cavalry_army",
+      "displayName": "骑军",
+      "maxHP": 9,
+      "components": [
+        {
+          "type": "motorizedInfantry",
+          "weight": 0.65
+        },
+        {
+          "type": "infantry",
+          "weight": 0.25
+        },
+        {
+          "type": "artillery",
+          "weight": 0.1
+        }
+      ]
+    },
+    {
+      "id": "tangsong_crossbow_garrison",
+      "displayName": "弓弩守军",
+      "maxHP": 9,
+      "components": [
+        {
+          "type": "infantry",
+          "weight": 0.6
+        },
+        {
+          "type": "artillery",
+          "weight": 0.35
+        },
+        {
+          "type": "motorizedInfantry",
+          "weight": 0.05
+        }
+      ]
+    },
+    {
+      "id": "tangsong_siege_train",
+      "displayName": "攻城器械营",
+      "maxHP": 8,
+      "components": [
+        {
+          "type": "artillery",
+          "weight": 0.7
+        },
+        {
+          "type": "infantry",
+          "weight": 0.25
+        },
+        {
+          "type": "motorizedInfantry",
+          "weight": 0.05
+        }
+      ]
+    }
+  ]
+}

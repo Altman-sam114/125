@@ -14,7 +14,7 @@ struct HUDView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Ardennes V0")
+                Text(gameState.scenarioDisplayName)
                     .font(.headline)
 
                 Spacer()
@@ -35,21 +35,21 @@ struct HUDView: View {
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 8) {
                 GridRow {
                     metric("Turn", "\(gameState.turn) / \(gameState.maxTurns)")
-                    metric("Faction", gameState.activeFaction.displayName)
+                    metric("Power", gameState.displayName(for: gameState.activeFaction))
                 }
 
                 GridRow {
-                    metric("Phase", gameState.phase.displayName)
+                    metric("Phase", gameState.phaseDisplayName)
                     metric("Victory", victoryText)
                 }
 
                 GridRow {
-                    metric("Manpower", "\(activeLedger.stockpile.manpower)")
-                    metric("Industry", "\(activeLedger.stockpile.industry)")
+                    metric(manpowerLabel, "\(activeLedger.stockpile.manpower)")
+                    metric(industryLabel, "\(activeLedger.stockpile.industry)")
                 }
 
                 GridRow {
-                    metric("Supplies", "\(activeLedger.stockpile.supplies)")
+                    metric(suppliesLabel, "\(activeLedger.stockpile.supplies)")
                     metric("Queue", "\(activeLedger.productionQueue.count)")
                 }
             }
@@ -77,10 +77,22 @@ struct HUDView: View {
         guard let winner = gameState.victoryState.winner else {
             return "Ongoing"
         }
-        return "\(winner.displayName) Victory"
+        return "\(gameState.displayName(for: winner)) Victory"
     }
 
     private var activeLedger: FactionEconomyLedger {
         gameState.economyState.ledger(for: gameState.activeFaction)
+    }
+
+    private var manpowerLabel: String {
+        gameState.isTangSongScenario ? "丁口" : "Manpower"
+    }
+
+    private var industryLabel: String {
+        gameState.isTangSongScenario ? "钱帛" : "Industry"
+    }
+
+    private var suppliesLabel: String {
+        gameState.isTangSongScenario ? "粮草" : "Supplies"
     }
 }

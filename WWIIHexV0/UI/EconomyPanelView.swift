@@ -8,7 +8,7 @@ struct EconomyPanelView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Economy")
+            Text(gameState.isTangSongScenario ? "府库" : "Economy")
                 .font(.headline)
 
             ledgerSection(for: gameState.activeFaction)
@@ -30,20 +30,20 @@ struct EconomyPanelView: View {
         let ledger = gameState.economyState.ledger(for: faction)
 
         return VStack(alignment: .leading, spacing: 8) {
-            Text("\(faction.displayName) Ledger")
+            Text("\(gameState.displayName(for: faction)) \(gameState.isTangSongScenario ? "府库" : "Ledger")")
                 .font(.subheadline.weight(.semibold))
 
             Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 6) {
                 GridRow {
-                    metric("Manpower", ledger.stockpile.manpower)
-                    metric("Industry", ledger.stockpile.industry)
-                    metric("Supplies", ledger.stockpile.supplies)
+                    metric(manpowerLabel, ledger.stockpile.manpower)
+                    metric(industryLabel, ledger.stockpile.industry)
+                    metric(suppliesLabel, ledger.stockpile.supplies)
                 }
 
                 GridRow {
-                    metric("Income MP", ledger.lastIncome.manpower)
-                    metric("Income IC", ledger.lastIncome.industry)
-                    metric("Upkeep", ledger.lastUpkeep.supplies)
+                    metric(incomeManpowerLabel, ledger.lastIncome.manpower)
+                    metric(incomeIndustryLabel, ledger.lastIncome.industry)
+                    metric(upkeepLabel, ledger.lastUpkeep.supplies)
                 }
             }
         }
@@ -51,14 +51,14 @@ struct EconomyPanelView: View {
 
     private var productionControls: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Production")
+            Text(gameState.isTangSongScenario ? "军备" : "Production")
                 .font(.subheadline.weight(.semibold))
 
             ForEach(ProductionKind.allCases) { kind in
                 Button {
                     onQueueProduction(kind)
                 } label: {
-                    Label(kind.displayName, systemImage: iconName(for: kind))
+                    Label(productionName(for: kind), systemImage: iconName(for: kind))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .buttonStyle(.bordered)
@@ -75,16 +75,16 @@ struct EconomyPanelView: View {
         let queue = gameState.economyState.ledger(for: faction).productionQueue
 
         return VStack(alignment: .leading, spacing: 6) {
-            Text("Queue")
+            Text(gameState.isTangSongScenario ? "队列" : "Queue")
                 .font(.subheadline.weight(.semibold))
 
             if queue.isEmpty {
-                Text("No active orders.")
+                Text(gameState.isTangSongScenario ? "暂无军备令。" : "No active orders.")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(queue) { order in
                     HStack {
-                        Text(order.kind.displayName)
+                        Text(productionName(for: order.kind))
                             .lineLimit(1)
                         Spacer()
                         Text(order.isReady ? "Ready" : "\(order.remainingTurns)")
@@ -117,7 +117,26 @@ struct EconomyPanelView: View {
     }
 
     private func resourceSummary(_ resources: EconomyResources) -> String {
-        "MP \(resources.manpower), IC \(resources.industry), SUP \(resources.supplies)"
+        "\(manpowerLabel) \(resources.manpower), \(industryLabel) \(resources.industry), \(suppliesLabel) \(resources.supplies)"
+    }
+
+    private func productionName(for kind: ProductionKind) -> String {
+        guard gameState.isTangSongScenario else {
+            return kind.displayName
+        }
+
+        switch kind {
+        case .infantryDivision:
+            return "募厢军"
+        case .panzerDivision:
+            return "募禁军"
+        case .motorizedDivision:
+            return "募骑军"
+        case .artilleryDivision:
+            return "造器械"
+        case .supplyStockpile:
+            return "整备粮草"
+        }
     }
 
     private func iconName(for kind: ProductionKind) -> String {
@@ -133,5 +152,29 @@ struct EconomyPanelView: View {
         case .supplyStockpile:
             return "shippingbox"
         }
+    }
+
+    private var manpowerLabel: String {
+        gameState.isTangSongScenario ? "丁口" : "MP"
+    }
+
+    private var industryLabel: String {
+        gameState.isTangSongScenario ? "钱帛" : "IC"
+    }
+
+    private var suppliesLabel: String {
+        gameState.isTangSongScenario ? "粮草" : "SUP"
+    }
+
+    private var incomeManpowerLabel: String {
+        gameState.isTangSongScenario ? "入丁" : "Income MP"
+    }
+
+    private var incomeIndustryLabel: String {
+        gameState.isTangSongScenario ? "入帛" : "Income IC"
+    }
+
+    private var upkeepLabel: String {
+        gameState.isTangSongScenario ? "耗粮" : "Upkeep"
     }
 }

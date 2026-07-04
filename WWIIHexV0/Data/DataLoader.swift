@@ -1,6 +1,16 @@
 import Foundation
 
 struct DataLoader {
+    private enum ScenarioResource {
+        static let tangSongJianlong = "jianlong_960_unification"
+        static let tangSongScenario = "tangsong_jianlong_960_scenario"
+        static let tangSongRegions = "tangsong_jianlong_960_regions"
+        static let tangSongUnitTemplates = "tangsong_unit_templates"
+        static let ardennesScenario = "ardennes_v0_scenario"
+        static let ardennesRegions = "ardennes_v02_regions"
+        static let legacyUnitTemplates = "unit_templates"
+    }
+
     private let bundle: Bundle
     private let resourceDirectory: URL?
     private let decoder: JSONDecoder
@@ -17,8 +27,16 @@ struct DataLoader {
 
     func loadInitialGameState() -> GameState {
         if let state = try? loadGameState(
-            scenarioName: "ardennes_v0_scenario",
-            regionName: "ardennes_v02_regions"
+            scenarioName: ScenarioResource.tangSongScenario,
+            regionName: ScenarioResource.tangSongRegions,
+            unitTemplateName: ScenarioResource.tangSongUnitTemplates
+        ) {
+            return state
+        }
+
+        if let state = try? loadGameState(
+            scenarioName: ScenarioResource.ardennesScenario,
+            regionName: ScenarioResource.ardennesRegions
         ) {
             return state
         }
@@ -92,13 +110,18 @@ struct DataLoader {
 
     /// v0.34: 加载 MapEditor 直接导出的 ScenarioDefinition + RegionDataSet。
     /// 这是编辑器输出的主验收路径，不要求走旧 Ardennes 数据集的 agent/胜利条件强校验。
-    func loadGameState(scenarioName: String, regionName: String) throws -> GameState {
+    func loadGameState(
+        scenarioName: String,
+        regionName: String,
+        unitTemplateName: String = "unit_templates"
+    ) throws -> GameState {
         let scenario = try loadScenarioDefinition(named: scenarioName)
         let regionData = try loadRegionDataSet(named: regionName)
+        let unitTemplates = try loadUnitTemplates(named: unitTemplateName)
         var map = try makeMapState(from: scenario)
         try apply(regionData, to: &map)
         map = RegionOccupationRules().mapByAggregatingControllers(in: map)
-        let divisions = try makeDivisions(from: scenario.initialUnits)
+        let divisions = try makeDivisions(from: scenario.initialUnits, templates: unitTemplates)
         let turn = scenario.initialTurn
 
         let theaterState = makeTheaterState(
@@ -128,6 +151,14 @@ struct DataLoader {
         let activeFaction = initialActiveFaction(for: scenario)
         let playerFaction = Faction(rawValue: scenario.playerFaction) ?? .allies
         let aiFaction = Faction(rawValue: scenario.aiFaction) ?? .germany
+        let turnOrderState = initialTurnOrderState(
+            for: scenario,
+            activeFaction: activeFaction,
+            phase: phase,
+            turn: turn,
+            playerFaction: playerFaction,
+            aiFaction: aiFaction
+        )
 
         return GameState(
             scenarioId: scenario.id,
@@ -135,18 +166,12 @@ struct DataLoader {
             maxTurns: scenario.maxTurns,
             activeFaction: activeFaction,
             phase: phase,
-            turnOrderState: TurnOrderState.legacy(
-                activeFaction: activeFaction,
-                phase: phase,
-                round: turn,
-                playerFaction: playerFaction,
-                aiFaction: aiFaction
-            ),
+            turnOrderState: turnOrderState,
             map: map,
             theaterState: theaterState,
             frontLineState: frontLineState,
             warDeploymentState: warDeploymentState,
-            diplomacyState: DiplomacyState.initial(from: scenario.factions, turn: turn),
+            diplomacyState: initialDiplomacyState(for: scenario, turn: turn),
             divisions: divisions,
             victoryState: .ongoing,
             selectedUnitSummary: nil,
@@ -173,12 +198,161 @@ struct DataLoader {
         }
     }
 
+    private func initialTurnOrderState(
+        for scenario: ScenarioDefinition,
+        activeFaction: Faction,
+        phase: GamePhase,
+        turn: Int,
+        playerFaction: Faction,
+        aiFaction: Faction
+    ) -> TurnOrderState {
+        guard scenario.id == ScenarioResource.tangSongJianlong else {
+            return TurnOrderState.legacy(
+                activeFaction: activeFaction,
+                phase: phase,
+                round: turn,
+                playerFaction: playerFaction,
+                aiFaction: aiFaction
+            )
+        }
+
+        return TurnOrderState(
+            powerOrder: [Faction.allies.powerId, Faction.germany.powerId],
+            activePowerId: activeFaction.powerId,
+            round: turn,
+            phase: phase,
+            profiles: [
+                PowerProfile(
+                    id: Faction.allies.powerId,
+                    displayName: "宋",
+                    shortName: "宋",
+                    controlMode: .human,
+                    legacyFactionBridge: .allies
+                ),
+                PowerProfile(
+                    id: Faction.germany.powerId,
+                    displayName: "北方与割据诸政权",
+                    shortName: "割据",
+                    controlMode: .ai,
+                    legacyFactionBridge: .germany
+                )
+            ],
+            playerControlledPowerIds: [Faction.allies.powerId],
+            relations: [
+                PowerRelation(
+                    firstPowerId: Faction.allies.powerId,
+                    secondPowerId: Faction.germany.powerId,
+                    status: .atWar,
+                    sinceTurn: turn
+                )
+            ]
+        )
+    }
+
+    private func initialDiplomacyState(for scenario: ScenarioDefinition, turn: Int) -> DiplomacyState {
+        guard scenario.id == ScenarioResource.tangSongJianlong else {
+            return DiplomacyState.initial(from: scenario.factions, turn: turn)
+        }
+
+        let countries: [CountryProfile] = [
+            CountryProfile(
+                id: "power_song",
+                name: "宋",
+                faction: .allies,
+                blocId: "bloc_song_court",
+                rulerAgentId: "zhao_kuangyin",
+                isPrimaryBelligerent: true,
+                capitalRegionId: "ts_q05_r02",
+                warSupport: 82
+            ),
+            CountryProfile(
+                id: "power_northern_han",
+                name: "北汉",
+                faction: .germany,
+                blocId: "bloc_anti_song",
+                rulerAgentId: "liu_jun",
+                isPrimaryBelligerent: true,
+                capitalRegionId: "ts_q08_r00",
+                warSupport: 78
+            ),
+            CountryProfile(
+                id: "power_liao_edge",
+                name: "辽边境压力",
+                faction: .germany,
+                blocId: "bloc_anti_song",
+                rulerAgentId: "liao_border_council",
+                capitalRegionId: "ts_q13_r00",
+                warSupport: 72
+            ),
+            CountryProfile(
+                id: "power_southern_tang",
+                name: "南唐",
+                faction: .germany,
+                blocId: "bloc_southern_realms",
+                rulerAgentId: "li_yu",
+                capitalRegionId: "ts_q10_r03",
+                warSupport: 68
+            ),
+            CountryProfile(
+                id: "power_wuyue",
+                name: "吴越",
+                faction: .germany,
+                blocId: "bloc_southern_realms",
+                rulerAgentId: "qian_chu",
+                capitalRegionId: "ts_q12_r04",
+                warSupport: 58
+            ),
+            CountryProfile(
+                id: "power_later_shu",
+                name: "后蜀",
+                faction: .germany,
+                blocId: "bloc_southern_realms",
+                rulerAgentId: "meng_chang",
+                capitalRegionId: "ts_q01_r04",
+                warSupport: 64
+            )
+        ]
+
+        let blocs: [DiplomaticBloc] = [
+            DiplomaticBloc(id: "bloc_song_court", name: "宋朝廷", faction: .allies, memberCountryIds: ["power_song"]),
+            DiplomaticBloc(
+                id: "bloc_anti_song",
+                name: "北方抗宋同盟",
+                faction: .germany,
+                memberCountryIds: ["power_liao_edge", "power_northern_han"]
+            ),
+            DiplomaticBloc(
+                id: "bloc_southern_realms",
+                name: "南方割据诸国",
+                faction: .germany,
+                memberCountryIds: ["power_later_shu", "power_southern_tang", "power_wuyue"]
+            )
+        ]
+
+        return DiplomacyState(
+            countries: countries,
+            blocs: blocs,
+            relations: [
+                DiplomaticRelation(firstCountryId: "power_song", secondCountryId: "power_northern_han", status: .atWar, tension: 100, sinceTurn: turn),
+                DiplomaticRelation(firstCountryId: "power_song", secondCountryId: "power_liao_edge", status: .hostile, tension: 85, sinceTurn: turn),
+                DiplomaticRelation(firstCountryId: "power_song", secondCountryId: "power_southern_tang", status: .hostile, tension: 72, sinceTurn: turn),
+                DiplomaticRelation(firstCountryId: "power_song", secondCountryId: "power_wuyue", status: .neutral, tension: 35, sinceTurn: turn),
+                DiplomaticRelation(firstCountryId: "power_song", secondCountryId: "power_later_shu", status: .hostile, tension: 60, sinceTurn: turn),
+                DiplomaticRelation(firstCountryId: "power_northern_han", secondCountryId: "power_liao_edge", status: .allied, tension: 10, sinceTurn: turn),
+                DiplomaticRelation(firstCountryId: "power_southern_tang", secondCountryId: "power_wuyue", status: .neutral, tension: 20, sinceTurn: turn),
+                DiplomaticRelation(firstCountryId: "power_southern_tang", secondCountryId: "power_later_shu", status: .neutral, tension: 25, sinceTurn: turn),
+                DiplomaticRelation(firstCountryId: "power_wuyue", secondCountryId: "power_later_shu", status: .neutral, tension: 18, sinceTurn: turn)
+            ],
+            lastUpdatedTurn: turn
+        )
+    }
+
     func loadTerrainRules() throws -> TerrainRuleDefinition {
         try loadJSON(TerrainRuleDefinition.self, named: "terrain_rules")
     }
 
-    func loadUnitTemplates() throws -> [UnitTemplateDefinition] {
-        try loadJSON(UnitTemplateCatalogDefinition.self, named: "unit_templates").templates
+    func loadUnitTemplates(named resourceName: String = "unit_templates") throws -> [UnitTemplateDefinition] {
+        try loadJSON(UnitTemplateCatalogDefinition.self, named: resourceName).templates
     }
 
     func loadGeneralAgents() throws -> [GeneralAgentDefinition] {
@@ -471,8 +645,10 @@ struct DataLoader {
         )
     }
 
-    private func makeDivisions(from definitions: [InitialUnitDefinition]) throws -> [Division] {
-        let templates = (try? loadUnitTemplates()) ?? []
+    private func makeDivisions(
+        from definitions: [InitialUnitDefinition],
+        templates: [UnitTemplateDefinition]
+    ) throws -> [Division] {
         var errors: [DataValidationError] = []
         let divisions = definitions.compactMap { definition -> Division? in
             guard let faction = Faction(rawValue: definition.faction) else {
@@ -481,7 +657,8 @@ struct DataLoader {
             }
 
             let components: [DivisionComponent]
-            if let template = templates.first(where: { $0.id == definition.templateId }) {
+            let template = templates.first { $0.id == definition.templateId }
+            if let template {
                 components = template.components.compactMap { component in
                     guard let type = ComponentType(rawValue: component.type) else { return nil }
                     return DivisionComponent(type: type, weight: component.weight)
@@ -502,7 +679,7 @@ struct DataLoader {
                 coord: HexCoord(q: definition.coord.q, r: definition.coord.r),
                 facing: HexDirection(rawValue: definition.facing) ?? .west,
                 hp: definition.hp,
-                maxHP: 10,
+                maxHP: template?.maxHP ?? 10,
                 components: components,
                 supplyState: SupplyState(rawValue: definition.supplyState) ?? .supplied,
                 retreatMode: definition.retreatMode.flatMap(RetreatMode.init(rawValue:)) ?? .retreatable

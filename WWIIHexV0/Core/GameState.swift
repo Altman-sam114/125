@@ -191,6 +191,44 @@ struct GameState: Codable, Equatable {
         turnOrderState.normalized(activeFaction: activeFaction, phase: phase, round: turn)
     }
 
+    var isTangSongScenario: Bool {
+        scenarioId == "jianlong_960_unification"
+    }
+
+    var scenarioDisplayName: String {
+        switch scenarioId {
+        case "jianlong_960_unification":
+            return "建隆元年：陈桥兵变与山河一统"
+        case "ardennes_v0":
+            return "Ardennes V0"
+        default:
+            return scenarioId
+        }
+    }
+
+    var phaseDisplayName: String {
+        guard phase != .resolution else {
+            return phase.displayName
+        }
+
+        guard let profile = effectiveTurnOrderState.profile(for: activeFaction.powerId) else {
+            return phase.displayName
+        }
+
+        switch profile.controlMode {
+        case .human:
+            return "Player Command"
+        case .ai:
+            return "AI Command"
+        case .inactive:
+            return "Inactive"
+        }
+    }
+
+    func displayName(for faction: Faction) -> String {
+        effectiveTurnOrderState.profile(for: faction.powerId)?.displayName ?? faction.displayName
+    }
+
     func division(id: String) -> Division? {
         divisions.first { $0.id == id }
     }

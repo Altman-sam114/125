@@ -95,7 +95,7 @@ struct RootGameView: View {
             renderState: BoardSceneAdapter.renderState(from: container),
             onHexTapped: container.handleBoardTap
         )
-        .accessibilityLabel("Ardennes V0 hex board")
+        .accessibilityLabel("\(container.gameState.scenarioDisplayName) hex board")
     }
 
     private func infoOverlay(isLandscape: Bool, size: CGSize) -> some View {
@@ -155,6 +155,7 @@ struct RootGameView: View {
                             activeFaction: container.playerFaction,
                             phase: container.gameState.phase
                         ),
+                        phaseDisplayName: container.gameState.phaseDisplayName,
                         lastCommandMessage: container.lastCommandMessage,
                         onHold: container.holdSelected,
                         onAllowRetreat: container.allowRetreatSelected,

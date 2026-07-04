@@ -1,0 +1,4472 @@
+{
+  "schemaVersion": 1,
+  "scenarioId": "jianlong_960_unification",
+  "displayName": "建隆元年州府与方面数据",
+  "hexToRegion": {
+    "0,0": "ts_q00_r00",
+    "1,0": "ts_q01_r00",
+    "2,0": "ts_q02_r00",
+    "3,0": "ts_q03_r00",
+    "4,0": "ts_q04_r00",
+    "5,0": "ts_q05_r00",
+    "6,0": "ts_q06_r00",
+    "7,0": "ts_q07_r00",
+    "8,0": "ts_q08_r00",
+    "9,0": "ts_q09_r00",
+    "10,0": "ts_q10_r00",
+    "11,0": "ts_q11_r00",
+    "12,0": "ts_q12_r00",
+    "13,0": "ts_q13_r00",
+    "0,1": "ts_q00_r00",
+    "1,1": "ts_q01_r00",
+    "2,1": "ts_q02_r00",
+    "3,1": "ts_q03_r00",
+    "4,1": "ts_q04_r00",
+    "5,1": "ts_q05_r00",
+    "6,1": "ts_q06_r00",
+    "7,1": "ts_q07_r00",
+    "8,1": "ts_q08_r00",
+    "9,1": "ts_q09_r00",
+    "10,1": "ts_q10_r00",
+    "11,1": "ts_q11_r00",
+    "12,1": "ts_q12_r00",
+    "13,1": "ts_q13_r00",
+    "0,2": "ts_q00_r01",
+    "1,2": "ts_q01_r01",
+    "2,2": "ts_q02_r01",
+    "3,2": "ts_q03_r01",
+    "4,2": "ts_q04_r01",
+    "5,2": "ts_q05_r01",
+    "6,2": "ts_q06_r01",
+    "7,2": "ts_q07_r01",
+    "8,2": "ts_q08_r01",
+    "9,2": "ts_q09_r01",
+    "10,2": "ts_q10_r01",
+    "11,2": "ts_q11_r01",
+    "12,2": "ts_q12_r01",
+    "13,2": "ts_q13_r01",
+    "0,3": "ts_q00_r01",
+    "1,3": "ts_q01_r01",
+    "2,3": "ts_q02_r01",
+    "3,3": "ts_q03_r01",
+    "4,3": "ts_q04_r01",
+    "5,3": "ts_q05_r01",
+    "6,3": "ts_q06_r01",
+    "7,3": "ts_q07_r01",
+    "8,3": "ts_q08_r01",
+    "9,3": "ts_q09_r01",
+    "10,3": "ts_q10_r01",
+    "11,3": "ts_q11_r01",
+    "12,3": "ts_q12_r01",
+    "13,3": "ts_q13_r01",
+    "0,4": "ts_q00_r02",
+    "1,4": "ts_q01_r02",
+    "2,4": "ts_q02_r02",
+    "3,4": "ts_q03_r02",
+    "4,4": "ts_q04_r02",
+    "5,4": "ts_q05_r02",
+    "6,4": "ts_q06_r02",
+    "7,4": "ts_q07_r02",
+    "8,4": "ts_q08_r02",
+    "9,4": "ts_q09_r02",
+    "10,4": "ts_q10_r02",
+    "11,4": "ts_q11_r02",
+    "12,4": "ts_q12_r02",
+    "13,4": "ts_q13_r02",
+    "0,5": "ts_q00_r02",
+    "1,5": "ts_q01_r02",
+    "2,5": "ts_q02_r02",
+    "3,5": "ts_q03_r02",
+    "4,5": "ts_q04_r02",
+    "5,5": "ts_q05_r02",
+    "6,5": "ts_q06_r02",
+    "7,5": "ts_q07_r02",
+    "8,5": "ts_q08_r02",
+    "9,5": "ts_q09_r02",
+    "10,5": "ts_q10_r02",
+    "11,5": "ts_q11_r02",
+    "12,5": "ts_q12_r02",
+    "13,5": "ts_q13_r02",
+    "0,6": "ts_q00_r03",
+    "1,6": "ts_q01_r03",
+    "2,6": "ts_q02_r03",
+    "3,6": "ts_q03_r03",
+    "4,6": "ts_q04_r03",
+    "5,6": "ts_q05_r03",
+    "6,6": "ts_q06_r03",
+    "7,6": "ts_q07_r03",
+    "8,6": "ts_q08_r03",
+    "9,6": "ts_q09_r03",
+    "10,6": "ts_q10_r03",
+    "11,6": "ts_q11_r03",
+    "12,6": "ts_q12_r03",
+    "13,6": "ts_q13_r03",
+    "0,7": "ts_q00_r03",
+    "1,7": "ts_q01_r03",
+    "2,7": "ts_q02_r03",
+    "3,7": "ts_q03_r03",
+    "4,7": "ts_q04_r03",
+    "5,7": "ts_q05_r03",
+    "6,7": "ts_q06_r03",
+    "7,7": "ts_q07_r03",
+    "8,7": "ts_q08_r03",
+    "9,7": "ts_q09_r03",
+    "10,7": "ts_q10_r03",
+    "11,7": "ts_q11_r03",
+    "12,7": "ts_q12_r03",
+    "13,7": "ts_q13_r03",
+    "0,8": "ts_q00_r04",
+    "1,8": "ts_q01_r04",
+    "2,8": "ts_q02_r04",
+    "3,8": "ts_q03_r04",
+    "4,8": "ts_q04_r04",
+    "5,8": "ts_q05_r04",
+    "6,8": "ts_q06_r04",
+    "7,8": "ts_q07_r04",
+    "8,8": "ts_q08_r04",
+    "9,8": "ts_q09_r04",
+    "10,8": "ts_q10_r04",
+    "11,8": "ts_q11_r04",
+    "12,8": "ts_q12_r04",
+    "13,8": "ts_q13_r04",
+    "0,9": "ts_q00_r04",
+    "1,9": "ts_q01_r04",
+    "2,9": "ts_q02_r04",
+    "3,9": "ts_q03_r04",
+    "4,9": "ts_q04_r04",
+    "5,9": "ts_q05_r04",
+    "6,9": "ts_q06_r04",
+    "7,9": "ts_q07_r04",
+    "8,9": "ts_q08_r04",
+    "9,9": "ts_q09_r04",
+    "10,9": "ts_q10_r04",
+    "11,9": "ts_q11_r04",
+    "12,9": "ts_q12_r04",
+    "13,9": "ts_q13_r04"
+  },
+  "regions": [
+    {
+      "id": "ts_q00_r00",
+      "name": "蜀口北境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_guanzhong",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q00_r01",
+        "ts_q01_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 0,
+          "r": 0
+        },
+        {
+          "q": 0,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 0,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q00_r01",
+      "name": "蜀口河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_guanzhong",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q00_r00",
+        "ts_q00_r02",
+        "ts_q01_r00",
+        "ts_q01_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 0,
+          "r": 2
+        },
+        {
+          "q": 0,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 0,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q00_r02",
+      "name": "蜀口淮右",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q00_r01",
+        "ts_q00_r03",
+        "ts_q01_r01",
+        "ts_q01_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 0,
+          "r": 4
+        },
+        {
+          "q": 0,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 0,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q00_r03",
+      "name": "蜀口江汉",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_shu",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q00_r02",
+        "ts_q00_r04",
+        "ts_q01_r02",
+        "ts_q01_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 0,
+          "r": 6
+        },
+        {
+          "q": 0,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 0,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q00_r04",
+      "name": "蜀口南境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_shu",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q00_r03",
+        "ts_q01_r03",
+        "ts_q01_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 0,
+          "r": 8
+        },
+        {
+          "q": 0,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 0,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q01_r00",
+      "name": "汉中北境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_guanzhong",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q00_r00",
+        "ts_q00_r01",
+        "ts_q01_r01",
+        "ts_q02_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 1,
+          "r": 0
+        },
+        {
+          "q": 1,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 1,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q01_r01",
+      "name": "汉中河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_guanzhong",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q00_r01",
+        "ts_q00_r02",
+        "ts_q01_r00",
+        "ts_q01_r02",
+        "ts_q02_r00",
+        "ts_q02_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 1,
+          "r": 2
+        },
+        {
+          "q": 1,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 1,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q01_r02",
+      "name": "汉中淮右",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q00_r02",
+        "ts_q00_r03",
+        "ts_q01_r01",
+        "ts_q01_r03",
+        "ts_q02_r01",
+        "ts_q02_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 1,
+          "r": 4
+        },
+        {
+          "q": 1,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 1,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q01_r03",
+      "name": "汉中江汉",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_shu",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q00_r03",
+        "ts_q00_r04",
+        "ts_q01_r02",
+        "ts_q01_r04",
+        "ts_q02_r02",
+        "ts_q02_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 1,
+          "r": 6
+        },
+        {
+          "q": 1,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 1,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q01_r04",
+      "name": "成都",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_shu",
+      "terrain": "city",
+      "neighbors": [
+        "ts_q00_r04",
+        "ts_q01_r03",
+        "ts_q02_r03",
+        "ts_q02_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 1,
+          "r": 8
+        },
+        {
+          "q": 1,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 1,
+        "r": 8
+      },
+      "city": {
+        "name": "成都",
+        "victoryPoints": 8,
+        "isCapital": true
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q02_r00",
+      "name": "关中北境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_guanzhong",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q01_r00",
+        "ts_q01_r01",
+        "ts_q02_r01",
+        "ts_q03_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 2,
+          "r": 0
+        },
+        {
+          "q": 2,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 2,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q02_r01",
+      "name": "关中河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_guanzhong",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q01_r01",
+        "ts_q01_r02",
+        "ts_q02_r00",
+        "ts_q02_r02",
+        "ts_q03_r00",
+        "ts_q03_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 2,
+          "r": 2
+        },
+        {
+          "q": 2,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 2,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q02_r02",
+      "name": "关中淮右",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q01_r02",
+        "ts_q01_r03",
+        "ts_q02_r01",
+        "ts_q02_r03",
+        "ts_q03_r01",
+        "ts_q03_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 2,
+          "r": 4
+        },
+        {
+          "q": 2,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 2,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q02_r03",
+      "name": "关中江汉",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_shu",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q01_r03",
+        "ts_q01_r04",
+        "ts_q02_r02",
+        "ts_q02_r04",
+        "ts_q03_r02",
+        "ts_q03_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 2,
+          "r": 6
+        },
+        {
+          "q": 2,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 2,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q02_r04",
+      "name": "关中南境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_shu",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q01_r04",
+        "ts_q02_r03",
+        "ts_q03_r03",
+        "ts_q03_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 2,
+          "r": 8
+        },
+        {
+          "q": 2,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 2,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q03_r00",
+      "name": "洛西北境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_guanzhong",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q02_r00",
+        "ts_q02_r01",
+        "ts_q03_r01",
+        "ts_q04_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 3,
+          "r": 0
+        },
+        {
+          "q": 3,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 3,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q03_r01",
+      "name": "洛西河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_guanzhong",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q02_r01",
+        "ts_q02_r02",
+        "ts_q03_r00",
+        "ts_q03_r02",
+        "ts_q04_r00",
+        "ts_q04_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 3,
+          "r": 2
+        },
+        {
+          "q": 3,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 3,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q03_r02",
+      "name": "洛西淮右",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_kaifeng_luoyang",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q02_r02",
+        "ts_q02_r03",
+        "ts_q03_r01",
+        "ts_q03_r03",
+        "ts_q04_r01",
+        "ts_q04_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 3,
+          "r": 4
+        },
+        {
+          "q": 3,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 3,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q03_r03",
+      "name": "洛西江汉",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_kaifeng_luoyang",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q02_r03",
+        "ts_q02_r04",
+        "ts_q03_r02",
+        "ts_q03_r04",
+        "ts_q04_r02",
+        "ts_q04_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 3,
+          "r": 6
+        },
+        {
+          "q": 3,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 3,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q03_r04",
+      "name": "洛西南境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_kaifeng_luoyang",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q02_r04",
+        "ts_q03_r03",
+        "ts_q04_r03",
+        "ts_q04_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 3,
+          "r": 8
+        },
+        {
+          "q": 3,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 3,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q04_r00",
+      "name": "洛阳北境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q03_r00",
+        "ts_q03_r01",
+        "ts_q04_r01",
+        "ts_q05_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 4,
+          "r": 0
+        },
+        {
+          "q": 4,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 4,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q04_r01",
+      "name": "洛阳河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q03_r01",
+        "ts_q03_r02",
+        "ts_q04_r00",
+        "ts_q04_r02",
+        "ts_q05_r00",
+        "ts_q05_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 4,
+          "r": 2
+        },
+        {
+          "q": 4,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 4,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q04_r02",
+      "name": "洛阳",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_kaifeng_luoyang",
+      "terrain": "city",
+      "neighbors": [
+        "ts_q03_r02",
+        "ts_q03_r03",
+        "ts_q04_r01",
+        "ts_q04_r03",
+        "ts_q05_r01",
+        "ts_q05_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 4,
+          "r": 4
+        },
+        {
+          "q": 4,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 4,
+        "r": 4
+      },
+      "city": {
+        "name": "洛阳",
+        "victoryPoints": 7,
+        "isCapital": false
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q04_r03",
+      "name": "洛阳江汉",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_kaifeng_luoyang",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q03_r03",
+        "ts_q03_r04",
+        "ts_q04_r02",
+        "ts_q04_r04",
+        "ts_q05_r02",
+        "ts_q05_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 4,
+          "r": 6
+        },
+        {
+          "q": 4,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 4,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q04_r04",
+      "name": "洛阳南境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_kaifeng_luoyang",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q03_r04",
+        "ts_q04_r03",
+        "ts_q05_r03",
+        "ts_q05_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 4,
+          "r": 8
+        },
+        {
+          "q": 4,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 4,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q05_r00",
+      "name": "开封北境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q04_r00",
+        "ts_q04_r01",
+        "ts_q05_r01",
+        "ts_q06_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 5,
+          "r": 0
+        },
+        {
+          "q": 5,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 5,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q05_r01",
+      "name": "开封河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q04_r01",
+        "ts_q04_r02",
+        "ts_q05_r00",
+        "ts_q05_r02",
+        "ts_q06_r00",
+        "ts_q06_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 5,
+          "r": 2
+        },
+        {
+          "q": 5,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 5,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q05_r02",
+      "name": "开封",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_kaifeng_luoyang",
+      "terrain": "city",
+      "neighbors": [
+        "ts_q04_r02",
+        "ts_q04_r03",
+        "ts_q05_r01",
+        "ts_q05_r03",
+        "ts_q06_r01",
+        "ts_q06_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 5,
+          "r": 4
+        },
+        {
+          "q": 5,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 5,
+        "r": 4
+      },
+      "city": {
+        "name": "开封",
+        "victoryPoints": 10,
+        "isCapital": true
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q05_r03",
+      "name": "开封江汉",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_jinghu",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q04_r03",
+        "ts_q04_r04",
+        "ts_q05_r02",
+        "ts_q05_r04",
+        "ts_q06_r02",
+        "ts_q06_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 5,
+          "r": 6
+        },
+        {
+          "q": 5,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 5,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q05_r04",
+      "name": "开封南境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_jinghu",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q04_r04",
+        "ts_q05_r03",
+        "ts_q06_r03",
+        "ts_q06_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 5,
+          "r": 8
+        },
+        {
+          "q": 5,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 5,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q06_r00",
+      "name": "澶滑北境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_central_plain",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q05_r00",
+        "ts_q05_r01",
+        "ts_q06_r01",
+        "ts_q07_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 6,
+          "r": 0
+        },
+        {
+          "q": 6,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 6,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q06_r01",
+      "name": "澶滑河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q05_r01",
+        "ts_q05_r02",
+        "ts_q06_r00",
+        "ts_q06_r02",
+        "ts_q07_r00",
+        "ts_q07_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 6,
+          "r": 2
+        },
+        {
+          "q": 6,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 6,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q06_r02",
+      "name": "澶滑淮右",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_kaifeng_luoyang",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q05_r02",
+        "ts_q05_r03",
+        "ts_q06_r01",
+        "ts_q06_r03",
+        "ts_q07_r01",
+        "ts_q07_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 6,
+          "r": 4
+        },
+        {
+          "q": 6,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 6,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q06_r03",
+      "name": "襄阳",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_jinghu",
+      "terrain": "fortress",
+      "neighbors": [
+        "ts_q05_r03",
+        "ts_q05_r04",
+        "ts_q06_r02",
+        "ts_q06_r04",
+        "ts_q07_r02",
+        "ts_q07_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 6,
+          "r": 6
+        },
+        {
+          "q": 6,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 6,
+        "r": 6
+      },
+      "city": {
+        "name": "襄阳",
+        "victoryPoints": 6,
+        "isCapital": false
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q06_r04",
+      "name": "澶滑南境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_jinghu",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q05_r04",
+        "ts_q06_r03",
+        "ts_q07_r03",
+        "ts_q07_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 6,
+          "r": 8
+        },
+        {
+          "q": 6,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 6,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q07_r00",
+      "name": "雁门",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "fortress",
+      "neighbors": [
+        "ts_q06_r00",
+        "ts_q06_r01",
+        "ts_q07_r01",
+        "ts_q08_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 7,
+          "r": 0
+        },
+        {
+          "q": 7,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 7,
+        "r": 0
+      },
+      "city": {
+        "name": "雁门",
+        "victoryPoints": 5,
+        "isCapital": false
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q07_r01",
+      "name": "河东河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q06_r01",
+        "ts_q06_r02",
+        "ts_q07_r00",
+        "ts_q07_r02",
+        "ts_q08_r00",
+        "ts_q08_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 7,
+          "r": 2
+        },
+        {
+          "q": 7,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 7,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q07_r02",
+      "name": "河东淮右",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q06_r02",
+        "ts_q06_r03",
+        "ts_q07_r01",
+        "ts_q07_r03",
+        "ts_q08_r01",
+        "ts_q08_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 7,
+          "r": 4
+        },
+        {
+          "q": 7,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 7,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q07_r03",
+      "name": "河东江汉",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_jinghu",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q06_r03",
+        "ts_q06_r04",
+        "ts_q07_r02",
+        "ts_q07_r04",
+        "ts_q08_r02",
+        "ts_q08_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 7,
+          "r": 6
+        },
+        {
+          "q": 7,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 7,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q07_r04",
+      "name": "河东南境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_jinghu",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q06_r04",
+        "ts_q07_r03",
+        "ts_q08_r03",
+        "ts_q08_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 7,
+          "r": 8
+        },
+        {
+          "q": 7,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 7,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q08_r00",
+      "name": "太原",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "fortress",
+      "neighbors": [
+        "ts_q07_r00",
+        "ts_q07_r01",
+        "ts_q08_r01",
+        "ts_q09_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 8,
+          "r": 0
+        },
+        {
+          "q": 8,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 8,
+        "r": 0
+      },
+      "city": {
+        "name": "太原",
+        "victoryPoints": 9,
+        "isCapital": true
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q08_r01",
+      "name": "太原河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q07_r01",
+        "ts_q07_r02",
+        "ts_q08_r00",
+        "ts_q08_r02",
+        "ts_q09_r00",
+        "ts_q09_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 8,
+          "r": 2
+        },
+        {
+          "q": 8,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 8,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q08_r02",
+      "name": "太原淮右",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_huainan",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q07_r02",
+        "ts_q07_r03",
+        "ts_q08_r01",
+        "ts_q08_r03",
+        "ts_q09_r01",
+        "ts_q09_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 8,
+          "r": 4
+        },
+        {
+          "q": 8,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 8,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q08_r03",
+      "name": "太原江汉",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q07_r03",
+        "ts_q07_r04",
+        "ts_q08_r02",
+        "ts_q08_r04",
+        "ts_q09_r02",
+        "ts_q09_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 8,
+          "r": 6
+        },
+        {
+          "q": 8,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 8,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q08_r04",
+      "name": "太原南境",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_central_plain",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q07_r04",
+        "ts_q08_r03",
+        "ts_q09_r03",
+        "ts_q09_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 8,
+          "r": 8
+        },
+        {
+          "q": 8,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 8,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q09_r00",
+      "name": "淮南北境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q08_r00",
+        "ts_q08_r01",
+        "ts_q09_r01",
+        "ts_q10_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 9,
+          "r": 0
+        },
+        {
+          "q": 9,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 9,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q09_r01",
+      "name": "淮南河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q08_r01",
+        "ts_q08_r02",
+        "ts_q09_r00",
+        "ts_q09_r02",
+        "ts_q10_r00",
+        "ts_q10_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 9,
+          "r": 2
+        },
+        {
+          "q": 9,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 9,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q09_r02",
+      "name": "扬州",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_huainan",
+      "terrain": "city",
+      "neighbors": [
+        "ts_q08_r02",
+        "ts_q08_r03",
+        "ts_q09_r01",
+        "ts_q09_r03",
+        "ts_q10_r01",
+        "ts_q10_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 9,
+          "r": 4
+        },
+        {
+          "q": 9,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 9,
+        "r": 4
+      },
+      "city": {
+        "name": "扬州",
+        "victoryPoints": 6,
+        "isCapital": false
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q09_r03",
+      "name": "淮南江汉",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q08_r03",
+        "ts_q08_r04",
+        "ts_q09_r02",
+        "ts_q09_r04",
+        "ts_q10_r02",
+        "ts_q10_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 9,
+          "r": 6
+        },
+        {
+          "q": 9,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 9,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q09_r04",
+      "name": "淮南南境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q08_r04",
+        "ts_q09_r03",
+        "ts_q10_r03",
+        "ts_q10_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 9,
+          "r": 8
+        },
+        {
+          "q": 9,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 9,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q10_r00",
+      "name": "金陵北境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q09_r00",
+        "ts_q09_r01",
+        "ts_q10_r01",
+        "ts_q11_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 10,
+          "r": 0
+        },
+        {
+          "q": 10,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 10,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q10_r01",
+      "name": "金陵河洛",
+      "owner": "allies",
+      "controller": "allies",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q09_r01",
+        "ts_q09_r02",
+        "ts_q10_r00",
+        "ts_q10_r02",
+        "ts_q11_r00",
+        "ts_q11_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 10,
+          "r": 2
+        },
+        {
+          "q": 10,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 10,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "allies"
+      ],
+      "occupationState": {
+        "resistance": 5,
+        "compliance": 70
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q10_r02",
+      "name": "金陵淮右",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_huainan",
+      "terrain": "plain",
+      "neighbors": [
+        "ts_q09_r02",
+        "ts_q09_r03",
+        "ts_q10_r01",
+        "ts_q10_r03",
+        "ts_q11_r01",
+        "ts_q11_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 10,
+          "r": 4
+        },
+        {
+          "q": 10,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 10,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q10_r03",
+      "name": "金陵",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "city",
+      "neighbors": [
+        "ts_q09_r03",
+        "ts_q09_r04",
+        "ts_q10_r02",
+        "ts_q10_r04",
+        "ts_q11_r02",
+        "ts_q11_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 10,
+          "r": 6
+        },
+        {
+          "q": 10,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 10,
+        "r": 6
+      },
+      "city": {
+        "name": "金陵",
+        "victoryPoints": 9,
+        "isCapital": true
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q10_r04",
+      "name": "金陵南境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q09_r04",
+        "ts_q10_r03",
+        "ts_q11_r03",
+        "ts_q11_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 10,
+          "r": 8
+        },
+        {
+          "q": 10,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 10,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q11_r00",
+      "name": "两浙北境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q10_r00",
+        "ts_q10_r01",
+        "ts_q11_r01",
+        "ts_q12_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 11,
+          "r": 0
+        },
+        {
+          "q": 11,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 11,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q11_r01",
+      "name": "寿州",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "fortress",
+      "neighbors": [
+        "ts_q10_r01",
+        "ts_q10_r02",
+        "ts_q11_r00",
+        "ts_q11_r02",
+        "ts_q12_r00",
+        "ts_q12_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 11,
+          "r": 2
+        },
+        {
+          "q": 11,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 11,
+        "r": 2
+      },
+      "city": {
+        "name": "寿州",
+        "victoryPoints": 5,
+        "isCapital": false
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q11_r02",
+      "name": "两浙淮右",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_liao_edge",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q10_r02",
+        "ts_q10_r03",
+        "ts_q11_r01",
+        "ts_q11_r03",
+        "ts_q12_r01",
+        "ts_q12_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 11,
+          "r": 4
+        },
+        {
+          "q": 11,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 11,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q11_r03",
+      "name": "两浙江汉",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q10_r03",
+        "ts_q10_r04",
+        "ts_q11_r02",
+        "ts_q11_r04",
+        "ts_q12_r02",
+        "ts_q12_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 11,
+          "r": 6
+        },
+        {
+          "q": 11,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 11,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q11_r04",
+      "name": "两浙南境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q10_r04",
+        "ts_q11_r03",
+        "ts_q12_r03",
+        "ts_q12_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 11,
+          "r": 8
+        },
+        {
+          "q": 11,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 11,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q12_r00",
+      "name": "岭南北境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q11_r00",
+        "ts_q11_r01",
+        "ts_q12_r01",
+        "ts_q13_r00"
+      ],
+      "displayHexes": [
+        {
+          "q": 12,
+          "r": 0
+        },
+        {
+          "q": 12,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 12,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q12_r01",
+      "name": "岭南河洛",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q11_r01",
+        "ts_q11_r02",
+        "ts_q12_r00",
+        "ts_q12_r02",
+        "ts_q13_r00",
+        "ts_q13_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 12,
+          "r": 2
+        },
+        {
+          "q": 12,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 12,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q12_r02",
+      "name": "岭南淮右",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_liao_edge",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q11_r02",
+        "ts_q11_r03",
+        "ts_q12_r01",
+        "ts_q12_r03",
+        "ts_q13_r01",
+        "ts_q13_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 12,
+          "r": 4
+        },
+        {
+          "q": 12,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 12,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q12_r03",
+      "name": "岭南江汉",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q11_r03",
+        "ts_q11_r04",
+        "ts_q12_r02",
+        "ts_q12_r04",
+        "ts_q13_r02",
+        "ts_q13_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 12,
+          "r": 6
+        },
+        {
+          "q": 12,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 12,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q12_r04",
+      "name": "杭州",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "city",
+      "neighbors": [
+        "ts_q11_r04",
+        "ts_q12_r03",
+        "ts_q13_r03",
+        "ts_q13_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 12,
+          "r": 8
+        },
+        {
+          "q": 12,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 12,
+        "r": 8
+      },
+      "city": {
+        "name": "杭州",
+        "victoryPoints": 7,
+        "isCapital": true
+      },
+      "infrastructure": 4,
+      "supplyValue": 4,
+      "factories": 2,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q13_r00",
+      "name": "辽边北境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q12_r00",
+        "ts_q12_r01",
+        "ts_q13_r01"
+      ],
+      "displayHexes": [
+        {
+          "q": 13,
+          "r": 0
+        },
+        {
+          "q": 13,
+          "r": 1
+        }
+      ],
+      "representativeHex": {
+        "q": 13,
+        "r": 0
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q13_r01",
+      "name": "辽边河洛",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_hedong_yanyun",
+      "terrain": "mountain",
+      "neighbors": [
+        "ts_q12_r01",
+        "ts_q12_r02",
+        "ts_q13_r00",
+        "ts_q13_r02"
+      ],
+      "displayHexes": [
+        {
+          "q": 13,
+          "r": 2
+        },
+        {
+          "q": 13,
+          "r": 3
+        }
+      ],
+      "representativeHex": {
+        "q": 13,
+        "r": 2
+      },
+      "city": null,
+      "infrastructure": 1,
+      "supplyValue": 1,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q13_r02",
+      "name": "辽边淮右",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_liao_edge",
+      "terrain": "hill",
+      "neighbors": [
+        "ts_q12_r02",
+        "ts_q12_r03",
+        "ts_q13_r01",
+        "ts_q13_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 13,
+          "r": 4
+        },
+        {
+          "q": 13,
+          "r": 5
+        }
+      ],
+      "representativeHex": {
+        "q": 13,
+        "r": 4
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q13_r03",
+      "name": "辽边江汉",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q12_r03",
+        "ts_q12_r04",
+        "ts_q13_r02",
+        "ts_q13_r04"
+      ],
+      "displayHexes": [
+        {
+          "q": 13,
+          "r": 6
+        },
+        {
+          "q": 13,
+          "r": 7
+        }
+      ],
+      "representativeHex": {
+        "q": 13,
+        "r": 6
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    },
+    {
+      "id": "ts_q13_r04",
+      "name": "辽边南境",
+      "owner": "germany",
+      "controller": "germany",
+      "theaterId": "theater_jiangnan_wuyue",
+      "terrain": "forest",
+      "neighbors": [
+        "ts_q12_r04",
+        "ts_q13_r03"
+      ],
+      "displayHexes": [
+        {
+          "q": 13,
+          "r": 8
+        },
+        {
+          "q": 13,
+          "r": 9
+        }
+      ],
+      "representativeHex": {
+        "q": 13,
+        "r": 8
+      },
+      "city": null,
+      "infrastructure": 2,
+      "supplyValue": 2,
+      "factories": 0,
+      "resources": [],
+      "coreOf": [
+        "germany"
+      ],
+      "occupationState": {
+        "resistance": 15,
+        "compliance": 45
+      },
+      "isPassable": true
+    }
+  ],
+  "edges": [
+    {
+      "from": "ts_q00_r00",
+      "to": "ts_q00_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q00_r00",
+      "to": "ts_q01_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q00_r01",
+      "to": "ts_q00_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q00_r01",
+      "to": "ts_q01_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q00_r02",
+      "to": "ts_q00_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q00_r02",
+      "to": "ts_q01_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q00_r03",
+      "to": "ts_q00_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q00_r03",
+      "to": "ts_q01_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q00_r04",
+      "to": "ts_q01_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r00",
+      "to": "ts_q00_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r00",
+      "to": "ts_q01_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r00",
+      "to": "ts_q02_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r01",
+      "to": "ts_q00_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r01",
+      "to": "ts_q01_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r01",
+      "to": "ts_q02_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r02",
+      "to": "ts_q00_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r02",
+      "to": "ts_q01_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r02",
+      "to": "ts_q02_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r03",
+      "to": "ts_q00_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r03",
+      "to": "ts_q01_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r03",
+      "to": "ts_q02_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q01_r04",
+      "to": "ts_q02_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r00",
+      "to": "ts_q01_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r00",
+      "to": "ts_q02_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r00",
+      "to": "ts_q03_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r01",
+      "to": "ts_q01_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r01",
+      "to": "ts_q02_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r01",
+      "to": "ts_q03_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r02",
+      "to": "ts_q01_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r02",
+      "to": "ts_q02_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r02",
+      "to": "ts_q03_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r03",
+      "to": "ts_q01_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r03",
+      "to": "ts_q02_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r03",
+      "to": "ts_q03_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q02_r04",
+      "to": "ts_q03_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r00",
+      "to": "ts_q02_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r00",
+      "to": "ts_q03_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r00",
+      "to": "ts_q04_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r01",
+      "to": "ts_q02_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r01",
+      "to": "ts_q03_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r01",
+      "to": "ts_q04_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r02",
+      "to": "ts_q02_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r02",
+      "to": "ts_q03_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r02",
+      "to": "ts_q04_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r03",
+      "to": "ts_q02_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r03",
+      "to": "ts_q03_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r03",
+      "to": "ts_q04_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q03_r04",
+      "to": "ts_q04_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r00",
+      "to": "ts_q03_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r00",
+      "to": "ts_q04_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r00",
+      "to": "ts_q05_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r01",
+      "to": "ts_q03_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r01",
+      "to": "ts_q04_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r01",
+      "to": "ts_q05_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r02",
+      "to": "ts_q03_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r02",
+      "to": "ts_q04_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r02",
+      "to": "ts_q05_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r03",
+      "to": "ts_q03_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r03",
+      "to": "ts_q04_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r03",
+      "to": "ts_q05_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q04_r04",
+      "to": "ts_q05_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r00",
+      "to": "ts_q04_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r00",
+      "to": "ts_q05_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r00",
+      "to": "ts_q06_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r01",
+      "to": "ts_q04_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r01",
+      "to": "ts_q05_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r01",
+      "to": "ts_q06_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r02",
+      "to": "ts_q04_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r02",
+      "to": "ts_q05_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r02",
+      "to": "ts_q06_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r03",
+      "to": "ts_q04_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r03",
+      "to": "ts_q05_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r03",
+      "to": "ts_q06_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q05_r04",
+      "to": "ts_q06_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r00",
+      "to": "ts_q05_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r00",
+      "to": "ts_q06_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r00",
+      "to": "ts_q07_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r01",
+      "to": "ts_q05_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r01",
+      "to": "ts_q06_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r01",
+      "to": "ts_q07_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r02",
+      "to": "ts_q05_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r02",
+      "to": "ts_q06_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r02",
+      "to": "ts_q07_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r03",
+      "to": "ts_q05_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r03",
+      "to": "ts_q06_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r03",
+      "to": "ts_q07_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q06_r04",
+      "to": "ts_q07_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r00",
+      "to": "ts_q06_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r00",
+      "to": "ts_q07_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r00",
+      "to": "ts_q08_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r01",
+      "to": "ts_q06_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r01",
+      "to": "ts_q07_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r01",
+      "to": "ts_q08_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r02",
+      "to": "ts_q06_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r02",
+      "to": "ts_q07_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r02",
+      "to": "ts_q08_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r03",
+      "to": "ts_q06_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r03",
+      "to": "ts_q07_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r03",
+      "to": "ts_q08_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q07_r04",
+      "to": "ts_q08_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r00",
+      "to": "ts_q07_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r00",
+      "to": "ts_q08_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r00",
+      "to": "ts_q09_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r01",
+      "to": "ts_q07_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r01",
+      "to": "ts_q08_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r01",
+      "to": "ts_q09_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r02",
+      "to": "ts_q07_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r02",
+      "to": "ts_q08_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r02",
+      "to": "ts_q09_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r03",
+      "to": "ts_q07_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r03",
+      "to": "ts_q08_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r03",
+      "to": "ts_q09_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q08_r04",
+      "to": "ts_q09_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r00",
+      "to": "ts_q08_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r00",
+      "to": "ts_q09_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r00",
+      "to": "ts_q10_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r01",
+      "to": "ts_q08_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r01",
+      "to": "ts_q09_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r01",
+      "to": "ts_q10_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r02",
+      "to": "ts_q08_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r02",
+      "to": "ts_q09_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r02",
+      "to": "ts_q10_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r03",
+      "to": "ts_q08_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r03",
+      "to": "ts_q09_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r03",
+      "to": "ts_q10_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q09_r04",
+      "to": "ts_q10_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r00",
+      "to": "ts_q09_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r00",
+      "to": "ts_q10_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r00",
+      "to": "ts_q11_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r01",
+      "to": "ts_q09_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r01",
+      "to": "ts_q10_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r01",
+      "to": "ts_q11_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r02",
+      "to": "ts_q09_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r02",
+      "to": "ts_q10_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r02",
+      "to": "ts_q11_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r03",
+      "to": "ts_q09_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r03",
+      "to": "ts_q10_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r03",
+      "to": "ts_q11_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q10_r04",
+      "to": "ts_q11_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r00",
+      "to": "ts_q10_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r00",
+      "to": "ts_q11_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r00",
+      "to": "ts_q12_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r01",
+      "to": "ts_q10_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r01",
+      "to": "ts_q11_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r01",
+      "to": "ts_q12_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r02",
+      "to": "ts_q10_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r02",
+      "to": "ts_q11_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r02",
+      "to": "ts_q12_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r03",
+      "to": "ts_q10_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r03",
+      "to": "ts_q11_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r03",
+      "to": "ts_q12_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q11_r04",
+      "to": "ts_q12_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r00",
+      "to": "ts_q11_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r00",
+      "to": "ts_q12_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r00",
+      "to": "ts_q13_r00",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r01",
+      "to": "ts_q11_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r01",
+      "to": "ts_q12_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r01",
+      "to": "ts_q13_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r02",
+      "to": "ts_q11_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r02",
+      "to": "ts_q12_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r02",
+      "to": "ts_q13_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r03",
+      "to": "ts_q11_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r03",
+      "to": "ts_q12_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r03",
+      "to": "ts_q13_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q12_r04",
+      "to": "ts_q13_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q13_r00",
+      "to": "ts_q12_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q13_r00",
+      "to": "ts_q13_r01",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q13_r01",
+      "to": "ts_q12_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q13_r01",
+      "to": "ts_q13_r02",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q13_r02",
+      "to": "ts_q12_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q13_r02",
+      "to": "ts_q13_r03",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q13_r03",
+      "to": "ts_q12_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    },
+    {
+      "from": "ts_q13_r03",
+      "to": "ts_q13_r04",
+      "hasRoad": true,
+      "hasRiverCrossing": false,
+      "movementCostModifier": 0
+    }
+  ],
+  "supplySources": [
+    {
+      "id": "supply_ts_q01_r04",
+      "faction": "germany",
+      "regionId": "ts_q01_r04"
+    },
+    {
+      "id": "supply_ts_q04_r02",
+      "faction": "allies",
+      "regionId": "ts_q04_r02"
+    },
+    {
+      "id": "supply_ts_q05_r02",
+      "faction": "allies",
+      "regionId": "ts_q05_r02"
+    },
+    {
+      "id": "supply_ts_q06_r03",
+      "faction": "allies",
+      "regionId": "ts_q06_r03"
+    },
+    {
+      "id": "supply_ts_q07_r00",
+      "faction": "germany",
+      "regionId": "ts_q07_r00"
+    },
+    {
+      "id": "supply_ts_q08_r00",
+      "faction": "germany",
+      "regionId": "ts_q08_r00"
+    },
+    {
+      "id": "supply_ts_q09_r02",
+      "faction": "germany",
+      "regionId": "ts_q09_r02"
+    },
+    {
+      "id": "supply_ts_q10_r03",
+      "faction": "germany",
+      "regionId": "ts_q10_r03"
+    },
+    {
+      "id": "supply_ts_q11_r01",
+      "faction": "germany",
+      "regionId": "ts_q11_r01"
+    },
+    {
+      "id": "supply_ts_q12_r04",
+      "faction": "germany",
+      "regionId": "ts_q12_r04"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "region_obj_kaifeng",
+      "name": "开封",
+      "regionId": "ts_q05_r02",
+      "type": "city",
+      "victoryPoints": 10,
+      "mainObjective": true
+    },
+    {
+      "id": "region_obj_luoyang",
+      "name": "洛阳",
+      "regionId": "ts_q04_r02",
+      "type": "city",
+      "victoryPoints": 7,
+      "mainObjective": true
+    },
+    {
+      "id": "region_obj_taiyuan",
+      "name": "太原",
+      "regionId": "ts_q08_r00",
+      "type": "fortress",
+      "victoryPoints": 9,
+      "mainObjective": true
+    },
+    {
+      "id": "region_obj_yanmen",
+      "name": "雁门",
+      "regionId": "ts_q07_r00",
+      "type": "fortress",
+      "victoryPoints": 5,
+      "mainObjective": false
+    },
+    {
+      "id": "region_obj_jinling",
+      "name": "金陵",
+      "regionId": "ts_q10_r03",
+      "type": "city",
+      "victoryPoints": 9,
+      "mainObjective": true
+    },
+    {
+      "id": "region_obj_chengdu",
+      "name": "成都",
+      "regionId": "ts_q01_r04",
+      "type": "city",
+      "victoryPoints": 8,
+      "mainObjective": true
+    },
+    {
+      "id": "region_obj_hangzhou",
+      "name": "杭州",
+      "regionId": "ts_q12_r04",
+      "type": "city",
+      "victoryPoints": 7,
+      "mainObjective": true
+    },
+    {
+      "id": "region_obj_yangzhou",
+      "name": "扬州",
+      "regionId": "ts_q09_r02",
+      "type": "city",
+      "victoryPoints": 6,
+      "mainObjective": false
+    },
+    {
+      "id": "region_obj_xiangyang",
+      "name": "襄阳",
+      "regionId": "ts_q06_r03",
+      "type": "fortress",
+      "victoryPoints": 6,
+      "mainObjective": false
+    },
+    {
+      "id": "region_obj_shouzhou",
+      "name": "寿州",
+      "regionId": "ts_q11_r01",
+      "type": "fortress",
+      "victoryPoints": 5,
+      "mainObjective": false
+    }
+  ]
+}

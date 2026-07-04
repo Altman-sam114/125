@@ -1,12 +1,12 @@
-# WWIIHexV0 — iOS / macOS 二战 AI 战略战棋游戏
+# WWIIHexV0 — 唐宋迁移中的 iOS / macOS AI 战略战棋
 
-> **当前状态：v0.5 元帅决策链分支 `v0.5-marshal-decision-chain`。默认战争 AI 已加入“元帅 -> 模拟 LLM JSON -> decoder -> compiler -> ZoneDirective”决策链；下游仍收口到 `WarCommandExecutor -> RuleEngine`。统治者层只作为后续上游预留，当前 v0.5 主链路不调用 `RulerAgent`，也不恢复 Cabinet / Minister。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查。**
+> **当前状态：v5.2 唐宋首发剧本迁移首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
 
 ---
 
 ## 项目定位
 
-一款 iOS / macOS 回合制二战策略游戏，目标结合战棋（六角格操作感）、大战略（省份占领、补给、前线）与角色扮演（LLM 驱动的将领 AI）。
+一款 iOS / macOS 回合制历史策略游戏，当前正从二战阿登原型迁移为唐宋时代 AI Agent 策略游戏。目标结合战棋（六角格操作感）、大战略（州府占领、粮道、前线）与角色扮演（LLM 驱动的将领/朝廷 AI）。
 
 **核心参考：**
 - 《统一指挥2》：六角格战棋、补给、攻击（战术层参照）
@@ -79,7 +79,7 @@ WWIIHexV0/
 ├── SpriteKit/     — 地图渲染（BoardScene、UnitNode、HexNode、HexLayout、TerrainStyle、BoardSceneAdapter）
 ├── UI/            — 界面组件（UnitInspectorView、EventLogView、HUDView、CommandPanelView、AgentPanelView、RootGameView）
 ├── App/           — 入口（AppContainer、WWIIHexV0App、WWIIHexV0MacApp）
-├── Data/          — 场景数据（DataLoader、ScenarioDefinition JSON、general_agents.json、generals.json、unit_templates.json、terrain_rules.json）
+├── Data/          — 场景数据（DataLoader、唐宋/legacy ScenarioDefinition JSON、unit templates、characters/generals、terrain_rules.json）
 ├── Probes/        — 历史高速探针测试 target（默认不执行）
 └── Tests/         — 历史单元测试 / 集成测试 / 真实战局模拟（默认不执行）
 ```

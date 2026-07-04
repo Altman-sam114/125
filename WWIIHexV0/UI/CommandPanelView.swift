@@ -7,6 +7,7 @@ struct CommandPanelView: View {
     let playerFaction: Faction
     let observerModeEnabled: Bool
     let commandsAllowed: Bool
+    let phaseDisplayName: String
     let lastCommandMessage: String?
     let onHold: () -> Void
     let onAllowRetreat: () -> Void
@@ -95,7 +96,7 @@ struct CommandPanelView: View {
         }
 
         guard activeFaction == playerFaction, commandsAllowed else {
-            return "Commands unavailable during \(phase.displayName)."
+            return "Commands unavailable during \(phaseDisplayName)."
         }
 
         guard !selectedDivision.hasActed else {

@@ -450,16 +450,17 @@ AppContainer.bootstrap()
   -> AppContainer(...)
 ```
 
-`DataLoader.loadInitialGameState()` 当前优先走编辑器兼容 JSON：
+`DataLoader.loadInitialGameState()` v5.2 后默认优先走唐宋首发剧本 JSON：
 
 ```text
 loadGameState(
-  scenarioName: "ardennes_v0_scenario",
-  regionName: "ardennes_v02_regions"
+  scenarioName: "tangsong_jianlong_960_scenario",
+  regionName: "tangsong_jianlong_960_regions",
+  unitTemplateName: "tangsong_unit_templates"
 )
 ```
 
-如果失败，才 fallback 到老的 `GameState.initial()` + v0.2 region 叠加路径。
+如果唐宋资源加载失败，才 fallback 到 legacy 阿登 `ardennes_v0_scenario` + `ardennes_v02_regions`；如果阿登也失败，才退回老的 `GameState.initial()` + v0.2 region 叠加路径。当前唐宋底层仍用 `Faction.allies` 表示宋、`Faction.germany` 表示北方与割据 AI 桥；`TurnOrderState` 的 `PowerProfile` 负责默认显示名。
 
 ### 2.2 loadGameState 的完整链条
 
@@ -468,6 +469,7 @@ loadGameState(
 ```text
 loadScenarioDefinition(named:)
 loadRegionDataSet(named:)
+loadUnitTemplates(named:)
   -> makeMapState(from: scenario)
      - ScenarioTileDefinition -> HexTile
      - tile.controller 字符串转 Faction；"neutral" 转 nil
@@ -481,7 +483,7 @@ loadRegionDataSet(named:)
      - validateRegionGraph()
   -> RegionOccupationRules().mapByAggregatingControllers(in: map)
      - 从 hex controller 派生 region controller
-  -> makeDivisions(from: scenario.initialUnits)
+  -> makeDivisions(from: scenario.initialUnits, templates:)
   -> makeTheaterState(map, regionData, divisions, turn)
      - 优先使用 regionData.regions[].theaterId
      - 没有 assignment 时使用 TheaterSystem.makeInitialFixedTheaters

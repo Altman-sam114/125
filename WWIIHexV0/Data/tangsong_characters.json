@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "scenarioId": "jianlong_960_unification",
+  "characters": [
+    {
+      "id": "zhao_kuangyin",
+      "name": "赵匡胤",
+      "powerId": "power_song",
+      "role": "皇帝",
+      "commandStyle": "central_unification",
+      "traits": [
+        "天命",
+        "禁军",
+        "招抚"
+      ]
+    },
+    {
+      "id": "zhao_pu",
+      "name": "赵普",
+      "powerId": "power_song",
+      "role": "宰辅",
+      "commandStyle": "court_strategy",
+      "traits": [
+        "谋略",
+        "制度",
+        "后勤"
+      ]
+    },
+    {
+      "id": "li_chongjin",
+      "name": "李重进",
+      "powerId": "power_local",
+      "role": "节镇",
+      "commandStyle": "regional_warlord",
+      "traits": [
+        "节度",
+        "观望"
+      ]
+    },
+    {
+      "id": "liu_jun",
+      "name": "刘钧",
+      "powerId": "power_northern_han",
+      "role": "国主",
+      "commandStyle": "defensive_hold",
+      "traits": [
+        "太原",
+        "辽援"
+      ]
+    },
+    {
+      "id": "li_yu",
+      "name": "李煜",
+      "powerId": "power_southern_tang",
+      "role": "国主",
+      "commandStyle": "river_defense",
+      "traits": [
+        "金陵",
+        "江防"
+      ]
+    },
+    {
+      "id": "qian_chu",
+      "name": "钱俶",
+      "powerId": "power_wuyue",
+      "role": "国主",
+      "commandStyle": "submission_diplomacy",
+      "traits": [
+        "吴越",
+        "归附"
+      ]
+    },
+    {
+      "id": "meng_chang",
+      "name": "孟昶",
+      "powerId": "power_later_shu",
+      "role": "国主",
+      "commandStyle": "mountain_defense",
+      "traits": [
+        "成都",
+        "剑门"
+      ]
+    }
+  ]
+}
