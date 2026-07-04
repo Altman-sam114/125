@@ -827,32 +827,37 @@ struct WarCommandExecutor {
             + zone.frontSegments.map(\.regionId)
         )
         let movementRange = MovementRules().movementRange(for: division, in: state)
-        let candidateHexes = preferredRegionIds
-            .compactMap { state.map.region(id: $0) }
-            .flatMap { stableUnique([$0.representativeHex] + $0.displayHexes) }
-            .filter { $0 != division.coord }
-            .filter { movementRange.contains($0) }
-            .filter { state.map.tile(at: $0)?.isPassable == true }
-            .filter { state.division(at: $0) == nil }
+        let preferredRegions: [RegionNode] = preferredRegionIds.compactMap { regionId in
+            state.map.region(id: regionId)
+        }
+        let regionHexes: [HexCoord] = preferredRegions.flatMap { region in
+            stableUnique([region.representativeHex] + region.displayHexes)
+        }
+        let candidateHexes: [HexCoord] = regionHexes.filter { hex in
+            hex != division.coord
+                && movementRange.contains(hex)
+                && state.map.tile(at: hex)?.isPassable == true
+                && state.division(at: hex) == nil
+        }
 
-        return candidateHexes.sorted {
-            let lhsDefense = state.map.tile(at: $0)?.baseTerrain.defenseBonus ?? 0
-            let rhsDefense = state.map.tile(at: $1)?.baseTerrain.defenseBonus ?? 0
+        return candidateHexes.sorted { lhs, rhs in
+            let lhsDefense = state.map.tile(at: lhs)?.baseTerrain.defenseBonus ?? 0
+            let rhsDefense = state.map.tile(at: rhs)?.baseTerrain.defenseBonus ?? 0
             if lhsDefense != rhsDefense {
                 return lhsDefense > rhsDefense
             }
-            let lhsFriendly = state.map.tile(at: $0)?.controller == division.faction
-            let rhsFriendly = state.map.tile(at: $1)?.controller == division.faction
+            let lhsFriendly = state.map.tile(at: lhs)?.controller == division.faction
+            let rhsFriendly = state.map.tile(at: rhs)?.controller == division.faction
             if lhsFriendly != rhsFriendly {
                 return lhsFriendly
             }
-            let lhsDistance = division.coord.distance(to: $0)
-            let rhsDistance = division.coord.distance(to: $1)
+            let lhsDistance = division.coord.distance(to: lhs)
+            let rhsDistance = division.coord.distance(to: rhs)
             if lhsDistance == rhsDistance {
-                if $0.q == $1.q {
-                    return $0.r < $1.r
+                if lhs.q == rhs.q {
+                    return lhs.r < rhs.r
                 }
-                return $0.q < $1.q
+                return lhs.q < rhs.q
             }
             return lhsDistance < rhsDistance
         }.first
