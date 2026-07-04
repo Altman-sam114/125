@@ -20,6 +20,15 @@ enum ComponentType: String, Codable, Equatable, CaseIterable {
     }
 }
 
+enum TangSongCombatRole: String, Equatable, Hashable {
+    case imperialGuard
+    case prefectureInfantry
+    case cavalry
+    case crossbowGarrison
+    case siegeEngine
+    case garrison
+}
+
 struct DivisionComponent: Codable, Equatable {
     let type: ComponentType
     let weight: Double
@@ -309,6 +318,67 @@ struct Division: Identifiable, Codable, Equatable {
 
     var isArtillery: Bool {
         components.contains { $0.type == .artillery && $0.weight >= 0.50 }
+    }
+
+    func componentWeight(_ type: ComponentType) -> Double {
+        components
+            .filter { $0.type == type }
+            .reduce(0.0) { $0 + $1.weight }
+    }
+
+    var tangSongCombatRoles: Set<TangSongCombatRole> {
+        let normalizedId = id.lowercased()
+        let artilleryWeight = componentWeight(.artillery)
+        let infantryWeight = componentWeight(.infantry)
+        let motorizedWeight = componentWeight(.motorizedInfantry)
+        let tankWeight = componentWeight(.tank)
+        var roles: Set<TangSongCombatRole> = []
+
+        if normalizedId.contains("imperial") || normalizedId.contains("panzerdivision") {
+            roles.insert(.imperialGuard)
+        }
+        if normalizedId.contains("prefecture") || normalizedId.contains("infantrydivision") {
+            roles.insert(.prefectureInfantry)
+        }
+        if normalizedId.contains("cavalry") ||
+            normalizedId.contains("motorizeddivision") ||
+            (motorizedWeight >= 0.55 && tankWeight < 0.25) {
+            roles.insert(.cavalry)
+        }
+        if normalizedId.contains("crossbow") ||
+            (normalizedId.contains("garrison") && artilleryWeight >= 0.30) {
+            roles.insert(.crossbowGarrison)
+        }
+        if normalizedId.contains("siege") ||
+            normalizedId.contains("artillerydivision") ||
+            artilleryWeight >= 0.65 {
+            roles.insert(.siegeEngine)
+        }
+        if normalizedId.contains("guard") || normalizedId.contains("garrison") {
+            roles.insert(.garrison)
+        }
+
+        if roles.isEmpty && infantryWeight >= 0.60 {
+            roles.insert(.prefectureInfantry)
+        }
+
+        return roles
+    }
+
+    var isTangSongCavalry: Bool {
+        tangSongCombatRoles.contains(.cavalry)
+    }
+
+    var isTangSongCrossbowGarrison: Bool {
+        tangSongCombatRoles.contains(.crossbowGarrison)
+    }
+
+    var isTangSongSiegeEngine: Bool {
+        tangSongCombatRoles.contains(.siegeEngine)
+    }
+
+    var isTangSongGarrison: Bool {
+        tangSongCombatRoles.contains(.garrison)
     }
 
     private func weightedStat(_ keyPath: KeyPath<EffectiveStats, Int>) -> Int {

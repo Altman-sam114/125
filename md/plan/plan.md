@@ -46,7 +46,26 @@ displayName: 建隆元年：陈桥兵变与山河一统
 - AI Agent 输出必须是 Codable JSON / directive，不能直接改 `GameState`。
 - 默认主路径不显示 Germany、Allies、Ardennes、Panzer、Bastogne、Guderian、German AI、Allied Player 等二战文案。
 
-## 3. md 目录职责
+## 3. 当前迁移进度快照
+
+截至当前工作树，唐宋迁移已经进入 v5.3 小切片迭代：
+
+- v5.0 已建立迁移总提示词和审计合同，明确首发 960 剧本、架构边界、版本路线、禁止项和验收标准。
+- v5.1 已加入 `PowerId` / `PowerProfile` / `PowerRelation` / `TurnOrderState` / `WarRelationRules` 兼容地基，回合和 AI 控制权主路径开始脱离硬编码 Germany/Allies。
+- v5.2 已新增唐宋 960 场景、州府/方面、单位模板和人物 JSON；默认加载优先唐宋资源，阿登保留 legacy fallback；MapEditor 默认资源桥和工具术语已迁到唐宋口径。
+- v5.3 已完成生产、府库和经济日志显示桥首轮：唐宋路径显示军备、丁口、钱帛、粮草、禁军、厢军、骑军、攻城器械营。
+- v5.3 已加入唐宋场景专用古代兵种战斗修正首轮：骑军平原/道路进攻、弓弩守军守城、攻城器械攻城/野战差异和守军城防差异已经由 `CombatRules` 处理。
+
+仍未完成的关键项：
+
+- `Faction` 底层仍是 `.allies` / `.germany` legacy 桥，真实多政权数据驱动未收口。
+- `ProductionKind`、`EconomyResources`、`Division`、`ComponentType` 的 Codable schema 仍保留二战兼容名。
+- 围城状态、真实粮道、唐宋专用胜利规则、天命/归附/治理和发布级 UI 仍未落地。
+- AI 默认人物和战术 raw case 仍有二战语义残留，需在 v5.4-v5.5 继续迁移。
+
+下一轮优先继续 v5.3 小切片：围城或粮道择一推进，仍必须走 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不得让事件或 Agent 直接改 `GameState`。
+
+## 4. md 目录职责
 
 ```text
 md/
@@ -89,22 +108,22 @@ md/
 - `md/test/test.md` 是检查边界权威。
 - `md/prompt/v5.0-唐宋迁移/` 放唐宋阶段 prompt、审计记录、实现记录和验收记录。
 
-## 4. 唐宋 v5.0-v5.9 路线
+## 5. 唐宋 v5.0-v5.9 路线
 
-| 版本 | 主题 | 目标 | 主要文档产物 |
-|---|---|---|---|
-| v5.0 | 迁移审计与合同冻结 | 不改玩法，先审计二战残留、冻结唐宋迁移合同、明确首发剧本与边界 | `v5.0_audit_and_contract.md`、词汇表、风险清单 |
-| v5.1 | 多势力与通用回合地基 | 解耦 `germany/allies`、`Faction.opponent`、`germanAI/alliedPlayer`，建立 `PowerId` / turn order / relation 兼容层 | 多势力合同记录、回合迁移记录 |
-| v5.2 | 首发剧本数据与 MapEditor 语义 | 默认数据迁到 `jianlong_960_unification`，MapEditor 术语迁到地块/州府/方面/军队/人物 | 剧本数据记录、地图编辑器迁移记录 |
-| v5.3 | 古代军制、粮草、围城与经济 | 兵种、生产、补给、粮道、围城最小闭环，资源显示迁为丁口/钱帛/粮草 | 规则迁移记录、数据检查记录 |
-| v5.4 | 唐宋 AI Agent 分层 | 皇帝/朝廷/枢密/节度使/转运使/州府守臣/外交使者分层，保留 directive 管线 | AI schema 记录、fallback 记录 |
-| v5.5 | 发布级 UI 与地图视觉 | 第一屏地图、HUD、军令、州府、府库、外交、战报、军议可读；移除默认二战文案 | UI/视觉迁移记录、可访问性记录 |
-| v5.6 | 外交、归附、天命与治理 | 多政权关系、归附、天命/国威、治理和事件闭环 | 外交治理记录、事件规则记录 |
-| v5.7 | 教程、剧本包装与可玩闭环 | 开局引导、势力选择、战报、新局/重置，让普通玩家能完成首发剧本 | 教程与可玩闭环记录 |
-| v5.8 | 发布候选硬化 | 玩家可见残留扫描、资源授权、性能和文档口径收口 | 发布候选审计报告 |
-| v5.9 | 可发布版本收口 | 首发剧本可完整试玩，Agent C 验收通过，README/flow/update_log 反映唐宋产品 | 发布验收报告 |
+| 版本 | 主题 | 当前状态 | 目标 | 主要文档产物 |
+|---|---|---|---|---|
+| v5.0 | 迁移审计与合同冻结 | 已建档 | 不改玩法，先审计二战残留、冻结唐宋迁移合同、明确首发剧本与边界 | `v5.0_audit_and_contract.md`、词汇表、风险清单 |
+| v5.1 | 多势力与通用回合地基 | 已完成首轮 | 解耦 `germany/allies`、`Faction.opponent`、`germanAI/alliedPlayer`，建立 `PowerId` / turn order / relation 兼容层 | `v5.1_powers_turn_order_record.md` |
+| v5.2 | 首发剧本数据与 MapEditor 语义 | 已完成首轮 | 默认数据迁到 `jianlong_960_unification`，MapEditor 术语迁到地块/州府/方面/军队/人物 | `v5.2_scenario_mapeditor_record.md` |
+| v5.3 | 古代军制、粮草、围城与经济 | 进行中 | 兵种、生产、补给、粮道、围城最小闭环，资源显示迁为丁口/钱帛/粮草 | `v5.3_rules_siege_grain_record.md` |
+| v5.4 | 唐宋 AI Agent 分层 | 未开始 | 皇帝/朝廷/枢密/节度使/转运使/州府守臣/外交使者分层，保留 directive 管线 | `v5.4_agent_schema_record.md` |
+| v5.5 | 发布级 UI 与地图视觉 | 未开始 | 第一屏地图、HUD、军令、州府、府库、外交、战报、军议可读；移除默认二战文案 | `v5.5_ui_visual_record.md` |
+| v5.6 | 外交、归附、天命与治理 | 未开始 | 多政权关系、归附、天命/国威、治理和事件闭环 | `v5.6_diplomacy_mandate_record.md` |
+| v5.7 | 教程、剧本包装与可玩闭环 | 未开始 | 开局引导、势力选择、战报、新局/重置，让普通玩家能完成首发剧本 | `v5.7_playable_loop_record.md` |
+| v5.8 | 发布候选硬化 | 未开始 | 玩家可见残留扫描、资源授权、性能和文档口径收口 | `v5.8_release_candidate_audit.md` |
+| v5.9 | 可发布版本收口 | 未开始 | 首发剧本可完整试玩，Agent C 验收通过，README/flow/update_log 反映唐宋产品 | `v5.9_release_acceptance.md` |
 
-## 5. 迁移词汇总表
+## 6. 迁移词汇总表
 
 短期源码可保留 legacy 类型名，但玩家可见路径和新文档必须按唐宋语义书写。
 
@@ -125,7 +144,7 @@ md/
 | General | 将领、节度使、州府主将 |
 | Diplomacy | 外交、称臣、纳土、归附、和议 |
 
-## 6. 后续阶段文档建议
+## 7. 后续阶段文档建议
 
 唐宋迁移进入实现后，建议按版本追加这些文件，避免把所有记录堆进总提示词：
 
@@ -135,7 +154,7 @@ md/prompt/v5.0-唐宋迁移/
 ├── v5.0_audit_and_contract.md              # 已创建：当前二战残留审计与 v5.1 合同
 ├── v5.1_powers_turn_order_record.md        # 已创建：Power/TurnOrder/Relation 兼容地基
 ├── v5.2_scenario_mapeditor_record.md       # 已创建：唐宋默认剧本数据、MapEditor 资源桥与术语迁移
-├── v5.3_rules_siege_grain_record.md       # 已创建：生产/府库显示桥首轮，围城和粮道待续
+├── v5.3_rules_siege_grain_record.md        # 已创建：生产/府库显示桥和兵种战斗修正首轮，围城和粮道待续
 ├── v5.4_agent_schema_record.md
 ├── v5.5_ui_visual_record.md
 ├── v5.6_diplomacy_mandate_record.md
@@ -154,7 +173,7 @@ md/prompt/v5.0-唐宋迁移/
 - 未跑本机重测试的原因。
 - 遗留风险和下一步。
 
-## 7. 轻量检查入口
+## 8. 轻量检查入口
 
 默认只做本地轻量检查，重验证交给 GitHub Actions。文档-only 大纲修改建议：
 

@@ -27,6 +27,14 @@ struct CombatRules {
            defenderTile.baseTerrain.supportsInfantryDefenseBonus {
             baseDefense = max(1, Int((Double(baseDefense) * 1.3).rounded()))
         }
+        if state.isTangSongScenario,
+           let defenderTile = state.map.tile(at: defender.coord) {
+            baseDefense = tangSongDefense(
+                baseDefense,
+                defender: defender,
+                tile: defenderTile
+            )
+        }
         guard defender.retreatMode == .hold else {
             return baseDefense
         }
@@ -57,6 +65,10 @@ struct CombatRules {
     func effectiveAttack(for attacker: Division, against defender: Division, in state: GameState) -> Int {
         guard let defenderTile = state.map.tile(at: defender.coord) else {
             return attacker.attack
+        }
+
+        if state.isTangSongScenario {
+            return tangSongAttack(attacker: attacker, defenderTile: defenderTile, in: state)
         }
 
         var multiplier = 1.0
@@ -115,6 +127,50 @@ struct CombatRules {
 
     private func clamp(_ value: Int, min minValue: Int, max maxValue: Int) -> Int {
         Swift.max(minValue, Swift.min(maxValue, value))
+    }
+
+    private func tangSongAttack(attacker: Division, defenderTile: HexTile, in state: GameState) -> Int {
+        var multiplier = 1.0
+        let attackerTile = state.map.tile(at: attacker.coord)
+
+        if attacker.isTangSongCavalry {
+            if defenderTile.baseTerrain == .plain || defenderTile.hasRoad || attackerTile?.hasRoad == true {
+                multiplier += 0.15
+            }
+            if defenderTile.baseTerrain == .city ||
+                defenderTile.baseTerrain == .fortress ||
+                defenderTile.baseTerrain == .forest ||
+                defenderTile.baseTerrain == .mountain {
+                multiplier -= 0.15
+            }
+        }
+
+        if attacker.isTangSongSiegeEngine {
+            if defenderTile.baseTerrain.isObjectiveTerrain || defenderTile.cityName != nil || defenderTile.fortressName != nil {
+                multiplier += 0.35
+            } else {
+                multiplier -= 0.25
+            }
+        }
+
+        return max(1, Int((Double(attacker.attack) * multiplier).rounded()))
+    }
+
+    private func tangSongDefense(_ baseDefense: Int, defender: Division, tile: HexTile) -> Int {
+        var defense = baseDefense
+        let isStronghold = tile.baseTerrain.isObjectiveTerrain || tile.cityName != nil || tile.fortressName != nil
+
+        if isStronghold {
+            if defender.isTangSongCrossbowGarrison {
+                defense += 2
+            } else if defender.isTangSongGarrison {
+                defense += 1
+            }
+        } else if defender.isTangSongSiegeEngine {
+            defense = max(1, defense - 1)
+        }
+
+        return defense
     }
 
     private func lossRatio(strengthDamage: Int, defender: Division) -> Double {

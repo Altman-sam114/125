@@ -1097,6 +1097,26 @@ resolveCombatResult
   attacker 也可能撤退/毁灭
 ```
 
+v5.3 唐宋场景下，`CombatRules` 在不改底层 `ComponentType` Codable schema 的前提下增加了古代兵种最小修正。角色由 `Division.tangSongCombatRoles` 从单位 id、生产 kind id 和现有组件权重推导，仅在 `state.isTangSongScenario == true` 时启用：
+
+```text
+cavalry
+  -> 进攻平原或道路目标 +15%
+  -> 进攻城池、关隘、森林、山地 -15%
+
+siegeEngine
+  -> 攻击 city / fortress / 具名城市或关隘 +35%
+  -> 野战攻击 -25%，野战防御 -1
+
+crossbowGarrison
+  -> 守 city / fortress / 具名城市或关隘 +2 防御
+
+garrison
+  -> 守 city / fortress / 具名城市或关隘 +1 防御
+```
+
+这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、粮道/漕运和唐宋专用胜利规则仍未实现。
+
 结束回合：
 
 ```text

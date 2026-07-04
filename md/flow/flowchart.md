@@ -216,6 +216,39 @@ flowchart TD
     classDef warn fill:#ffedd5,stroke:#f97316,color:#431407
 ```
 
+## 3.5 v5.3 唐宋古代兵种战斗修正
+
+这张图看 v5.3 的战斗数值切片。底层 `ComponentType` 仍保留 legacy case；唐宋角色由单位 id、生产 kind id 和现有组件权重推导。修正只在 `state.isTangSongScenario` 为 true 时启用，阿登 legacy 路径仍走原装甲/火炮规则。
+
+```mermaid
+flowchart TD
+    CMD["攻击命令<br/>Command.attack<br/>玩家或 WarCommandExecutor 生成"]:::command
+    VALID["统一校验<br/>CommandValidator<br/>检查阵营、射程、敌我关系"]:::rules
+    DIV["军队角色推导<br/>Division.tangSongCombatRoles<br/>id + production kind + 组件权重"]:::state
+    SCENE{"唐宋场景?<br/>GameState.isTangSongScenario"}:::decision
+    LEGACY["Legacy 战斗修正<br/>装甲平原加成 / 地形减速"]:::rules
+    CAV["骑军<br/>平原/道路进攻 +15%<br/>攻城关/山林 -15%"]:::rules
+    SIEGE["攻城器械<br/>攻城池/关隘 +35%<br/>野战攻击 -25%，防御 -1"]:::rules
+    GARRISON["弓弩守军 / 守军<br/>守城池/关隘 +2 / +1 防御"]:::rules
+    DAMAGE["伤害结算<br/>CombatRules.damage<br/>攻防、侧翼、河流、固守"]:::rules
+    EXEC["执行结果<br/>CommandExecutor<br/>扣 strength、撤退、反击、消灭"]:::rules
+    HEX["边界<br/>攻击不直接占领 hex<br/>占领仍只能由合法移动触发"]:::authority
+
+    CMD --> VALID --> SCENE
+    SCENE -->|否| LEGACY --> DAMAGE
+    SCENE -->|是| DIV
+    DIV --> CAV --> DAMAGE
+    DIV --> SIEGE --> DAMAGE
+    DIV --> GARRISON --> DAMAGE
+    DAMAGE --> EXEC --> HEX
+
+    classDef command fill:#fae8ff,stroke:#a21caf,color:#2a0a2f
+    classDef rules fill:#ccfbf1,stroke:#0f766e,color:#042f2e
+    classDef state fill:#ede9fe,stroke:#7c3aed,color:#1f143d
+    classDef decision fill:#fff7ed,stroke:#ea580c,color:#1f1300
+    classDef authority fill:#fee2e2,stroke:#dc2626,color:#111827
+```
+
 ## 4. AI / 元帅决策链：AI 怎么下命令
 
 这张图看 v0.5 分支默认 AI 主路径。AI 不直接控制单位，也不直接改地图；元帅先读取降维战场摘要，模拟 LLM 输出 `TheaterDirectiveEnvelope` JSON，经 decoder 校验和 compiler 降级后，形成战区级 `DirectiveEnvelope`。`WarCommandExecutor` 再把这些战术翻译成底层 `Command`，最后交给 `RuleEngine`。
