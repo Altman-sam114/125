@@ -12,6 +12,7 @@
   -> hex 是真实战术权威
   -> region / theater / front / deploy 都是从 hex 和单位位置派生出来的战略层
   -> economy 是 faction 级经济总账，收入仍从真实控制的 hex/region 聚合
+  -> turn order / power profile 是 v5.1 多势力回合桥
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -43,6 +44,7 @@ flowchart TD
     FRONT["前线层<br/>FrontLine / FrontSegment<br/>按双方动态战区的真实相邻 hex 生成"]:::derived
     DEPLOY["部署层<br/>WarDeploymentState<br/>用 hexToFrontZone 把单位分成前线/纵深/驻军"]:::derived
     ECO["经济总账<br/>EconomyState / EconomyRules<br/>收入、维护费、生产队列、自动补员"]:::economy
+    TURN["回合与势力桥<br/>TurnOrderState / PowerProfile<br/>power order、active power、控制模式、关系表"]:::state
     PLAYER["玩家输入<br/>点击地图、移动、攻击、结束回合"]:::input
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
     DEC["元帅 JSON 解码<br/>TheaterDirectiveDecoder<br/>提取 fenced JSON、校验 id 与 schema"]:::command
@@ -67,7 +69,10 @@ flowchart TD
     HEX --> H2T
     H2T --> FRONT --> DEPLOY
     GS --> ECO
+    GS --> TURN
 
+    TURN --> PLAYER
+    TURN --> AI
     PLAYER --> CMD
     AI --> DEC --> COMP --> ZD --> WCE --> CMD
     CMD --> RE --> HEX
@@ -172,7 +177,7 @@ flowchart TD
     VALIDATE["生产校验<br/>CommandValidator.validateProduction<br/>检查 phase 与资源是否足够"]:::rules
     PAY["预付成本并入队<br/>EconomyRules.queueProduction<br/>扣 MP/IC/SUP，追加 ProductionOrder"]:::economy
 
-    END["结束当前阵营回合<br/>Command.endTurn<br/>CommandExecutor.executeEndTurn"]:::command
+    END["结束当前阵营回合<br/>Command.endTurn<br/>CommandExecutor.executeEndTurn<br/>按 TurnOrderState 推进 active power"]:::command
     SUPPLY["补给状态刷新<br/>SupplyRules.updateSupplyStates"]:::rules
     RESOLVE["经济结算<br/>EconomyRules.resolveFactionTurn<br/>收入、维护费、短缺、补员、生产推进"]:::economy
     SHORT{"补给库存够吗?"}:::decision

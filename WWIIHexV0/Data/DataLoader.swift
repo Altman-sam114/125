@@ -124,13 +124,24 @@ struct DataLoader {
             map: map,
             regionData: regionData
         )
+        let phase = GamePhase(rawValue: scenario.initialPhase) ?? .germanAI
+        let activeFaction = initialActiveFaction(for: scenario)
+        let playerFaction = Faction(rawValue: scenario.playerFaction) ?? .allies
+        let aiFaction = Faction(rawValue: scenario.aiFaction) ?? .germany
 
         return GameState(
             scenarioId: scenario.id,
             turn: turn,
             maxTurns: scenario.maxTurns,
-            activeFaction: initialActiveFaction(for: scenario),
-            phase: GamePhase(rawValue: scenario.initialPhase) ?? .germanAI,
+            activeFaction: activeFaction,
+            phase: phase,
+            turnOrderState: TurnOrderState.legacy(
+                activeFaction: activeFaction,
+                phase: phase,
+                round: turn,
+                playerFaction: playerFaction,
+                aiFaction: aiFaction
+            ),
             map: map,
             theaterState: theaterState,
             frontLineState: frontLineState,
@@ -142,8 +153,8 @@ struct DataLoader {
             eventLog: [
                 GameLogEntry(
                     turn: turn,
-                    faction: initialActiveFaction(for: scenario),
-                    phase: GamePhase(rawValue: scenario.initialPhase) ?? .germanAI,
+                    faction: activeFaction,
+                    phase: phase,
                     message: "Loaded \(scenario.id) from MapEditor-compatible JSON."
                 )
             ]

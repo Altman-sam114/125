@@ -109,8 +109,10 @@ struct EconomyPanelView: View {
 
     private func canQueue(_ kind: ProductionKind) -> Bool {
         !observerModeEnabled &&
-            gameState.activeFaction == playerFaction &&
-            gameState.phase == .alliedPlayer &&
+            gameState.effectiveTurnOrderState.allowsCommands(
+                activeFaction: playerFaction,
+                phase: gameState.phase
+            ) &&
             gameState.economyState.ledger(for: gameState.activeFaction).stockpile.canAfford(kind.cost)
     }
 

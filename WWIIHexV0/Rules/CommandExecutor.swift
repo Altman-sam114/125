@@ -170,15 +170,13 @@ struct CommandExecutor {
         supplyRules.applyEncirclementAttrition(in: &state)
         victoryRules.updateVictoryState(in: &state)
 
-        switch state.activeFaction {
-        case .germany:
-            state.activeFaction = .allies
-            state.phase = .alliedPlayer
-        case .allies:
-            state.activeFaction = .germany
-            state.phase = .germanAI
-            state.turn += 1
-        }
+        let nextTurnOrderState = state.effectiveTurnOrderState.advancedAfterEndTurn(
+            fallbackActiveFaction: state.activeFaction
+        )
+        state.turnOrderState = nextTurnOrderState
+        state.activeFaction = nextTurnOrderState.activeLegacyFaction(fallback: state.activeFaction)
+        state.phase = nextTurnOrderState.phase
+        state.turn = nextTurnOrderState.round
 
         resetActionsForActiveFaction(in: &state)
         state = StrategicStateBootstrapper().refreshRuntimeState(state)

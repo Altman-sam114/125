@@ -2,6 +2,7 @@ import Foundation
 
 struct CommandValidator {
     private let movementRules = MovementRules()
+    private let warRelationRules = WarRelationRules()
 
     func validate(_ command: Command, in state: GameState) -> CommandValidation {
         switch command {
@@ -64,7 +65,7 @@ struct CommandValidator {
             return .invalid(.targetNotFound)
         }
 
-        guard target.faction != attacker.faction else {
+        guard warRelationRules.canTarget(attacker: attacker.faction, target: target.faction, in: state) else {
             return .invalid(.invalidTargetFaction)
         }
 
@@ -136,13 +137,9 @@ struct CommandValidator {
     }
 
     private func phaseAllowsCommands(in state: GameState) -> Bool {
-        switch state.phase {
-        case .germanAI:
-            return state.activeFaction == .germany
-        case .alliedPlayer:
-            return state.activeFaction == .allies
-        case .resolution:
-            return false
-        }
+        state.effectiveTurnOrderState.allowsCommands(
+            activeFaction: state.activeFaction,
+            phase: state.phase
+        )
     }
 }

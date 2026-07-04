@@ -387,8 +387,7 @@ final class AppContainer: ObservableObject {
         }
         guard let division = selectedDivision,
               division.faction == playerFaction,
-              gameState.activeFaction == playerFaction,
-              gameState.phase == .alliedPlayer,
+              gameState.effectiveTurnOrderState.allowsCommands(activeFaction: playerFaction, phase: gameState.phase),
               !division.hasActed else {
             return nil
         }
@@ -398,8 +397,7 @@ final class AppContainer: ObservableObject {
 
     private var canIssuePlayerDirective: Bool {
         !observerModeEnabled &&
-            gameState.activeFaction == playerFaction &&
-            gameState.phase == .alliedPlayer
+            gameState.effectiveTurnOrderState.allowsCommands(activeFaction: playerFaction, phase: gameState.phase)
     }
 
     private var selectedAttackTarget: (region: RegionNode, zone: FrontZone)? {
@@ -453,8 +451,7 @@ final class AppContainer: ObservableObject {
         }
 
         guard let divisionId = command.actingDivisionId,
-              previousState.activeFaction == playerFaction,
-              previousState.phase == .alliedPlayer,
+              previousState.effectiveTurnOrderState.allowsCommands(activeFaction: playerFaction, phase: previousState.phase),
               previousState.division(id: divisionId)?.faction == playerFaction else {
             return next
         }
@@ -645,12 +642,11 @@ final class AppContainer: ObservableObject {
     }
 
     private func shouldRunAI(for faction: Faction, phase: GamePhase) -> Bool {
-        switch faction {
-        case .germany:
-            return phase == .germanAI
-        case .allies:
-            return observerModeEnabled && phase == .alliedPlayer
-        }
+        gameState.effectiveTurnOrderState.shouldRunAI(
+            activeFaction: faction,
+            phase: phase,
+            observerModeEnabled: observerModeEnabled
+        )
     }
 
     private func runAISequence(
@@ -699,12 +695,11 @@ final class AppContainer: ObservableObject {
     }
 
     private func shouldRunAIInSnapshot(state: GameState, observerEnabled: Bool) -> Bool {
-        switch state.activeFaction {
-        case .germany:
-            return state.phase == .germanAI
-        case .allies:
-            return observerEnabled && state.phase == .alliedPlayer
-        }
+        state.effectiveTurnOrderState.shouldRunAI(
+            activeFaction: state.activeFaction,
+            phase: state.phase,
+            observerModeEnabled: observerEnabled
+        )
     }
 
     private func turnManager(for faction: Faction, state: GameState) -> TurnManager {

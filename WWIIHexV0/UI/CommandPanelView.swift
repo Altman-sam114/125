@@ -6,6 +6,7 @@ struct CommandPanelView: View {
     let phase: GamePhase
     let playerFaction: Faction
     let observerModeEnabled: Bool
+    let commandsAllowed: Bool
     let lastCommandMessage: String?
     let onHold: () -> Void
     let onAllowRetreat: () -> Void
@@ -68,8 +69,7 @@ struct CommandPanelView: View {
         }
 
         return selectedDivision.faction == playerFaction &&
-            activeFaction == playerFaction &&
-            phase == .alliedPlayer &&
+            commandsAllowed &&
             !selectedDivision.hasActed
     }
 
@@ -94,7 +94,7 @@ struct CommandPanelView: View {
             return "Enemy unit selected. Commands disabled."
         }
 
-        guard activeFaction == playerFaction, phase == .alliedPlayer else {
+        guard activeFaction == playerFaction, commandsAllowed else {
             return "Commands unavailable during \(phase.displayName)."
         }
 

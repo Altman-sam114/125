@@ -6,6 +6,7 @@ struct GameState: Codable, Equatable {
     var maxTurns: Int
     var activeFaction: Faction
     var phase: GamePhase
+    var turnOrderState: TurnOrderState
     var map: MapState
     var theaterState: TheaterState
     var frontLineState: FrontLineState
@@ -25,6 +26,7 @@ struct GameState: Codable, Equatable {
         maxTurns: Int,
         activeFaction: Faction,
         phase: GamePhase,
+        turnOrderState: TurnOrderState? = nil,
         map: MapState,
         theaterState: TheaterState = .empty,
         frontLineState: FrontLineState = .empty,
@@ -43,6 +45,11 @@ struct GameState: Codable, Equatable {
         self.maxTurns = maxTurns
         self.activeFaction = activeFaction
         self.phase = phase
+        self.turnOrderState = turnOrderState ?? TurnOrderState.legacy(
+            activeFaction: activeFaction,
+            phase: phase,
+            round: turn
+        )
         self.map = map
         self.theaterState = theaterState
         self.frontLineState = frontLineState
@@ -141,6 +148,7 @@ struct GameState: Codable, Equatable {
         case maxTurns
         case activeFaction
         case phase
+        case turnOrderState
         case map
         case theaterState
         case frontLineState
@@ -163,6 +171,7 @@ struct GameState: Codable, Equatable {
             maxTurns: try container.decode(Int.self, forKey: .maxTurns),
             activeFaction: try container.decode(Faction.self, forKey: .activeFaction),
             phase: try container.decode(GamePhase.self, forKey: .phase),
+            turnOrderState: try container.decodeIfPresent(TurnOrderState.self, forKey: .turnOrderState),
             map: try container.decode(MapState.self, forKey: .map),
             theaterState: try container.decodeIfPresent(TheaterState.self, forKey: .theaterState) ?? .empty,
             frontLineState: try container.decodeIfPresent(FrontLineState.self, forKey: .frontLineState) ?? .empty,
@@ -176,6 +185,10 @@ struct GameState: Codable, Equatable {
             warDirectiveRecords: try container.decodeIfPresent([WarDirectiveRecord].self, forKey: .warDirectiveRecords) ?? [],
             playerCommandState: try container.decodeIfPresent(PlayerCommandState.self, forKey: .playerCommandState) ?? .empty
         )
+    }
+
+    var effectiveTurnOrderState: TurnOrderState {
+        turnOrderState.normalized(activeFaction: activeFaction, phase: phase, round: turn)
     }
 
     func division(id: String) -> Division? {

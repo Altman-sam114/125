@@ -17,6 +17,7 @@ MapEditor / JSON 数据
   -> Hex controller / Division coord
   -> Region 聚合
   -> EconomyState 收入 / 生产 / 补员
+  -> TurnOrderState / PowerProfile 回合与控制权桥
   -> Initial Theater snapshot + runtime hexToTheater
   -> FrontLine 动态 hex 接触
   -> WarDeployment hexToFrontZone + FRONT/DEPTH/GARRISON
@@ -39,6 +40,7 @@ MapEditor / JSON 数据
 - `hexToTheater` 是运行时动态战区权威。
 - `hexToFrontZone` 是部署层动态归属权威。
 - `EconomyState` 是 faction 级经济总账；收入来自受控 region、城市、工厂、基础设施和补给值，但战术占领仍以 hex 为准。
+- v5.1 新增 `TurnOrderState`，用于保存 power order、active power、控制模式和 power relations；`activeFaction` / `phase` 仍保留为 legacy 执行桥。
 - 玩家、AI、后续聊天命令最终都必须经过 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不能直接改 `GameState`。
 - v0.5 默认战争 AI 上游是 `MarshalAgent -> TheaterDirective JSON -> TheaterDirectiveDecoder -> TheaterDirectiveCompiler`，下游执行收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
 - 统治者层只作为后续方向预留；当前 v0.5 主链路不调用 `RulerAgent`，也不写统治者决策记录。
@@ -58,6 +60,7 @@ scenarioId
 turn / maxTurns
 activeFaction
 phase
+turnOrderState
 map: MapState
 theaterState: TheaterState
 frontLineState: FrontLineState
@@ -78,6 +81,7 @@ playerCommandState
 - `frontLineState` 从动态战区相邻 hex 派生。
 - `warDeploymentState` 从动态战区/前线/单位位置派生，供 AI 调度单位。
 - `economyState` 保存 manpower、industry、supplies、生产队列、上回合收入/维护费/补员消耗，不直接改变战术占领权。
+- `turnOrderState` 保存 `PowerId` / `PowerProfile` / `PowerRelation` / power order。旧状态缺失时由 `TurnOrderState.legacy(...)` 从 `activeFaction`、`phase` 和当前 turn 派生。
 - `eventLog` 给 UI 和调试看。
 - `warDirectiveRecords` 记录战争指令执行回放，供 v0.36+ 后续接 LLM / 聊天命令审计。
 
@@ -1075,14 +1079,18 @@ SupplyRules.advanceRetreats
 SupplyRules.applyEncirclementAttrition
 VictoryRules.updateVictoryState
 
-activeFaction:
-  germany -> allies, phase alliedPlayer
-  allies -> germany, phase germanAI, turn += 1
+TurnOrderState.advancedAfterEndTurn
+  -> 按 powerOrder 推进 activePowerId
+  -> 新 active power 的 controlMode 决定 legacy phase
+  -> powerOrder 回到首位时 round += 1
+  -> activePowerId 桥接回 legacy activeFaction
 
 resetActionsForActiveFaction
 StrategicStateBootstrapper.refreshRuntimeState
 appendEvent("Turn advanced ...")
 ```
+
+v5.1 后，`CommandValidator.phaseAllowsCommands`、`CommandExecutor.executeEndTurn`、`TurnManager.isAITurn` 和 `AppContainer.shouldRunAI` 都读取 `GameState.effectiveTurnOrderState`。`Faction.germany/allies` 和 `GamePhase.germanAI/alliedPlayer` 仍在，但不再是回合推进代码里的直接 switch 权威。
 
 ---
 
@@ -1170,11 +1178,10 @@ TurnManager.runAITurn(... pipelineMode: .zoneDirective)
 `AppContainer.shouldRunAI`：
 
 ```text
-germany:
-  phase == .germanAI
-
-allies:
-  observerModeEnabled && phase == .alliedPlayer
+TurnOrderState.shouldRunAI
+  -> activePowerId 对应 PowerProfile.controlMode == ai 时运行 AI
+  -> observerModeEnabled 时，playerControlledPowerIds 也可由 AI 自动跑
+  -> TurnManager.isAITurn 只检查当前 active power / phase 是否允许命令
 ```
 
 `runAISequence`：

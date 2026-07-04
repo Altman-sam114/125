@@ -151,6 +151,10 @@ struct RootGameView: View {
                         phase: container.gameState.phase,
                         playerFaction: container.playerFaction,
                         observerModeEnabled: container.observerModeEnabled,
+                        commandsAllowed: container.gameState.effectiveTurnOrderState.allowsCommands(
+                            activeFaction: container.playerFaction,
+                            phase: container.gameState.phase
+                        ),
                         lastCommandMessage: container.lastCommandMessage,
                         onHold: container.holdSelected,
                         onAllowRetreat: container.allowRetreatSelected,
