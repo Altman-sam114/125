@@ -442,7 +442,7 @@ struct TheaterSystem {
             if let city = region.city {
                 victoryPointArea += max(1, city.victoryPoints) * max(1, region.displayHexes.count)
             }
-            frontWeight += region.displayHexes.count { hex in
+            frontWeight += region.displayHexes.filter { hex in
                 guard state.dynamicTheaterId(for: hex, map: map) == theater.id else {
                     return false
                 }
@@ -454,7 +454,7 @@ struct TheaterSystem {
                     }
                     return state.theaters[neighborTheaterId]?.controllingFaction != theater.controllingFaction
                 }
-            }
+            }.count
         }
 
         var ratios: [Faction: Double] = [:]

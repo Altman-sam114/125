@@ -707,10 +707,10 @@ struct WarDeploymentManager {
                 }
                 return neighborZoneId == enemyZoneId || zones[neighborZoneId]?.faction == zones[enemyZoneId]?.faction
             }
-            let hostileContacts = map.neighbors(of: enemyRegionId).count {
+            let hostileContacts = map.neighbors(of: enemyRegionId).filter {
                 guard let neighborZoneId = regionToZone[$0] else { return false }
                 return zones[neighborZoneId]?.faction == zones[zoneId]?.faction
-            }
+            }.count
             return exits.isEmpty || (hostileContacts >= 2 && exits.count < 2)
         }
     }

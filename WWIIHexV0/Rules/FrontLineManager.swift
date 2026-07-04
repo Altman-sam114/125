@@ -534,9 +534,9 @@ struct FrontLineManager {
         let hasLocalSupply = enemyRegion.supplyValue > 0 || map.neighbors(of: enemyRegionId).contains {
             map.regions[$0]?.controller == enemyFaction && (map.regions[$0]?.supplyValue ?? 0) > 0
         }
-        let friendlyContacts = map.neighbors(of: enemyRegionId).count {
+        let friendlyContacts = map.neighbors(of: enemyRegionId).filter {
             map.regions[$0]?.controller == friendlyFaction
-        }
+        }.count
 
         if encirclementCandidate || (!hasLocalSupply && friendlyContacts >= 2) {
             return .high
@@ -554,12 +554,12 @@ struct FrontLineManager {
         map: MapState
     ) -> Bool {
         let neighbors = map.neighbors(of: enemyRegionId)
-        let friendlyContacts = neighbors.count {
+        let friendlyContacts = neighbors.filter {
             map.regions[$0]?.controller == friendlyFaction
-        }
-        let escapeRoutes = neighbors.count {
+        }.count
+        let escapeRoutes = neighbors.filter {
             map.regions[$0]?.controller == enemyFaction && map.regions[$0]?.isPassable == true
-        }
+        }.count
         let hasSupplyPath = (map.regions[enemyRegionId]?.supplyValue ?? 0) > 0 || neighbors.contains {
             map.regions[$0]?.controller == enemyFaction && (map.regions[$0]?.supplyValue ?? 0) > 0
         }
