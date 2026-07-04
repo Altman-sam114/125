@@ -249,6 +249,40 @@ flowchart TD
     classDef authority fill:#fee2e2,stroke:#dc2626,color:#111827
 ```
 
+## 3.6 v5.3 唐宋粮道供给首轮
+
+这张图看 v5.3 的粮道供给切片。它不新增补给状态，也不实现完整漕运；只是让唐宋场景的高补给州府/粮仓和道路、山林、跨河成本影响既有 `supplied / lowSupply / encircled` 判定。
+
+```mermaid
+flowchart TD
+    START["补给刷新<br/>SupplyRules.updateSupplyStates<br/>结束回合时执行"]:::rules
+    DIV["逐支军队<br/>Division.coord + faction<br/>hex 仍是位置权威"]:::authority
+    SOURCE["补给源集合<br/>effectiveSupplySources<br/>原 supply source + 唐宋高 supplyValue 州府粮仓"]:::state
+    PATH["粮道寻路<br/>SupplyRules.supplyPathCost<br/>道路/城关便宜，山林/跨河更贵"]:::rules
+    REL["敌控判断<br/>WarRelationRules.canTarget<br/>不再依赖 Faction.opponent"]:::rules
+    STATE{"路径是否可达?<br/>唐宋 max 9 / legacy max 7"}:::decision
+    OK["supplied<br/>可补员，保持正常战力"]:::state
+    LOW["lowSupply<br/>攻击/防御/移动下降"]:::state
+    ENC["encircled<br/>包围 attrition"]:::state
+    ECON["府库粮草<br/>EconomyRules.resolveFactionTurn<br/>战略库存短缺仍可压低补给"]:::economy
+
+    START --> DIV --> SOURCE --> PATH --> REL --> STATE
+    STATE -->|可达| OK
+    STATE -->|不可达但有退路| LOW
+    STATE -->|退路不足| ENC
+    ECON --> LOW
+
+    WARN["边界<br/>没有新增漕运 UI、粮队、仓储容量或围城断粮<br/>仍复用 SupplyState 三态"]:::warn
+    SOURCE -.守住.-> WARN
+
+    classDef rules fill:#ccfbf1,stroke:#0f766e,color:#042f2e
+    classDef authority fill:#fee2e2,stroke:#dc2626,color:#111827
+    classDef state fill:#ede9fe,stroke:#7c3aed,color:#1f143d
+    classDef decision fill:#fff7ed,stroke:#ea580c,color:#1f1300
+    classDef economy fill:#fef9c3,stroke:#ca8a04,color:#292107
+    classDef warn fill:#ffedd5,stroke:#f97316,color:#431407
+```
+
 ## 4. AI / 元帅决策链：AI 怎么下命令
 
 这张图看 v0.5 分支默认 AI 主路径。AI 不直接控制单位，也不直接改地图；元帅先读取降维战场摘要，模拟 LLM 输出 `TheaterDirectiveEnvelope` JSON，经 decoder 校验和 compiler 降级后，形成战区级 `DirectiveEnvelope`。`WarCommandExecutor` 再把这些战术翻译成底层 `Command`，最后交给 `RuleEngine`。

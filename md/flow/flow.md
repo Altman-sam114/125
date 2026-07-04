@@ -1144,6 +1144,24 @@ appendEvent("Turn advanced ...")
 
 v5.1 后，`CommandValidator.phaseAllowsCommands`、`CommandExecutor.executeEndTurn`、`TurnManager.isAITurn` 和 `AppContainer.shouldRunAI` 都读取 `GameState.effectiveTurnOrderState`。`Faction.germany/allies` 和 `GamePhase.germanAI/alliedPlayer` 仍在，但不再是回合推进代码里的直接 switch 权威。
 
+v5.3 唐宋粮道供给首轮仍复用现有 `SupplyState` 三态，不新增 schema：
+
+```text
+SupplyRules.effectiveSupplySources
+  -> 非唐宋：MapState.supplySources(for:)
+  -> 唐宋：MapState supply source + 己方控制且 supplyValue >= 4 的高补给州府/粮仓 region
+
+SupplyRules.supplyPathCost
+  -> 非唐宋：沿用 legacy max 7、road 1、mountain 3、default 2、river +2
+  -> 唐宋：max 9；road 1；city/fortress 1；plain 2；forest/hill 3；mountain 4；river +2
+
+canSupplyPass / RegionSupplyRules
+  -> 敌控判断改用 WarRelationRules.canTarget
+  -> 不再依赖二元 Faction.opponent
+```
+
+这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮和包围效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。完整漕运、粮草运输队、仓储容量、围城断粮和 UI 粮道线仍未实现。
+
 ---
 
 ## 6. AI / 战争指令流程

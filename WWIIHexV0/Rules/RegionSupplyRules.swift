@@ -3,6 +3,7 @@ import Foundation
 struct RegionSupplyRules {
     let maxSupplyPathCost = 7
     private let pathfinder = RegionPathfinder()
+    private let warRelationRules = WarRelationRules()
 
     func supplyState(for division: Division, in state: GameState) -> SupplyState {
         guard let regionId = state.map.region(for: division.coord) else {
@@ -56,7 +57,7 @@ struct RegionSupplyRules {
     func isSafeRetreatRegion(_ regionId: RegionId, for faction: Faction, in state: GameState) -> Bool {
         guard let region = state.map.region(id: regionId),
               region.isPassable,
-              region.controller != faction.opponent else {
+              !isHostileController(region.controller, to: faction, in: state) else {
             return false
         }
         return hasSupplyLine(from: regionId, for: faction, in: state)
@@ -83,7 +84,7 @@ struct RegionSupplyRules {
             return false
         }
 
-        if region.controller == faction.opponent {
+        if isHostileController(region.controller, to: faction, in: state) {
             let friendlyUnitPresent = state.divisions.contains {
                 $0.faction == faction && state.map.region(for: $0.coord) == region.id
             }
@@ -91,6 +92,15 @@ struct RegionSupplyRules {
         }
 
         return true
+    }
+
+    private func isHostileController(_ controller: Faction?, to faction: Faction, in state: GameState) -> Bool {
+        guard let controller, controller != faction else {
+            return false
+        }
+
+        return warRelationRules.canTarget(attacker: faction, target: controller, in: state) ||
+            warRelationRules.canTarget(attacker: controller, target: faction, in: state)
     }
 
     private func supplyCost(entering region: RegionNode, edge: RegionEdge?) -> Int {

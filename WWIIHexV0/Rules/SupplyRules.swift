@@ -6,6 +6,7 @@ struct SupplyRules {
     let encircledHPLoss = 1
     let failedRetreatHPLoss = 1
     private let movementRules = MovementRules()
+    private let warRelationRules = WarRelationRules()
 
     func updateSupplyStates(in state: inout GameState) {
         let snapshot = state
@@ -98,8 +99,9 @@ struct SupplyRules {
     }
 
     func hasSupplyLine(for division: Division, in state: GameState) -> Bool {
-        state.map.supplySources(for: division.faction).contains { source in
-            supplyPathCost(from: division.coord, to: source.coord, for: division.faction, in: state) <= maxSupplyPathCost
+        effectiveSupplySources(for: division.faction, in: state).contains { source in
+            supplyPathCost(from: division.coord, to: source.coord, for: division.faction, in: state) <=
+                maximumSupplyPathCost(in: state)
         }
     }
 
@@ -134,7 +136,7 @@ struct SupplyRules {
             return false
         }
 
-        if tile.isCapturable && tile.controller == faction.opponent {
+        if tile.isCapturable && isHostileController(tile.controller, to: faction, in: state) {
             return false
         }
 
@@ -142,8 +144,9 @@ struct SupplyRules {
             return false
         }
 
-        return state.map.supplySources(for: faction).contains { source in
-            supplyPathCost(from: coord, to: source.coord, for: faction, in: state) <= maxSupplyPathCost
+        return effectiveSupplySources(for: faction, in: state).contains { source in
+            supplyPathCost(from: coord, to: source.coord, for: faction, in: state) <=
+                maximumSupplyPathCost(in: state)
         }
     }
 
@@ -191,12 +194,12 @@ struct SupplyRules {
                     continue
                 }
 
-                var nextCost = current.cost + supplyCost(entering: toTile)
+                var nextCost = current.cost + supplyCost(entering: toTile, in: state)
                 if movementRules.hasRiverCrossing(from: fromTile, to: toTile, direction: direction) {
                     nextCost += 2
                 }
 
-                guard nextCost <= maxSupplyPathCost,
+                guard nextCost <= maximumSupplyPathCost(in: state),
                       nextCost < bestCost[next, default: Int.max] else {
                     continue
                 }
@@ -214,7 +217,7 @@ struct SupplyRules {
             return false
         }
 
-        if tile.isCapturable && tile.controller == faction.opponent {
+        if tile.isCapturable && isHostileController(tile.controller, to: faction, in: state) {
             return false
         }
 
@@ -229,14 +232,14 @@ struct SupplyRules {
     }
 
     private func retreatSortKey(for coord: HexCoord, faction: Faction, in state: GameState) -> RetreatSortKey {
-        let supplySources = state.map.supplySources(for: faction)
+        let supplySources = effectiveSupplySources(for: faction, in: state)
         let pathCost = supplySources
             .map { supplyPathCost(from: coord, to: $0.coord, for: faction, in: state) }
             .min() ?? Int.max
         let sourceDistance = supplySources
             .map { coord.distance(to: $0.coord) }
             .min() ?? Int.max
-        let tileCost = state.map.tile(at: coord).map(supplyCost(entering:)) ?? Int.max
+        let tileCost = state.map.tile(at: coord).map { supplyCost(entering: $0, in: state) } ?? Int.max
 
         return RetreatSortKey(
             pathCost: pathCost,
@@ -266,9 +269,82 @@ struct SupplyRules {
         return true
     }
 
-    private func supplyCost(entering tile: HexTile) -> Int {
+    private func maximumSupplyPathCost(in state: GameState) -> Int {
+        state.isTangSongScenario ? maxSupplyPathCost + 2 : maxSupplyPathCost
+    }
+
+    private func effectiveSupplySources(for faction: Faction, in state: GameState) -> [SupplySource] {
+        var sources = state.map.supplySources(for: faction)
+        guard state.isTangSongScenario else {
+            return sources
+        }
+
+        var seenCoords = Set(sources.map(\.coord))
+        let granaryRegions = state.map.regions.values
+            .filter { $0.controller == faction && $0.isPassable && $0.supplyValue >= 4 }
+            .sorted { $0.id.rawValue < $1.id.rawValue }
+
+        for region in granaryRegions {
+            guard let coord = controlledGranaryHex(in: region, faction: faction, state: state),
+                  !seenCoords.contains(coord) else {
+                continue
+            }
+            seenCoords.insert(coord)
+            sources.append(
+                SupplySource(
+                    id: "tangsong_grain_\(region.id.rawValue)",
+                    faction: faction,
+                    coord: coord
+                )
+            )
+        }
+
+        return sources
+    }
+
+    private func controlledGranaryHex(in region: RegionNode, faction: Faction, state: GameState) -> HexCoord? {
+        let candidates = [region.representativeHex] + region.displayHexes.sorted { lhs, rhs in
+            if lhs.q == rhs.q {
+                return lhs.r < rhs.r
+            }
+            return lhs.q < rhs.q
+        }
+
+        return candidates.first { coord in
+            guard let tile = state.map.tile(at: coord), tile.isPassable else {
+                return false
+            }
+            return tile.controller == faction
+        }
+    }
+
+    private func isHostileController(_ controller: Faction?, to faction: Faction, in state: GameState) -> Bool {
+        guard let controller, controller != faction else {
+            return false
+        }
+
+        return warRelationRules.canTarget(attacker: faction, target: controller, in: state) ||
+            warRelationRules.canTarget(attacker: controller, target: faction, in: state)
+    }
+
+    private func supplyCost(entering tile: HexTile, in state: GameState) -> Int {
         if tile.hasRoad {
             return 1
+        }
+
+        if state.isTangSongScenario {
+            switch tile.baseTerrain {
+            case .city,
+                 .fortress:
+                return 1
+            case .mountain:
+                return 4
+            case .forest,
+                 .hill:
+                return 3
+            case .plain:
+                return 2
+            }
         }
 
         switch tile.baseTerrain {
