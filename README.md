@@ -341,7 +341,11 @@ md/
 - 元帅层和未来统治者层不得绕过 `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
 - 当前 v0.5 只模拟 LLM JSON 接口，不接真实模型；真实 LLM 接入必须保留 decoder 校验与 fallback。
 
-**轻量检查**（每轮先读 [`md/test/test.md`](md/test/test.md)，默认禁止 Xcode / XCTest / 模拟器 / 性能类测试）：
+## 协作与云端验证
+
+当前协作制度固定使用 `main` 作为上传、提交、推送和云端验证分支。Agent B 本地只跑 `md/test/test.md` 允许的轻量检查，提交后直接 push 到 `origin/main` 触发 GitHub Actions；Agent C 通过 GitHub CLI 下载未加密 CI 结果包，核对 manifest、JUnit、构建日志和失败摘要后再验收。详细规则见 `AGENTS.md`、`md/test/test.md` 和 `md/prompt/README.md`。
+
+**轻量检查**（每轮先读 [`md/test/test.md`](md/test/test.md)，本机默认只做轻量检查，重验证交给 GitHub Actions）：
 ```bash
 rg -n "[[:blank:]]+$" AGENTS.md README.md update_log.md md/test/test.md md/flow/flow.md
 ```

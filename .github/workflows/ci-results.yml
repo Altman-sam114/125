@@ -1,0 +1,181 @@
+name: WWIIHexV0 CI Results
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    name: Build and package CI results
+    runs-on: macos-14
+    env:
+      PROJECT_NAME: WWIIHexV0
+      PROJECT_FILE: WWIIHexV0.xcodeproj
+      SCHEME: WWIIHexV0
+      CONFIGURATION: Debug
+      DESTINATION: generic/platform=iOS
+      DERIVED_DATA_PATH: .derivedData-ci
+      RESULT_BUNDLE_PATH: ci-results/WWIIHexV0.xcresult
+      VERSION_LABEL: cloud-main-ci-v1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare result directory
+        run: mkdir -p ci-results
+
+      - name: Static checks
+        id: static_checks
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          {
+            git diff --check
+            plutil -lint "$PROJECT_FILE/project.pbxproj"
+            xmllint --noout "$PROJECT_FILE/xcshareddata/xcschemes/WWIIHexV0.xcscheme"
+            xmllint --noout "$PROJECT_FILE/xcshareddata/xcschemes/WWIIHexV0Probes.xcscheme"
+          } 2>&1 | tee ci-results/static-checks.log
+
+      - name: Xcode build
+        id: xcode_build
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project "$PROJECT_FILE" \
+            -scheme "$SCHEME" \
+            -configuration "$CONFIGURATION" \
+            -destination "$DESTINATION" \
+            -derivedDataPath "$DERIVED_DATA_PATH" \
+            -resultBundlePath "$RESULT_BUNDLE_PATH" \
+            CODE_SIGNING_ALLOWED=NO \
+            build 2>&1 | tee ci-results/xcodebuild.log
+
+      - name: Generate Agent C result files
+        id: results
+        if: always()
+        shell: bash
+        env:
+          STATIC_CHECKS_OUTCOME: ${{ steps.static_checks.outcome }}
+          BUILD_OUTCOME: ${{ steps.xcode_build.outcome }}
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          BRANCH="${GITHUB_REF_NAME}"
+          BRANCH_SLUG="$(echo "$BRANCH" | tr '/[:upper:]' '-[:lower:]')"
+          ARTIFACT_NAME="wwiihexv0-ci-${VERSION_LABEL}-${BRANCH_SLUG}-${SHORT_SHA}-run${GITHUB_RUN_ID}-attempt${GITHUB_RUN_ATTEMPT}"
+          CREATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          RESULT_EXISTS="false"
+          if [ -d "$RESULT_BUNDLE_PATH" ]; then
+            RESULT_EXISTS="true"
+          fi
+
+          echo "$ARTIFACT_NAME" > ci-results/artifact-name.txt
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
+          cat > ci-results/ci-artifact-manifest.json <<EOF
+          {
+            "version": "$VERSION_LABEL",
+            "branch": "$BRANCH",
+            "commitSha": "$GITHUB_SHA",
+            "shortSha": "$SHORT_SHA",
+            "runId": "$GITHUB_RUN_ID",
+            "runAttempt": "$GITHUB_RUN_ATTEMPT",
+            "workflowName": "WWIIHexV0 CI Results",
+            "createdAt": "$CREATED_AT",
+            "projectName": "$PROJECT_NAME",
+            "scheme": "$SCHEME",
+            "destination": "$DESTINATION",
+            "resultBundlePath": "$RESULT_BUNDLE_PATH",
+            "resultBundleExists": "$RESULT_EXISTS",
+            "junitPath": "ci-results/junit.xml",
+            "buildLogPath": "ci-results/xcodebuild.log",
+            "failureSummaryPath": "ci-results/ci-failure-summary.md",
+            "staticChecksOutcome": "$STATIC_CHECKS_OUTCOME",
+            "buildOutcome": "$BUILD_OUTCOME",
+            "testOutcome": "skipped",
+            "projectSpecificReports": [
+              "ci-results/static-checks.log",
+              "ci-results/xcodebuild.log"
+            ]
+          }
+          EOF
+
+          if [ "$STATIC_CHECKS_OUTCOME" = "success" ] && [ "$BUILD_OUTCOME" = "success" ]; then
+            FAILURES="0"
+          else
+            FAILURES="1"
+          fi
+
+          cat > ci-results/junit.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <testsuite name="WWIIHexV0 CI Results" tests="2" failures="$FAILURES" errors="0" skipped="0">
+            <testcase classname="ci.static" name="static checks">
+          EOF
+          if [ "$STATIC_CHECKS_OUTCOME" != "success" ]; then
+            cat >> ci-results/junit.xml <<EOF
+              <failure message="Static checks failed">See ci-results/static-checks.log.</failure>
+          EOF
+          fi
+          cat >> ci-results/junit.xml <<EOF
+            </testcase>
+            <testcase classname="ci.xcode" name="xcodebuild build">
+          EOF
+          if [ "$BUILD_OUTCOME" != "success" ]; then
+            cat >> ci-results/junit.xml <<EOF
+              <failure message="Xcode build failed">See ci-results/xcodebuild.log.</failure>
+          EOF
+          fi
+          cat >> ci-results/junit.xml <<EOF
+            </testcase>
+          </testsuite>
+          EOF
+
+          {
+            echo "# CI Failure Summary"
+            echo
+            echo "- Branch: $BRANCH"
+            echo "- Commit: $GITHUB_SHA"
+            echo "- Run ID: $GITHUB_RUN_ID"
+            echo "- Run attempt: $GITHUB_RUN_ATTEMPT"
+            echo "- Static checks outcome: $STATIC_CHECKS_OUTCOME"
+            echo "- Xcode build outcome: $BUILD_OUTCOME"
+            echo "- Tests outcome: skipped"
+            echo
+            if [ "$STATIC_CHECKS_OUTCOME" = "success" ] && [ "$BUILD_OUTCOME" = "success" ]; then
+              echo "No CI failure detected."
+            else
+              echo "At least one required CI step failed. Agent C should inspect:"
+              echo
+              echo "- ci-results/static-checks.log"
+              echo "- ci-results/xcodebuild.log"
+              echo "- ci-results/junit.xml"
+            fi
+          } > ci-results/ci-failure-summary.md
+
+      - name: Upload Agent C result package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.results.outputs.artifact_name }}
+          path: ci-results
+          if-no-files-found: error
+
+      - name: Fail if required checks failed
+        if: always()
+        shell: bash
+        env:
+          STATIC_CHECKS_OUTCOME: ${{ steps.static_checks.outcome }}
+          BUILD_OUTCOME: ${{ steps.xcode_build.outcome }}
+        run: |
+          if [ "$STATIC_CHECKS_OUTCOME" != "success" ] || [ "$BUILD_OUTCOME" != "success" ]; then
+            exit 1
+          fi

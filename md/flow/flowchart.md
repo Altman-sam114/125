@@ -434,3 +434,48 @@ flowchart TD
     classDef ui fill:#e5e7eb,stroke:#4b5563,color:#111827
     classDef warn fill:#ffedd5,stroke:#f97316,color:#431407
 ```
+
+## 9. 云端协作：main 直推与结果包验收
+
+这张图说明当前默认协作制度。它不改变游戏规则，只规定 Agent A/B/C 如何把本地轻量检查、`main` 直推、GitHub Actions 云端重验证和 Agent C 结果包复判串起来。
+
+```mermaid
+flowchart TD
+    HUMAN["人工目标<br/>说明本轮业务或制度目标"]:::input
+    A["Agent A<br/>读取入口文档和源码<br/>写阶段提示词"]:::agent
+    PROMPT["阶段提示词<br/>md/prompt/...<br/>包含 main push / CI / artifact 要求"]:::doc
+    BSTART["Agent B 开始<br/>git fetch origin<br/>git switch main<br/>git pull --ff-only origin main"]:::git
+    WORK["本地实现<br/>只改本轮相关文件<br/>不改无关业务逻辑"]:::work
+    LIGHT["本地轻量检查<br/>git diff --check / YAML / plist / JSON<br/>不跑本机重测试"]:::check
+    COMMIT["main commit<br/>git add + git commit<br/>提交本轮相关文件"]:::git
+    PUSH["push 到 origin/main<br/>git push origin main<br/>触发云端 workflow"]:::git
+    GHA["GitHub Actions<br/>WWIIHexV0 CI Results<br/>静态检查 + xcodebuild build"]:::cloud
+    ART["未加密结果包<br/>ci-results artifact<br/>manifest / JUnit / xcodebuild.log / failure summary"]:::artifact
+    C["Agent C<br/>gh auth login<br/>下载到 /private/tmp/wwiihexv0-c-review-run"]:::agent
+    VERIFY["结果包复判<br/>核对 branch=main<br/>commitSha / runId / runAttempt<br/>读取 JUnit 和日志"]:::check
+    PASS{"云端 run 和 artifact 是否通过?"}:::decision
+    ACCEPT["验收通过<br/>记录结论<br/>按需更新 flow / update_log"]:::done
+    REJECT["退回清单<br/>列出失败日志、manifest、修复要求"]:::warn
+    FIX["Agent B 追加修复 commit<br/>仍在 main 上小步修复"]:::work
+
+    HUMAN --> A --> PROMPT --> BSTART --> WORK --> LIGHT --> COMMIT --> PUSH --> GHA --> ART --> C --> VERIFY --> PASS
+    PASS -->|通过| ACCEPT
+    PASS -->|失败| REJECT --> FIX --> LIGHT
+
+    WARN1["禁止<br/>验收旧 artifact 或只看文字汇报"]:::warn
+    WARN2["禁止<br/>本轮默认创建 PR、develop、smalldata_test、codeb 分支"]:::warn
+    VERIFY -.守住.-> WARN1
+    BSTART -.守住.-> WARN2
+
+    classDef input fill:#fef3c7,stroke:#d97706,color:#1f1600
+    classDef agent fill:#e0e7ff,stroke:#4f46e5,color:#111827
+    classDef doc fill:#f8f9fb,stroke:#6b7280,color:#111827
+    classDef git fill:#ede9fe,stroke:#7c3aed,color:#1f143d
+    classDef work fill:#dbeafe,stroke:#2563eb,color:#0f172a
+    classDef check fill:#ccfbf1,stroke:#0f766e,color:#042f2e
+    classDef cloud fill:#dcfce7,stroke:#16a34a,color:#052e16
+    classDef artifact fill:#fae8ff,stroke:#a21caf,color:#2a0a2f
+    classDef decision fill:#fff7ed,stroke:#ea580c,color:#1f1300
+    classDef done fill:#dcfce7,stroke:#15803d,color:#052e16
+    classDef warn fill:#ffedd5,stroke:#f97316,color:#431407
+```

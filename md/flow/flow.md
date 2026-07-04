@@ -1840,3 +1840,100 @@ Data/generals.json
 - v0.4 没有实现真正抗命、政变、完整 RPG 成长树或真实 LLM 聊天解析；当前是忠诚/满意度和干预次数的可视化与数据底座。
 - v0.4 没有做自由手绘前线。采用 region 锚点法：选择战区/目标 region 后自动画箭头，符合 0.44 文档中的移动端妥协方案。
 - 当前工作树混有 v0.5、v0.7、v0.9、v1.x 外部改动；合并前必须重新做文件/API/schema/project 冲突审查。
+
+---
+
+## 14. 云端协作与 main 直推验证
+
+本节记录项目协作制度，不改变游戏业务逻辑。当前默认流程固定为 `main` 直推和 GitHub Actions 云端重验证：
+
+```text
+人工提出目标
+  -> Agent A 读取入口文档、源码和当前 main，写阶段提示词
+  -> Agent B 同步 origin/main，在 main 上小步实现
+  -> Agent B 本地只跑轻量检查
+  -> Agent B commit 并 push 到 origin/main
+  -> GitHub Actions 运行静态检查和 Xcode build
+  -> GitHub Actions 上传未加密 ci-results artifact
+  -> Agent C 用 gh auth login 后下载结果包
+  -> Agent C 核对 manifest / JUnit / xcodebuild.log / failure summary
+      -> 失败：退回 Agent B 在 main 上追加修复 commit
+      -> 通过：Agent C 记录验收并按需更新核心文档
+```
+
+### 14.1 角色召唤
+
+- `agenta`、`a:` 或 `A:`：召唤 Agent A；最终回复第一行写 `我是 Agent A。`
+- `agentb`、`b:` 或 `B:`：召唤 Agent B；最终回复第一行写 `我是 Agent B。`
+- `agentc`、`c:` 或 `C:`：召唤 Agent C；最终回复第一行写 `我是 Agent C。`
+- 没有前缀时按普通 Codex 任务处理。
+
+### 14.2 main 直推边界
+
+- `main` 是唯一上传、提交、推送和云端验证分支。
+- 默认不使用 `smalldata_test`、`develop`、`codeb/...`、候选分支或 PR 合并流。
+- Agent B 每轮开始前必须：
+
+```sh
+git fetch origin
+git switch main
+git pull --ff-only origin main
+git status --short
+```
+
+- `git push origin main` 前必须确认当前分支是 `main`、目标远端是 `origin/main`、提交范围只包含本轮相关文件。
+- Agent C 发现问题时，不回滚远端 main；默认退回 Agent B 在 `main` 上追加修复 commit。
+
+### 14.3 云端结果包
+
+workflow：`.github/workflows/ci-results.yml`
+
+触发：
+
+- `push` 到 `main`
+- `workflow_dispatch`
+
+云端执行：
+
+- `git diff --check`
+- `plutil -lint WWIIHexV0.xcodeproj/project.pbxproj`
+- `xmllint --noout` 检查共享 scheme
+- `xcodebuild build`，使用 `WWIIHexV0.xcodeproj` / `WWIIHexV0` / `Debug` / `generic/platform=iOS` / `CODE_SIGNING_ALLOWED=NO`
+
+未加密结果包至少包含：
+
+- `ci-artifact-manifest.json`
+- `ci-failure-summary.md`
+- `junit.xml`
+- `static-checks.log`
+- `xcodebuild.log`
+- `WWIIHexV0.xcresult`，如果 Xcode 生成 result bundle
+- `artifact-name.txt`
+
+manifest 必须记录 `branch`、`commitSha`、`shortSha`、`runId`、`runAttempt`、`workflowName`、`projectName`、`scheme`、`destination`、`resultBundlePath`、`junitPath`、`buildLogPath`、`failureSummaryPath`、`staticChecksOutcome`、`buildOutcome` 和 `testOutcome`。
+
+### 14.4 Agent C 验收入口
+
+Agent C 必须先确保 GitHub CLI 有权限：
+
+```sh
+gh auth login
+```
+
+下载缓存默认：
+
+```text
+/private/tmp/wwiihexv0-c-review-<run_id>/
+```
+
+验收时必须核对：
+
+- `origin/main` 最新 commit 与 manifest 的 `commitSha` 一致。
+- 当前 run id / run attempt 与 manifest 的 `runId` / `runAttempt` 一致。
+- `branch` 是 `main`。
+- `junit.xml`、`xcodebuild.log`、`ci-failure-summary.md` 已读取。
+- artifact 是本轮 workflow 新生成结果，不是旧 artifact、旧 output 或 checkout 里的历史报告。
+
+### 14.5 与 AITRANS 的取舍
+
+本项目只复用 AITRANS 的协作制度骨架：云端验证、未加密结果包、Agent C 下载复判、失败后在 main 追加修复 commit。不会照搬 AITRANS 的漫画探针、GGUF、模型 Release、`test/1.png`、`smalldata_test` 或其他项目特例。
