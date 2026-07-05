@@ -288,13 +288,13 @@ flowchart TD
 
 ## 3.7 v5.3 唐宋围城城防、修城、解围与招降首轮
 
-这张图看 v5.3 的围城最小闭环。围城、修城、解围和招降都是底层 `Command`，仍经 `RuleEngine` 校验执行；围城记录压力与城防，城防归零后才在回合结算压低守军补给，解围只削减 pressure 或移除 SiegeRecord。招降是显式命令，只有 pressure 达标、城防归零且守军不再 supplied 后才交割目标州府可占 hex，并调用战略同步器刷新派生层。地图围城 overlay 只从 `SiegeState` 派生显示，不参与规则写入；AI 围城首轮只让 `ZoneDirective.attack` 经 `WarCommandExecutor` 生成底层 `Command.besiege`。
+这张图看 v5.3 的围城最小闭环。围城、修城、解围和招降都是底层 `Command`，仍经 `RuleEngine` 校验执行；围城记录压力与城防，城防归零后才在回合结算压低守军补给，解围只削减 pressure 或移除 SiegeRecord。招降是显式命令，只有 pressure 达标、城防归零且守军不再 supplied 后才交割目标州府可占 hex，并调用战略同步器刷新派生层。地图围城 overlay 只从 `SiegeState` 派生显示，不参与规则写入；AI 围城/招降首轮让 `ZoneDirective.attack` 经 `WarCommandExecutor` 生成底层 `Command.demandSurrender` 或 `Command.besiege`。
 
 ```mermaid
 flowchart TD
     UI["玩家命令面板<br/>CommandPanelView<br/>选择可行动军队后发起围城、修城、解围或招降"]:::ui
-    AI["AI / 方面攻击指令<br/>ZoneDirective.attack<br/>目标州府可围且无可攻击单位时"]:::command
-    WCE["指令翻译<br/>WarCommandExecutor.siegeCommand<br/>生成底层 besiege，不写 SiegeState"]:::command
+    AI["AI / 方面攻击指令<br/>ZoneDirective.attack<br/>目标州府可招降或可围时"]:::command
+    WCE["指令翻译<br/>WarCommandExecutor<br/>生成 demandSurrender 或 besiege，不写 SiegeState"]:::command
     CMD["围城命令<br/>Command.besiege<br/>attackerId + targetRegionId"]:::command
     VALID["统一校验<br/>CommandValidator.validateBesiege<br/>敌对城池/关隘/粮仓州府 + 距离合法"]:::rules
     REPAIR["修城命令<br/>Command.repairFortification<br/>守方军队 + 被围目标州府"]:::command
@@ -323,7 +323,9 @@ flowchart TD
     HEX["边界<br/>围城/修城/解围/overlay 不写占领<br/>招降只通过显式 Command 交割 hex 并同步派生层"]:::authority
 
     UI --> CMD --> VALID --> PASS
-    AI --> WCE --> CMD
+    AI --> WCE
+    WCE --> SURRENDER
+    WCE --> CMD
     UI --> REPAIR --> RVALID --> PASS
     UI --> RELIEVE --> LVALID --> PASS
     UI --> SURRENDER --> SVALID --> PASS

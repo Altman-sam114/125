@@ -1115,7 +1115,7 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState` 和 `WarCommandExecutor.siegeCommand` 落地，但自动破城、完整外交归附、完整漕运和唐宋专用胜利规则仍未实现。
+这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地，但自动破城、完整外交归附、完整漕运和唐宋专用胜利规则仍未实现。
 
 v5.3 围城城防、修城、解围与招降首轮：
 
@@ -1170,9 +1170,11 @@ MapDisplayAdapter.siegeOverlays(viewerFaction)
 
 ZoneDirective.attack
   -> WarCommandExecutor.executeAttack
-  -> 若目标 region 无可攻击敌军、是敌控城池/关隘/高 supplyValue 粮仓且攻击军队射程覆盖 displayHexes
-  -> 生成底层 Command.besiege
-  -> 仍由 RuleEngine / CommandValidator.validateBesiege 最终校验执行
+  -> 先尝试 WarCommandExecutor.demandSurrenderCommand
+  -> 若目标 SiegeRecord 已满足招降条件，生成底层 Command.demandSurrender
+  -> 若不能招降，再攻击可见敌军
+  -> 若无可攻击敌军，且目标 region 是敌控城池 / 关隘 / 高 supplyValue 粮仓州府，则生成 Command.besiege
+  -> Command.demandSurrender / Command.besiege 仍交给 RuleEngine / CommandValidator 最终校验执行
 ```
 
 围城压力、城防损耗和解围不会直接改 `HexTile.controller`、`RegionNode.controller`、`hexToTheater` 或 `hexToFrontZone`，也不会删除敌军。招降首轮会改变目标州府内可占 hex 控制权，但它必须通过显式 `Command.demandSurrender -> CommandValidator -> CommandExecutor` 执行，并在交割后调用 `StrategicStateSynchronizer` 刷新 Region / Theater / FrontLine / WarDeployment；它不是结束回合自动破城，也不是外交归附系统。`SiegeRecord` 新增城防字段时使用 `decodeIfPresent` 兼容旧存档；旧围城记录缺少城防时按默认城防和既有 pressure 推导。

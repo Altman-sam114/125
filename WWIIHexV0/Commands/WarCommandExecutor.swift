@@ -338,7 +338,14 @@ struct WarCommandExecutor {
             }
 
             let command: Command
-            if let target = visibleEnemyDivision(
+            if let surrenderCommand = demandSurrenderCommand(
+                for: division,
+                targetRegionId: targetRegionId,
+                zone: zone,
+                state: nextState
+            ) {
+                command = surrenderCommand
+            } else if let target = visibleEnemyDivision(
                 in: [targetRegionId],
                 for: division,
                 zone: zone,
@@ -947,6 +954,24 @@ struct WarCommandExecutor {
         }
 
         return .besiege(attackerId: division.id, targetRegionId: targetRegionId)
+    }
+
+    private func demandSurrenderCommand(
+        for division: Division,
+        targetRegionId: RegionId,
+        zone: FrontZone,
+        state: GameState
+    ) -> Command? {
+        guard division.faction == zone.faction,
+              division.canAct else {
+            return nil
+        }
+
+        let command = Command.demandSurrender(
+            negotiatorId: division.id,
+            targetRegionId: targetRegionId
+        )
+        return CommandValidator().validate(command, in: state).isValid ? command : nil
     }
 
     private func isSiegeTarget(_ region: RegionNode, in state: GameState) -> Bool {
