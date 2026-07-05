@@ -83,6 +83,8 @@ struct UnitInspectorStrategicState: Equatable {
     let frontLineIds: [FrontLineId]
     let frontZoneId: FrontZoneId?
     let deploymentRole: UnitDeploymentRole
+    let supplyRouteSummary: SupplyRouteSummary
+    let isTangSongScenario: Bool
 }
 
 struct MapDisplayAdapter {
@@ -291,7 +293,9 @@ struct MapDisplayAdapter {
                 for: division,
                 in: state.map,
                 state: state.warDeploymentState
-            )
+            ),
+            supplyRouteSummary: SupplyRules().supplyRouteSummary(for: division, in: state),
+            isTangSongScenario: state.isTangSongScenario
         )
     }
 

@@ -61,6 +61,11 @@ struct UnitInspectorView: View {
                     Text(frontLineSummary(strategicState.frontLineIds))
                         .multilineTextAlignment(.trailing)
                 }
+
+                LabeledContent(strategicState.isTangSongScenario ? "粮道" : "Supply Line") {
+                    Text(supplyRouteSummary(strategicState.supplyRouteSummary, isTangSongScenario: strategicState.isTangSongScenario))
+                        .multilineTextAlignment(.trailing)
+                }
             }
 
             LabeledContent("Strength") {
@@ -98,6 +103,23 @@ struct UnitInspectorView: View {
 
     private func frontLineSummary(_ ids: [FrontLineId]) -> String {
         ids.isEmpty ? "None" : ids.map(\.rawValue).joined(separator: ", ")
+    }
+
+    private func supplyRouteSummary(_ summary: SupplyRouteSummary, isTangSongScenario: Bool) -> String {
+        let sourceName = summary.nearestSourceRegionId?.rawValue ?? summary.nearestSourceId ?? "None"
+        let sourceCoord = summary.nearestSourceCoord.map { "(\($0.q),\($0.r))" } ?? ""
+
+        if isTangSongScenario {
+            if let pathCost = summary.pathCost {
+                return "通 \(pathCost)/\(summary.maxPathCost) 至 \(sourceName) \(sourceCoord)"
+            }
+            return "断；近源 \(sourceName) \(sourceCoord)，退路 \(summary.safeRetreatExitCount)"
+        }
+
+        if let pathCost = summary.pathCost {
+            return "Open \(pathCost)/\(summary.maxPathCost) to \(sourceName) \(sourceCoord)"
+        }
+        return "Cut; nearest \(sourceName) \(sourceCoord), exits \(summary.safeRetreatExitCount)"
     }
 }
 

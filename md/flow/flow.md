@@ -1209,12 +1209,17 @@ SupplyRules.supplyPathCost
   -> 非唐宋：沿用 legacy max 7、road 1、mountain 3、default 2、river +2
   -> 唐宋：max 9；road 1；city/fortress 1；plain 2；forest/hill 3；mountain 4；river +2
 
+SupplyRules.supplyRouteSummary
+  -> 只读计算当前军队补给状态、补给源数量、最近粮源、可达路径成本/上限和安全退路数
+  -> MapDisplayAdapter.unitInspectorState
+  -> UnitInspectorView 显示“粮道 通/断、成本/上限、最近粮源、退路数”
+
 canSupplyPass / RegionSupplyRules
   -> 敌控判断改用 WarRelationRules.canTarget
   -> 不再依赖二元 Faction.opponent
 ```
 
-这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。完整漕运、粮草运输队、仓储容量、自动破城和 UI 粮道线仍未实现。
+这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。单位面板已有粮道读法首轮；完整漕运、粮草运输队、仓储容量、自动破城和地图粮道线仍未实现。
 
 ---
 

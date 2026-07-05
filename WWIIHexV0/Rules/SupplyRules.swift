@@ -1,5 +1,20 @@
 import Foundation
 
+struct SupplyRouteSummary: Equatable {
+    let supplyState: SupplyState
+    let sourceCount: Int
+    let nearestSourceId: String?
+    let nearestSourceCoord: HexCoord?
+    let nearestSourceRegionId: RegionId?
+    let pathCost: Int?
+    let maxPathCost: Int
+    let safeRetreatExitCount: Int
+
+    var hasReachableSource: Bool {
+        pathCost != nil
+    }
+}
+
 struct SupplyRules {
     let maxSupplyPathCost = 7
     let suppliedResupplyHPRecovery = 2
@@ -115,6 +130,51 @@ struct SupplyRules {
         }
 
         return .lowSupply
+    }
+
+    func supplyRouteSummary(for division: Division, in state: GameState) -> SupplyRouteSummary {
+        let sources = effectiveSupplySources(for: division.faction, in: state)
+        let maxCost = maximumSupplyPathCost(in: state)
+        let safeExits = division.coord.neighbors.filter {
+            isSafeRetreatTile($0, for: division.faction, in: state)
+        }.count
+        let routeOptions = sources.map { source in
+            (
+                source: source,
+                pathCost: supplyPathCost(from: division.coord, to: source.coord, for: division.faction, in: state),
+                sourceDistance: division.coord.distance(to: source.coord),
+                sourceRegionId: state.map.region(for: source.coord)
+            )
+        }
+        let bestReachable = routeOptions
+            .filter { $0.pathCost <= maxCost }
+            .sorted {
+                if $0.pathCost != $1.pathCost {
+                    return $0.pathCost < $1.pathCost
+                }
+                if $0.sourceDistance != $1.sourceDistance {
+                    return $0.sourceDistance < $1.sourceDistance
+                }
+                return $0.source.id < $1.source.id
+            }
+            .first
+        let nearestSource = bestReachable ?? routeOptions.sorted {
+            if $0.sourceDistance != $1.sourceDistance {
+                return $0.sourceDistance < $1.sourceDistance
+            }
+            return $0.source.id < $1.source.id
+        }.first
+
+        return SupplyRouteSummary(
+            supplyState: supplyState(for: division, in: state),
+            sourceCount: sources.count,
+            nearestSourceId: nearestSource?.source.id,
+            nearestSourceCoord: nearestSource?.source.coord,
+            nearestSourceRegionId: nearestSource?.sourceRegionId,
+            pathCost: bestReachable?.pathCost,
+            maxPathCost: maxCost,
+            safeRetreatExitCount: safeExits
+        )
     }
 
     func isEncircled(_ division: Division, in state: GameState) -> Bool {
