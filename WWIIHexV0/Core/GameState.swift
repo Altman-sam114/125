@@ -260,6 +260,7 @@ struct GameState: Codable, Equatable {
     var warDeploymentState: WarDeploymentState
     var economyState: EconomyState
     var diplomacyState: DiplomacyState
+    var mandateState: MandateState
     var siegeState: SiegeState
     var divisions: [Division]
     var victoryState: VictoryState
@@ -281,6 +282,7 @@ struct GameState: Codable, Equatable {
         warDeploymentState: WarDeploymentState = .empty,
         economyState: EconomyState = .empty,
         diplomacyState: DiplomacyState = .empty,
+        mandateState: MandateState = .empty,
         siegeState: SiegeState = .empty,
         divisions: [Division],
         victoryState: VictoryState,
@@ -305,6 +307,7 @@ struct GameState: Codable, Equatable {
         self.warDeploymentState = warDeploymentState
         self.economyState = economyState
         self.diplomacyState = diplomacyState
+        self.mandateState = mandateState
         self.siegeState = siegeState
         self.divisions = divisions
         self.victoryState = victoryState
@@ -405,6 +408,7 @@ struct GameState: Codable, Equatable {
         case warDeploymentState
         case economyState
         case diplomacyState
+        case mandateState
         case siegeState
         case divisions
         case victoryState
@@ -429,6 +433,7 @@ struct GameState: Codable, Equatable {
             warDeploymentState: try container.decodeIfPresent(WarDeploymentState.self, forKey: .warDeploymentState) ?? .empty,
             economyState: try container.decodeIfPresent(EconomyState.self, forKey: .economyState) ?? .empty,
             diplomacyState: try container.decodeIfPresent(DiplomacyState.self, forKey: .diplomacyState) ?? .empty,
+            mandateState: try container.decodeIfPresent(MandateState.self, forKey: .mandateState) ?? .empty,
             siegeState: try container.decodeIfPresent(SiegeState.self, forKey: .siegeState) ?? .empty,
             divisions: try container.decode([Division].self, forKey: .divisions),
             victoryState: try container.decode(VictoryState.self, forKey: .victoryState),

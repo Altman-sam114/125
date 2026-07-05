@@ -4,6 +4,7 @@ struct CommandValidator {
     private let movementRules = MovementRules()
     private let warRelationRules = WarRelationRules()
     private let siegeCapitulationPressureThreshold = 10
+    private let submissionMandateThreshold = 45
 
     func validate(_ command: Command, in state: GameState) -> CommandValidation {
         switch command {
@@ -19,6 +20,13 @@ struct CommandValidator {
             return validateRelieveSiege(relieverId: relieverId, targetRegionId: targetRegionId, in: state)
         case .demandSurrender(let negotiatorId, let targetRegionId):
             return validateDemandSurrender(negotiatorId: negotiatorId, targetRegionId: targetRegionId, in: state)
+        case .proposeSubmission(let negotiatorId, let targetCountryId, let targetRegionIds):
+            return validateProposeSubmission(
+                negotiatorId: negotiatorId,
+                targetCountryId: targetCountryId,
+                targetRegionIds: targetRegionIds,
+                in: state
+            )
         case .hold(let divisionId):
             return validateUnitCommand(divisionId: divisionId, in: state)
         case .allowRetreat(let divisionId):
@@ -128,6 +136,69 @@ struct CommandValidator {
               hasCapitulatingHexes(region, defenderFaction: record.defenderFaction, in: state),
               defendersAreReadyToSurrender(record: record, in: region, state: state) else {
             return .invalid(.capitulationNotReady)
+        }
+
+        return .valid
+    }
+
+    private func validateProposeSubmission(
+        negotiatorId: String,
+        targetCountryId: CountryId,
+        targetRegionIds: [RegionId],
+        in state: GameState
+    ) -> CommandValidation {
+        let unitValidation = validateUnitCommand(divisionId: negotiatorId, in: state)
+        guard unitValidation.isValid,
+              let negotiator = state.division(id: negotiatorId) else {
+            return unitValidation
+        }
+
+        guard let actorCountry = state.diplomacyState.primaryCountry(for: negotiator.faction),
+              let targetCountry = state.diplomacyState.country(id: targetCountryId),
+              actorCountry.id != targetCountry.id else {
+            return .invalid(.countryNotFound)
+        }
+
+        guard targetCountry.faction != negotiator.faction else {
+            return .invalid(.invalidTargetFaction)
+        }
+
+        guard state.mandateState.legitimacy(for: negotiator.faction) >= submissionMandateThreshold else {
+            return .invalid(.mandateTooLow)
+        }
+
+        guard let relation = state.diplomacyState.relation(between: actorCountry.id, and: targetCountry.id),
+              canProposeSubmission(from: relation.status) else {
+            return .invalid(.invalidDiplomaticRelation)
+        }
+
+        guard !targetRegionIds.isEmpty else {
+            return .invalid(.invalidRegionForHex)
+        }
+
+        let targetRegionIdSet = Set(targetRegionIds)
+        if let capitalRegionId = targetCountry.capitalRegionId,
+           !targetRegionIdSet.contains(capitalRegionId) {
+            return .invalid(.invalidRegionForHex)
+        }
+
+        let targetRegions = targetRegionIds.compactMap { state.map.region(id: $0) }
+        guard targetRegions.count == targetRegionIds.count else {
+            return .invalid(.regionNotFound)
+        }
+
+        guard targetRegions.allSatisfy({ $0.controller == targetCountry.faction }) else {
+            return .invalid(.invalidTargetFaction)
+        }
+
+        guard isSubmissionReady(
+            relation: relation,
+            targetCountry: targetCountry,
+            targetRegions: targetRegions,
+            negotiator: negotiator,
+            in: state
+        ) else {
+            return .invalid(.submissionNotReady)
         }
 
         return .valid
@@ -321,6 +392,52 @@ struct CommandValidator {
         return region.displayHexes.contains { targetHex in
             reliever.coord.distance(to: targetHex) <= maxDistance
         }
+    }
+
+    private func canProposeSubmission(from status: DiplomaticStatus) -> Bool {
+        switch status {
+        case .neutral, .hostile, .atWar, .negotiating:
+            return true
+        case .allied, .tributary, .coBelligerent, .submitting:
+            return false
+        }
+    }
+
+    private func isSubmissionReady(
+        relation: DiplomaticRelation,
+        targetCountry: CountryProfile,
+        targetRegions: [RegionNode],
+        negotiator: Division,
+        in state: GameState
+    ) -> Bool {
+        if targetRegions.contains(where: { regionIsUnderPacificationPressure($0, negotiator: negotiator, in: state) }) {
+            return true
+        }
+
+        switch relation.status {
+        case .neutral, .negotiating:
+            return targetCountry.warSupport <= 60
+        case .hostile, .atWar:
+            return false
+        case .allied, .tributary, .coBelligerent, .submitting:
+            return false
+        }
+    }
+
+    private func regionIsUnderPacificationPressure(
+        _ region: RegionNode,
+        negotiator: Division,
+        in state: GameState
+    ) -> Bool {
+        guard let record = state.siegeState.record(for: region.id),
+              record.attackerFaction == negotiator.faction,
+              record.defenderFaction == region.controller,
+              record.pressure >= siegeCapitulationPressureThreshold,
+              record.fortification == 0 else {
+            return false
+        }
+
+        return defendersAreReadyToSurrender(record: record, in: region, state: state)
     }
 
     private func hasCapitulatingHexes(

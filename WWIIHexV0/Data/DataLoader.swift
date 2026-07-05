@@ -172,6 +172,7 @@ struct DataLoader {
             frontLineState: frontLineState,
             warDeploymentState: warDeploymentState,
             diplomacyState: initialDiplomacyState(for: scenario, turn: turn),
+            mandateState: initialMandateState(for: scenario, turn: turn),
             divisions: divisions,
             victoryState: .ongoing,
             selectedUnitSummary: nil,
@@ -342,6 +343,20 @@ struct DataLoader {
                 DiplomaticRelation(firstCountryId: "power_southern_tang", secondCountryId: "power_wuyue", status: .neutral, tension: 20, sinceTurn: turn),
                 DiplomaticRelation(firstCountryId: "power_southern_tang", secondCountryId: "power_later_shu", status: .neutral, tension: 25, sinceTurn: turn),
                 DiplomaticRelation(firstCountryId: "power_wuyue", secondCountryId: "power_later_shu", status: .neutral, tension: 18, sinceTurn: turn)
+            ],
+            lastUpdatedTurn: turn
+        )
+    }
+
+    private func initialMandateState(for scenario: ScenarioDefinition, turn: Int) -> MandateState {
+        guard scenario.id == ScenarioResource.tangSongJianlong else {
+            return .empty
+        }
+
+        return MandateState(
+            legitimacyByFaction: [
+                .allies: 62,
+                .germany: 38
             ],
             lastUpdatedTurn: turn
         )

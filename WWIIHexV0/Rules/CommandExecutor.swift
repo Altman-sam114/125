@@ -26,6 +26,13 @@ struct CommandExecutor {
             executeRelieveSiege(relieverId: relieverId, targetRegionId: targetRegionId, in: &nextState)
         case .demandSurrender(let negotiatorId, let targetRegionId):
             executeDemandSurrender(negotiatorId: negotiatorId, targetRegionId: targetRegionId, in: &nextState)
+        case .proposeSubmission(let negotiatorId, let targetCountryId, let targetRegionIds):
+            executeProposeSubmission(
+                negotiatorId: negotiatorId,
+                targetCountryId: targetCountryId,
+                targetRegionIds: targetRegionIds,
+                in: &nextState
+            )
         case .hold(let divisionId):
             executeHold(divisionId: divisionId, in: &nextState)
         case .allowRetreat(let divisionId):
@@ -311,6 +318,78 @@ struct CommandExecutor {
                 ? "\(negotiator.name)招降\(siegeTargetName(region))：守军纳降 \(surrenderedDefenders.count) 支，交割 \(capturedHexes.count) 个地块。"
                 : "\(negotiator.name) demanded surrender of \(siegeTargetName(region)): \(surrenderedDefenders.count) defender(s) capitulated, \(capturedHexes.count) hex(es) transferred.",
             category: .siege
+        )
+    }
+
+    private func executeProposeSubmission(
+        negotiatorId: String,
+        targetCountryId: CountryId,
+        targetRegionIds: [RegionId],
+        in state: inout GameState
+    ) {
+        guard let negotiatorIndex = state.divisionIndex(id: negotiatorId),
+              let actorCountry = state.diplomacyState.primaryCountry(for: state.divisions[negotiatorIndex].faction),
+              let targetCountry = state.diplomacyState.country(id: targetCountryId) else {
+            return
+        }
+
+        let previousStatus = state.diplomacyState
+            .relation(between: actorCountry.id, and: targetCountry.id)?
+            .status
+        let previousTension = state.diplomacyState
+            .relation(between: actorCountry.id, and: targetCountry.id)?
+            .tension ?? 50
+        let mandateDelta = 8
+        let resultStatus: DiplomaticStatus = .submitting
+        let sortedRegionIds = targetRegionIds.sorted { $0.rawValue < $1.rawValue }
+
+        state.diplomacyState.setRelationStatus(
+            between: actorCountry.id,
+            and: targetCountry.id,
+            status: resultStatus,
+            tension: max(0, previousTension - 25),
+            turn: state.turn
+        )
+
+        let record = PacificationRecord(
+            id: pacificationRecordId(
+                turn: state.turn,
+                actorCountryId: actorCountry.id,
+                targetCountryId: targetCountry.id,
+                targetRegionIds: sortedRegionIds
+            ),
+            turn: state.turn,
+            actorCountryId: actorCountry.id,
+            targetCountryId: targetCountry.id,
+            targetRegionIds: sortedRegionIds,
+            previousStatus: previousStatus,
+            resultStatus: resultStatus,
+            mandateDelta: mandateDelta,
+            reason: state.isTangSongScenario ? "天命与兵势支撑的招抚提议" : "Submission proposal accepted by rule contract"
+        )
+        state.diplomacyState.appendPacificationRecord(record)
+        let updatedMandate = state.mandateState.adjustLegitimacy(
+            for: state.divisions[negotiatorIndex].faction,
+            by: mandateDelta,
+            turn: state.turn
+        )
+
+        if let focusRegion = sortedRegionIds
+            .compactMap({ state.map.region(id: $0) })
+            .first,
+           let targetHex = closestHex(in: focusRegion, to: state.divisions[negotiatorIndex].coord),
+           let direction = state.divisions[negotiatorIndex].coord.direction(to: targetHex) {
+            state.divisions[negotiatorIndex].facing = direction
+        }
+        state.divisions[negotiatorIndex].hasActed = true
+
+        let regionText = sortedRegionIds.map(\.rawValue).joined(separator: ", ")
+        state.appendEvent(
+            state.isTangSongScenario
+                ? "\(state.divisions[negotiatorIndex].name)招抚\(targetCountry.name)：关系转为\(resultStatus.displayName)，天命 +\(mandateDelta) 至 \(updatedMandate)，候选州府 \(regionText)。"
+                : "\(state.divisions[negotiatorIndex].name) proposed submission to \(targetCountry.name): relation \(resultStatus.displayName), mandate +\(mandateDelta) to \(updatedMandate), target region(s) \(regionText).",
+            category: .diplomacy,
+            relatedRecordId: record.id
         )
     }
 
@@ -798,6 +877,16 @@ struct CommandExecutor {
             }
             return $0.r < $1.r
         }
+    }
+
+    private func pacificationRecordId(
+        turn: Int,
+        actorCountryId: CountryId,
+        targetCountryId: CountryId,
+        targetRegionIds: [RegionId]
+    ) -> String {
+        let regionKey = targetRegionIds.map(\.rawValue).joined(separator: "-")
+        return "pacification-\(turn)-\(actorCountryId.rawValue)-\(targetCountryId.rawValue)-\(regionKey)"
     }
 
     private func siegeTargetName(_ region: RegionNode) -> String {

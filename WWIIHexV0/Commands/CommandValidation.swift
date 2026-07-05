@@ -5,6 +5,7 @@ enum CommandValidationError: String, Codable, Equatable {
     case wrongFaction
     case divisionNotFound
     case targetNotFound
+    case countryNotFound
     case alreadyActed
     case destinationOutOfBounds
     case destinationOccupied
@@ -18,6 +19,9 @@ enum CommandValidationError: String, Codable, Equatable {
     case noActiveSiege
     case fortificationAlreadyFull
     case capitulationNotReady
+    case invalidDiplomaticRelation
+    case submissionNotReady
+    case mandateTooLow
     case insufficientResources
 }
 

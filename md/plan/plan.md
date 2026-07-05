@@ -215,19 +215,27 @@ v5.3 收口标准：
 - 进入 v5.8 前：默认数据、UI、AI 文案和 README/flow/update_log 必须统一指向唐宋首发剧本，而不是阿登主产品。
 - 进入 v5.9 前：Agent C 必须核对 `origin/main` 最新 commit 对应的 GitHub Actions run 和未加密 artifact，不能只看本地文字汇报。
 
-### 8.1 v5.6 进入前风险
+### 8.1 v5.6a 当前状态与后续风险
 
-v5.6 外交、归附、天命与治理不能先做 UI 或 Agent 文案。当前风险：
+v5.6 外交、归附、天命与治理不能先做 UI 或 Agent 文案。当前已完成 v5.6a 规则合同首轮：
 
-- `Command` / `CommandValidation` 还没有外交、归附、天命和治理命令合同；若先做事件或面板，容易绕过 `Command -> RuleEngine`。
+- 新增 `MandateState`，在 `GameState` 中向后兼容保存 faction 级天命/合法性分数。
+- `DiplomacyState` 扩展 `tributary`、`submitting`、`negotiating`，并保存 `PacificationRecord`。
+- 新增 `Command.proposeSubmission(negotiatorId:targetCountryId:targetRegionIds:)`，经 `CommandValidator -> CommandExecutor -> RuleEngine` 写入国家关系、归附记录、天命变化和 diplomacy 日志。
+- 唐宋默认剧本初始化宋/割据天命分数。
+- 本轮不交割 hex / region controller，不转换部队，不改变 `TurnOrderState.relations`，不让 AI `pacificationTargets` 自动执行。
+
+仍保留的风险：
+
 - `DiplomacyState` 与 `TurnOrderState.relations` 仍是两套关系来源；战争合法性当前主要由 `WarRelationRules` 读取 turn order 关系，不能只改外交面板。
 - `VictoryRules` 仍有 legacy 阿登胜利口径；天命/国威若要影响统一评价或胜利，必须先设计规则层状态和唐宋胜利判断。
-- v5.4 的 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 是解释字段，不是归附执行结果。
+- v5.4 的 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 仍是解释字段；v5.6a 还没有把它们编译成 `Command.proposeSubmission`。
+- 当前唐宋政权仍桥接到 legacy `.allies/.germany`，不能宣称吴越等单国已经实现 tactical neutral 或独立战争关系。
 
 建议下一轮并发切片：
 
-- Core/Rules 单一 owner：设计 `MandateState`、`PacificationRecord`、`GovernancePolicy` 和归附/外交命令合同，经 `CommandValidator -> CommandExecutor -> RuleEngine` 落地。
-- Data/AI 只读 owner：审计 `DiplomacyState` 与 `TurnOrderState.relations` 同步方案，规定 AI 解释字段只能编译为合法命令。
+- Core/Rules 单一 owner：继续设计 `GovernancePolicy`、唐宋胜利条件和单国归附后的控制权/部队处理方案。
+- Data/AI 只读 owner：审计 `DiplomacyState` 与 `TurnOrderState.relations` 同步方案，规定 AI 解释字段如何安全编译为合法命令。
 - UI owner：等规则状态确定后，只读展示归附记录、天命/国威和治理政策，不写 `GameState`。
 
 ## 9. 后续阶段文档建议
@@ -243,6 +251,7 @@ md/prompt/v5.0-唐宋迁移/
 ├── v5.3_rules_siege_grain_record.md        # 已创建：生产/府库、兵种战斗、粮道供给、围城城防、修城、解围和招降首轮
 ├── v5.4_agent_schema_record.md
 ├── v5.5_ui_visual_record.md              # 已创建：默认唐宋主界面术语桥和视觉 token 首轮
+├── v5.6a_diplomacy_mandate_contract_record.md # 已创建：外交归附与天命规则合同首轮
 ├── v5.6_diplomacy_mandate_record.md
 ├── v5.7_playable_loop_record.md
 ├── v5.8_release_candidate_audit.md

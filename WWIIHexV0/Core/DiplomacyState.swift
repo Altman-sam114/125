@@ -54,10 +54,13 @@ struct DiplomaticBlocId: Hashable, Codable, Equatable, RawRepresentable, Express
 
 enum DiplomaticStatus: String, Codable, Equatable, CaseIterable {
     case allied
+    case tributary
     case coBelligerent
     case neutral
     case hostile
     case atWar
+    case submitting
+    case negotiating
 
     var isHostile: Bool {
         self == .hostile || self == .atWar
@@ -67,6 +70,8 @@ enum DiplomaticStatus: String, Codable, Equatable, CaseIterable {
         switch self {
         case .allied:
             return "Allied"
+        case .tributary:
+            return "Tributary"
         case .coBelligerent:
             return "Co-belligerent"
         case .neutral:
@@ -75,6 +80,10 @@ enum DiplomaticStatus: String, Codable, Equatable, CaseIterable {
             return "Hostile"
         case .atWar:
             return "At war"
+        case .submitting:
+            return "Submitting"
+        case .negotiating:
+            return "Negotiating"
         }
     }
 }
@@ -197,11 +206,71 @@ struct RulerDecisionRecord: Identifiable, Codable, Equatable {
     let rationale: String
 }
 
+struct PacificationRecord: Identifiable, Codable, Equatable {
+    let id: String
+    let turn: Int
+    let actorCountryId: CountryId
+    let targetCountryId: CountryId
+    let targetRegionIds: [RegionId]
+    let previousStatus: DiplomaticStatus?
+    let resultStatus: DiplomaticStatus
+    let mandateDelta: Int
+    let reason: String
+
+    init(
+        id: String,
+        turn: Int,
+        actorCountryId: CountryId,
+        targetCountryId: CountryId,
+        targetRegionIds: [RegionId],
+        previousStatus: DiplomaticStatus?,
+        resultStatus: DiplomaticStatus,
+        mandateDelta: Int,
+        reason: String
+    ) {
+        self.id = id
+        self.turn = max(1, turn)
+        self.actorCountryId = actorCountryId
+        self.targetCountryId = targetCountryId
+        self.targetRegionIds = targetRegionIds.sorted { $0.rawValue < $1.rawValue }
+        self.previousStatus = previousStatus
+        self.resultStatus = resultStatus
+        self.mandateDelta = mandateDelta
+        self.reason = reason
+    }
+}
+
+struct MandateState: Codable, Equatable {
+    var legitimacyByFaction: [Faction: Int]
+    var lastUpdatedTurn: Int?
+
+    init(legitimacyByFaction: [Faction: Int] = [:], lastUpdatedTurn: Int? = nil) {
+        self.legitimacyByFaction = legitimacyByFaction.mapValues { max(0, min(100, $0)) }
+        self.lastUpdatedTurn = lastUpdatedTurn
+    }
+
+    static var empty: MandateState {
+        MandateState()
+    }
+
+    func legitimacy(for faction: Faction) -> Int {
+        legitimacyByFaction[faction] ?? 50
+    }
+
+    mutating func adjustLegitimacy(for faction: Faction, by delta: Int, turn: Int) -> Int {
+        let updated = max(0, min(100, legitimacy(for: faction) + delta))
+        legitimacyByFaction[faction] = updated
+        lastUpdatedTurn = max(1, turn)
+        return updated
+    }
+}
+
 struct DiplomacyState: Codable, Equatable {
     var countries: [CountryProfile]
     var blocs: [DiplomaticBloc]
     var relations: [DiplomaticRelation]
     var rulerRecords: [RulerDecisionRecord]
+    var pacificationRecords: [PacificationRecord]
     var lastUpdatedTurn: Int?
 
     init(
@@ -209,13 +278,46 @@ struct DiplomacyState: Codable, Equatable {
         blocs: [DiplomaticBloc] = [],
         relations: [DiplomaticRelation] = [],
         rulerRecords: [RulerDecisionRecord] = [],
+        pacificationRecords: [PacificationRecord] = [],
         lastUpdatedTurn: Int? = nil
     ) {
         self.countries = countries.sorted { $0.id.rawValue < $1.id.rawValue }
         self.blocs = blocs.sorted { $0.id.rawValue < $1.id.rawValue }
         self.relations = relations.sorted { $0.id < $1.id }
         self.rulerRecords = rulerRecords
+        self.pacificationRecords = pacificationRecords
         self.lastUpdatedTurn = lastUpdatedTurn
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case countries
+        case blocs
+        case relations
+        case rulerRecords
+        case pacificationRecords
+        case lastUpdatedTurn
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            countries: try container.decodeIfPresent([CountryProfile].self, forKey: .countries) ?? [],
+            blocs: try container.decodeIfPresent([DiplomaticBloc].self, forKey: .blocs) ?? [],
+            relations: try container.decodeIfPresent([DiplomaticRelation].self, forKey: .relations) ?? [],
+            rulerRecords: try container.decodeIfPresent([RulerDecisionRecord].self, forKey: .rulerRecords) ?? [],
+            pacificationRecords: try container.decodeIfPresent([PacificationRecord].self, forKey: .pacificationRecords) ?? [],
+            lastUpdatedTurn: try container.decodeIfPresent(Int.self, forKey: .lastUpdatedTurn)
+        )
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(countries, forKey: .countries)
+        try container.encode(blocs, forKey: .blocs)
+        try container.encode(relations, forKey: .relations)
+        try container.encode(rulerRecords, forKey: .rulerRecords)
+        try container.encode(pacificationRecords, forKey: .pacificationRecords)
+        try container.encodeIfPresent(lastUpdatedTurn, forKey: .lastUpdatedTurn)
     }
 
     static var empty: DiplomacyState {
@@ -304,6 +406,10 @@ struct DiplomacyState: Codable, Equatable {
         countries.filter { $0.faction == faction }
     }
 
+    func country(id: CountryId) -> CountryProfile? {
+        countries.first { $0.id == id }
+    }
+
     func primaryCountry(for faction: Faction) -> CountryProfile? {
         countries(for: faction).first(where: \.isPrimaryBelligerent) ?? countries(for: faction).first
     }
@@ -342,6 +448,37 @@ struct DiplomacyState: Codable, Equatable {
         rulerRecords.append(record)
         if rulerRecords.count > 40 {
             rulerRecords.removeFirst(rulerRecords.count - 40)
+        }
+        lastUpdatedTurn = record.turn
+    }
+
+    mutating func setRelationStatus(
+        between lhs: CountryId,
+        and rhs: CountryId,
+        status: DiplomaticStatus,
+        tension: Int,
+        turn: Int
+    ) {
+        let updatedRelation = DiplomaticRelation(
+            firstCountryId: lhs,
+            secondCountryId: rhs,
+            status: status,
+            tension: tension,
+            sinceTurn: turn
+        )
+        if let index = relations.firstIndex(where: { $0.id == updatedRelation.id }) {
+            relations[index] = updatedRelation
+        } else {
+            relations.append(updatedRelation)
+        }
+        relations.sort { $0.id < $1.id }
+        lastUpdatedTurn = max(1, turn)
+    }
+
+    mutating func appendPacificationRecord(_ record: PacificationRecord) {
+        pacificationRecords.append(record)
+        if pacificationRecords.count > 40 {
+            pacificationRecords.removeFirst(pacificationRecords.count - 40)
         }
         lastUpdatedTurn = record.turn
     }

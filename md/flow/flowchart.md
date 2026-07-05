@@ -44,6 +44,7 @@ flowchart TD
     FRONT["前线层<br/>FrontLine / FrontSegment<br/>按双方动态战区的真实相邻 hex 生成"]:::derived
     DEPLOY["部署层<br/>WarDeploymentState<br/>用 hexToFrontZone 把单位分成前线/纵深/驻军"]:::derived
     ECO["经济总账<br/>EconomyState / EconomyRules<br/>收入、维护费、生产队列、自动补员"]:::economy
+    DIP["外交与天命<br/>DiplomacyState + MandateState<br/>国家关系、归附记录、天命分数"]:::state
     TURN["回合与势力桥<br/>TurnOrderState / PowerProfile<br/>power order、active power、控制模式、关系表"]:::state
     PLAYER["玩家输入<br/>点击地图、移动、攻击、结束回合"]:::input
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
@@ -51,7 +52,7 @@ flowchart TD
     COMP["元帅意图编译<br/>TheaterDirectiveCompiler<br/>把 TheaterDirective 降级成 ZoneDirective"]:::command
     ZD["战争指令<br/>ZoneDirective<br/>方面级 attack/defend 意图"]:::command
     WCE["指令翻译器<br/>WarCommandExecutor<br/>把方面意图翻成具体单位命令"]:::command
-    CMD["底层命令<br/>Command<br/>move / attack / hold / resupply / queueProduction / endTurn"]:::command
+    CMD["底层命令<br/>Command<br/>move / attack / besiege / demandSurrender / proposeSubmission / endTurn"]:::command
     RE["规则引擎<br/>RuleEngine<br/>先校验，再真正修改 GameState"]:::rules
     SYNC["战略同步器<br/>StrategicStateSynchronizer<br/>占领后刷新州府、方面、前线、部署"]:::rules
 
@@ -69,6 +70,7 @@ flowchart TD
     HEX --> H2T
     H2T --> FRONT --> DEPLOY
     GS --> ECO
+    GS --> DIP
     GS --> TURN
 
     TURN --> PLAYER
@@ -77,6 +79,7 @@ flowchart TD
     AI --> DEC --> COMP --> ZD --> WCE --> CMD
     CMD --> RE --> HEX
     RE --> ECO
+    RE --> DIP
     RE --> SYNC
     SYNC --> REGION
     SYNC --> H2T
