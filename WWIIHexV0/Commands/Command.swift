@@ -4,6 +4,7 @@ enum Command: Codable, Equatable {
     case move(divisionId: String, destination: HexCoord)
     case attack(attackerId: String, targetId: String)
     case besiege(attackerId: String, targetRegionId: RegionId)
+    case repairFortification(defenderId: String, targetRegionId: RegionId)
     case hold(divisionId: String)
     case allowRetreat(divisionId: String)
     case resupply(divisionId: String)
@@ -31,6 +32,8 @@ enum Command: Codable, Equatable {
                 return "进攻(\(attackerId) -> \(targetId))"
             case .besiege(let attackerId, let targetRegionId):
                 return "围城(\(attackerId) -> \(targetRegionId.rawValue))"
+            case .repairFortification(let defenderId, let targetRegionId):
+                return "修城(\(defenderId) -> \(targetRegionId.rawValue))"
             case .hold(let divisionId):
                 return "固守(\(divisionId))"
             case .allowRetreat(let divisionId):
@@ -51,6 +54,8 @@ enum Command: Codable, Equatable {
             return "Attack(\(attackerId) -> \(targetId))"
         case .besiege(let attackerId, let targetRegionId):
             return "Besiege(\(attackerId) -> \(targetRegionId.rawValue))"
+        case .repairFortification(let defenderId, let targetRegionId):
+            return "RepairFortification(\(defenderId) -> \(targetRegionId.rawValue))"
         case .hold(let divisionId):
             return "Hold(\(divisionId))"
         case .allowRetreat(let divisionId):
@@ -68,6 +73,7 @@ enum Command: Codable, Equatable {
         switch self {
         case .move(let divisionId, _),
              .besiege(let divisionId, _),
+             .repairFortification(let divisionId, _),
              .hold(let divisionId),
              .allowRetreat(let divisionId),
              .resupply(let divisionId):
@@ -88,6 +94,7 @@ enum Command: Codable, Equatable {
         case .move,
              .attack,
              .besiege,
+             .repairFortification,
              .hold,
              .allowRetreat,
              .queueProduction,

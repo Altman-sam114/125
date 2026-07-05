@@ -15,6 +15,8 @@ enum CommandValidationError: String, Codable, Equatable {
     case regionNotFound
     case invalidRegionForHex
     case invalidSiegeTarget
+    case noActiveSiege
+    case fortificationAlreadyFull
     case insufficientResources
 }
 

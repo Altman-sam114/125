@@ -11,10 +11,12 @@ struct CommandPanelView: View {
     let lastCommandMessage: String?
     let isTangSongScenario: Bool
     let besiegeTargetName: String?
+    let repairFortificationTargetName: String?
     let onHold: () -> Void
     let onAllowRetreat: () -> Void
     let onResupply: () -> Void
     let onBesiege: () -> Void
+    let onRepairFortification: () -> Void
     let onEndTurn: () -> Void
 
     var body: some View {
@@ -51,6 +53,13 @@ struct CommandPanelView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!canBesiege)
+
+            Button(action: onRepairFortification) {
+                Label(repairFortificationButtonTitle, systemImage: "hammer")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .disabled(!canRepairFortification)
 
             Button(action: onEndTurn) {
                 Label("End Turn", systemImage: "forward.end")
@@ -96,11 +105,24 @@ struct CommandPanelView: View {
         canCommandSelectedUnit && besiegeTargetName != nil
     }
 
+    private var canRepairFortification: Bool {
+        canCommandSelectedUnit && repairFortificationTargetName != nil
+    }
+
     private var besiegeButtonTitle: String {
         guard let besiegeTargetName else {
             return isTangSongScenario ? "围城" : "Besiege"
         }
         return isTangSongScenario ? "围城 \(besiegeTargetName)" : "Besiege \(besiegeTargetName)"
+    }
+
+    private var repairFortificationButtonTitle: String {
+        guard let repairFortificationTargetName else {
+            return isTangSongScenario ? "修城" : "Repair Wall"
+        }
+        return isTangSongScenario
+            ? "修城 \(repairFortificationTargetName)"
+            : "Repair \(repairFortificationTargetName)"
     }
 
     private var statusText: String {

@@ -131,6 +131,6 @@ struct RegionInspectorView: View {
             return "None"
         }
 
-        return "围城压力 \(record.pressure), \(record.attackerFaction.displayName) -> \(record.defenderFaction.displayName), \(record.besiegingDivisionIds.count) unit(s)"
+        return "围城压力 \(record.pressure), 城防 \(record.fortification)/\(record.maxFortification), \(record.attackerFaction.displayName) -> \(record.defenderFaction.displayName), \(record.besiegingDivisionIds.count) unit(s)"
     }
 }

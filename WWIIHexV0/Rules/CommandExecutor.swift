@@ -20,6 +20,8 @@ struct CommandExecutor {
             executeAttack(attackerId: attackerId, targetId: targetId, in: &nextState)
         case .besiege(let attackerId, let targetRegionId):
             executeBesiege(attackerId: attackerId, targetRegionId: targetRegionId, in: &nextState)
+        case .repairFortification(let defenderId, let targetRegionId):
+            executeRepairFortification(defenderId: defenderId, targetRegionId: targetRegionId, in: &nextState)
         case .hold(let divisionId):
             executeHold(divisionId: divisionId, in: &nextState)
         case .allowRetreat(let divisionId):
@@ -138,12 +140,20 @@ struct CommandExecutor {
 
         let attacker = state.divisions[attackerIndex]
         let pressureGain = siegePressure(for: attacker, targetRegion: region, in: state)
+        let fortificationDamage = siegeFortificationDamage(
+            pressureGain: pressureGain,
+            attacker: attacker,
+            targetRegion: region,
+            in: state
+        )
         let record = state.siegeState.startOrUpdate(
             targetRegionId: targetRegionId,
             attackerFaction: attacker.faction,
             defenderFaction: region.controller,
             turn: state.turn,
             pressureGain: pressureGain,
+            fortificationDamage: fortificationDamage,
+            maxFortification: maxFortification(for: region, in: state),
             besiegingDivisionId: attacker.id
         )
 
@@ -156,8 +166,34 @@ struct CommandExecutor {
         let targetName = siegeTargetName(region)
         state.appendEvent(
             state.isTangSongScenario
-                ? "\(attacker.name)围困\(targetName)：围城压力 +\(pressureGain)，当前 \(record.pressure)。"
-                : "\(attacker.name) besieged \(targetName): pressure +\(pressureGain), now \(record.pressure).",
+                ? "\(attacker.name)围困\(targetName)：围城压力 +\(pressureGain)，城防 -\(fortificationDamage)，当前 \(record.fortification)/\(record.maxFortification)。"
+                : "\(attacker.name) besieged \(targetName): pressure +\(pressureGain), fortification -\(fortificationDamage), now \(record.fortification)/\(record.maxFortification).",
+            category: .siege
+        )
+    }
+
+    private func executeRepairFortification(defenderId: String, targetRegionId: RegionId, in state: inout GameState) {
+        guard let defenderIndex = state.divisionIndex(id: defenderId),
+              let region = state.map.region(id: targetRegionId) else {
+            return
+        }
+
+        let defender = state.divisions[defenderIndex]
+        let repairGain = fortificationRepair(for: defender, targetRegion: region, in: state)
+        guard let record = state.siegeState.repairFortification(
+            targetRegionId: targetRegionId,
+            defenderFaction: defender.faction,
+            turn: state.turn,
+            repairGain: repairGain
+        ) else {
+            return
+        }
+
+        state.divisions[defenderIndex].hasActed = true
+        state.appendEvent(
+            state.isTangSongScenario
+                ? "\(defender.name)修筑\(siegeTargetName(region))城防：+\(repairGain)，当前 \(record.fortification)/\(record.maxFortification)。"
+                : "\(defender.name) repaired \(siegeTargetName(region)) fortification: +\(repairGain), now \(record.fortification)/\(record.maxFortification).",
             category: .siege
         )
     }
@@ -418,14 +454,23 @@ struct CommandExecutor {
             updatedRecord.besiegingDivisionIds = maintainers.map(\.id)
 
             if updatedRecord.pressure >= siegeSupplyPressureThreshold {
-                let affectedCount = applySiegeLowSupply(record: updatedRecord, in: &state)
-                if affectedCount > 0 {
+                if updatedRecord.fortification > 0 {
                     state.appendEvent(
                         state.isTangSongScenario
-                            ? "\(siegeTargetName(region))被围断粮：\(affectedCount) 支守军降为缺粮。"
-                            : "\(siegeTargetName(region)) is under siege supply pressure: \(affectedCount) defender(s) degraded to low supply.",
+                            ? "\(siegeTargetName(region))城防尚存 \(updatedRecord.fortification)/\(updatedRecord.maxFortification)，围城断粮压力暂未突破。"
+                            : "\(siegeTargetName(region)) fortification remains \(updatedRecord.fortification)/\(updatedRecord.maxFortification); siege supply pressure has not broken through.",
                         category: .siege
                     )
+                } else {
+                    let affectedCount = applySiegeLowSupply(record: updatedRecord, in: &state)
+                    if affectedCount > 0 {
+                        state.appendEvent(
+                            state.isTangSongScenario
+                                ? "\(siegeTargetName(region))城防已破、被围断粮：\(affectedCount) 支守军降为缺粮。"
+                                : "\(siegeTargetName(region)) fortification is broken: \(affectedCount) defender(s) degraded to low supply.",
+                            category: .siege
+                        )
+                    }
                 }
             }
 
@@ -489,6 +534,81 @@ struct CommandExecutor {
         }
 
         return max(1, pressure)
+    }
+
+    private func siegeFortificationDamage(
+        pressureGain: Int,
+        attacker: Division,
+        targetRegion region: RegionNode,
+        in state: GameState
+    ) -> Int {
+        var damage = max(1, pressureGain / 3)
+        let roles = attacker.tangSongCombatRoles
+
+        if state.isTangSongScenario {
+            if roles.contains(.siegeEngine) {
+                damage += 2
+            }
+            if roles.contains(.cavalry) && !roles.contains(.siegeEngine) {
+                damage -= 1
+            }
+            if region.terrain == .fortress {
+                damage = max(1, damage - 1)
+            }
+        }
+
+        return max(1, damage)
+    }
+
+    private func fortificationRepair(for defender: Division, targetRegion region: RegionNode, in state: GameState) -> Int {
+        var repair = max(2, defender.defense / 2)
+        let roles = defender.tangSongCombatRoles
+
+        if state.isTangSongScenario {
+            if roles.contains(.garrison) {
+                repair += 2
+            }
+            if roles.contains(.crossbowGarrison) {
+                repair += 1
+            }
+            if roles.contains(.imperialGuard) {
+                repair += 1
+            }
+            if defender.supplyState == .lowSupply {
+                repair -= 1
+            } else if defender.supplyState == .encircled {
+                repair -= 2
+            }
+            if region.terrain == .fortress {
+                repair += 1
+            }
+        }
+
+        return max(1, repair)
+    }
+
+    private func maxFortification(for region: RegionNode, in state: GameState) -> Int {
+        var value = 8
+
+        if let city = region.city {
+            value += city.isCapital ? 4 : 2
+            value += min(3, city.victoryPoints / 2)
+        }
+
+        if region.terrain == .fortress {
+            value += 4
+        }
+
+        if state.isTangSongScenario {
+            if region.supplyValue >= 4 {
+                value += 2
+            }
+            if region.infrastructure >= 3 {
+                value += 1
+            }
+        }
+
+        return SiegeRecord.normalizedMaxFortification(value)
     }
 
     private func closestHex(in region: RegionNode, to origin: HexCoord) -> HexCoord? {

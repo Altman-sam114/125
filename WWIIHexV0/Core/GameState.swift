@@ -11,6 +11,8 @@ struct SiegeRecord: Codable, Equatable, Identifiable {
     var startedTurn: Int
     var lastUpdatedTurn: Int
     var pressure: Int
+    var fortification: Int
+    var maxFortification: Int
     var besiegingDivisionIds: [String]
 
     init(
@@ -20,19 +22,84 @@ struct SiegeRecord: Codable, Equatable, Identifiable {
         startedTurn: Int,
         lastUpdatedTurn: Int,
         pressure: Int,
+        fortification: Int? = nil,
+        maxFortification: Int = Self.defaultMaxFortification,
         besiegingDivisionIds: [String]
     ) {
+        let normalizedMaxFortification = Self.normalizedMaxFortification(maxFortification)
         self.targetRegionId = targetRegionId
         self.attackerFaction = attackerFaction
         self.defenderFaction = defenderFaction
         self.startedTurn = max(1, startedTurn)
         self.lastUpdatedTurn = max(1, lastUpdatedTurn)
         self.pressure = Self.clampPressure(pressure)
+        self.maxFortification = normalizedMaxFortification
+        self.fortification = Self.clampFortification(
+            fortification ?? normalizedMaxFortification,
+            max: normalizedMaxFortification
+        )
         self.besiegingDivisionIds = Self.normalizedDivisionIds(besiegingDivisionIds)
     }
 
+    private enum CodingKeys: String, CodingKey {
+        case targetRegionId
+        case attackerFaction
+        case defenderFaction
+        case startedTurn
+        case lastUpdatedTurn
+        case pressure
+        case fortification
+        case maxFortification
+        case besiegingDivisionIds
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let decodedPressure = try container.decodeIfPresent(Int.self, forKey: .pressure) ?? 0
+        let decodedMaxFortification = Self.normalizedMaxFortification(
+            try container.decodeIfPresent(Int.self, forKey: .maxFortification) ?? Self.defaultMaxFortification
+        )
+        let decodedFortification = try container.decodeIfPresent(Int.self, forKey: .fortification) ??
+            max(0, decodedMaxFortification - min(decodedMaxFortification, decodedPressure / 10))
+
+        self.init(
+            targetRegionId: try container.decode(RegionId.self, forKey: .targetRegionId),
+            attackerFaction: try container.decode(Faction.self, forKey: .attackerFaction),
+            defenderFaction: try container.decode(Faction.self, forKey: .defenderFaction),
+            startedTurn: try container.decodeIfPresent(Int.self, forKey: .startedTurn) ?? 1,
+            lastUpdatedTurn: try container.decodeIfPresent(Int.self, forKey: .lastUpdatedTurn) ?? 1,
+            pressure: decodedPressure,
+            fortification: decodedFortification,
+            maxFortification: decodedMaxFortification,
+            besiegingDivisionIds: try container.decodeIfPresent([String].self, forKey: .besiegingDivisionIds) ?? []
+        )
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(targetRegionId, forKey: .targetRegionId)
+        try container.encode(attackerFaction, forKey: .attackerFaction)
+        try container.encode(defenderFaction, forKey: .defenderFaction)
+        try container.encode(startedTurn, forKey: .startedTurn)
+        try container.encode(lastUpdatedTurn, forKey: .lastUpdatedTurn)
+        try container.encode(pressure, forKey: .pressure)
+        try container.encode(fortification, forKey: .fortification)
+        try container.encode(maxFortification, forKey: .maxFortification)
+        try container.encode(besiegingDivisionIds, forKey: .besiegingDivisionIds)
+    }
+
+    static let defaultMaxFortification = 10
+
     static func clampPressure(_ value: Int) -> Int {
         max(0, min(100, value))
+    }
+
+    static func normalizedMaxFortification(_ value: Int) -> Int {
+        max(1, min(30, value))
+    }
+
+    static func clampFortification(_ value: Int, max maxFortification: Int) -> Int {
+        max(0, min(normalizedMaxFortification(maxFortification), value))
     }
 
     static func normalizedDivisionIds(_ ids: [String]) -> [String] {
@@ -60,9 +127,13 @@ struct SiegeState: Codable, Equatable {
         defenderFaction: Faction,
         turn: Int,
         pressureGain: Int,
+        fortificationDamage: Int = 0,
+        maxFortification: Int = SiegeRecord.defaultMaxFortification,
         besiegingDivisionId: String
     ) -> SiegeRecord {
         let normalizedTurn = max(1, turn)
+        let normalizedMaxFortification = SiegeRecord.normalizedMaxFortification(maxFortification)
+        let normalizedFortificationDamage = max(0, fortificationDamage)
         if let index = records.firstIndex(where: { $0.targetRegionId == targetRegionId }) {
             var record = records[index]
             if record.attackerFaction != attackerFaction || record.defenderFaction != defenderFaction {
@@ -73,11 +144,25 @@ struct SiegeState: Codable, Equatable {
                     startedTurn: normalizedTurn,
                     lastUpdatedTurn: normalizedTurn,
                     pressure: pressureGain,
+                    fortification: normalizedMaxFortification - normalizedFortificationDamage,
+                    maxFortification: normalizedMaxFortification,
                     besiegingDivisionIds: [besiegingDivisionId]
                 )
             } else {
                 record.lastUpdatedTurn = normalizedTurn
                 record.pressure = SiegeRecord.clampPressure(record.pressure + pressureGain)
+                if normalizedMaxFortification > record.maxFortification {
+                    let extraFortification = normalizedMaxFortification - record.maxFortification
+                    record.maxFortification = normalizedMaxFortification
+                    record.fortification = SiegeRecord.clampFortification(
+                        record.fortification + extraFortification,
+                        max: normalizedMaxFortification
+                    )
+                }
+                record.fortification = SiegeRecord.clampFortification(
+                    record.fortification - normalizedFortificationDamage,
+                    max: record.maxFortification
+                )
                 record.besiegingDivisionIds = SiegeRecord.normalizedDivisionIds(
                     record.besiegingDivisionIds + [besiegingDivisionId]
                 )
@@ -94,9 +179,37 @@ struct SiegeState: Codable, Equatable {
             startedTurn: normalizedTurn,
             lastUpdatedTurn: normalizedTurn,
             pressure: pressureGain,
+            fortification: normalizedMaxFortification - normalizedFortificationDamage,
+            maxFortification: normalizedMaxFortification,
             besiegingDivisionIds: [besiegingDivisionId]
         )
         records.append(record)
+        records.sort { $0.targetRegionId.rawValue < $1.targetRegionId.rawValue }
+        return record
+    }
+
+    @discardableResult
+    mutating func repairFortification(
+        targetRegionId: RegionId,
+        defenderFaction: Faction,
+        turn: Int,
+        repairGain: Int
+    ) -> SiegeRecord? {
+        guard let index = records.firstIndex(where: { $0.targetRegionId == targetRegionId }) else {
+            return nil
+        }
+
+        var record = records[index]
+        guard record.defenderFaction == defenderFaction else {
+            return nil
+        }
+
+        record.lastUpdatedTurn = max(1, turn)
+        record.fortification = SiegeRecord.clampFortification(
+            record.fortification + max(0, repairGain),
+            max: record.maxFortification
+        )
+        records[index] = record
         records.sort { $0.targetRegionId.rawValue < $1.targetRegionId.rawValue }
         return record
     }

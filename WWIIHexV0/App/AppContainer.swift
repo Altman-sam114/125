@@ -212,6 +212,20 @@ final class AppContainer: ObservableObject {
         submit(.besiege(attackerId: division.id, targetRegionId: target.id))
     }
 
+    func repairFortificationSelected() {
+        guard let division = selectedActionDivision else {
+            appendInteractionEvent("Repair fortification rejected: no active allied unit selected.")
+            return
+        }
+
+        guard let target = selectedRepairFortificationTarget else {
+            appendInteractionEvent("Repair fortification rejected: no damaged friendly besieged city selected.")
+            return
+        }
+
+        submit(.repairFortification(defenderId: division.id, targetRegionId: target.id))
+    }
+
     func orderSelectedGeneralHoldLine() {
         guard let zone = selectedGeneralCommandZone else {
             appendInteractionEvent("General order rejected: no allied front zone selected.")
@@ -403,6 +417,10 @@ final class AppContainer: ObservableObject {
         selectedBesiegeTarget.map(siegeTargetName)
     }
 
+    var selectedRepairFortificationTargetName: String? {
+        selectedRepairFortificationTarget.map(siegeTargetName)
+    }
+
     private var selectedActionDivision: Division? {
         guard !observerModeEnabled else {
             return nil
@@ -441,6 +459,26 @@ final class AppContainer: ObservableObject {
             .first
     }
 
+    private var selectedRepairFortificationTarget: RegionNode? {
+        guard let division = selectedActionDivision,
+              let divisionRegionId = division.location(in: gameState.map) else {
+            return nil
+        }
+
+        if let selectedRegionId,
+           selectedRegionId == divisionRegionId,
+           let selectedRegion = gameState.map.region(id: selectedRegionId),
+           canRepairFortification(division: division, targetRegion: selectedRegion) {
+            return selectedRegion
+        }
+
+        guard let currentRegion = gameState.map.region(id: divisionRegionId),
+              canRepairFortification(division: division, targetRegion: currentRegion) else {
+            return nil
+        }
+        return currentRegion
+    }
+
     private var canIssuePlayerDirective: Bool {
         !observerModeEnabled &&
             gameState.effectiveTurnOrderState.allowsCommands(activeFaction: playerFaction, phase: gameState.phase)
@@ -464,6 +502,19 @@ final class AppContainer: ObservableObject {
         }
 
         return siegeDistance(from: division, to: region) <= max(1, division.range)
+    }
+
+    private func canRepairFortification(division: Division, targetRegion region: RegionNode) -> Bool {
+        guard region.isPassable,
+              isSiegeTarget(region),
+              region.controller == division.faction,
+              division.location(in: gameState.map) == region.id,
+              let record = gameState.siegeState.record(for: region.id),
+              record.defenderFaction == division.faction else {
+            return false
+        }
+
+        return record.fortification < record.maxFortification
     }
 
     private func isSiegeTarget(_ region: RegionNode) -> Bool {

@@ -12,6 +12,8 @@ struct CommandValidator {
             return validateAttack(attackerId: attackerId, targetId: targetId, in: state)
         case .besiege(let attackerId, let targetRegionId):
             return validateBesiege(attackerId: attackerId, targetRegionId: targetRegionId, in: state)
+        case .repairFortification(let defenderId, let targetRegionId):
+            return validateRepairFortification(defenderId: defenderId, targetRegionId: targetRegionId, in: state)
         case .hold(let divisionId):
             return validateUnitCommand(divisionId: divisionId, in: state)
         case .allowRetreat(let divisionId):
@@ -100,6 +102,46 @@ struct CommandValidator {
 
         guard canInvest(attacker, targetRegion: region) else {
             return .invalid(.targetOutOfRange)
+        }
+
+        return .valid
+    }
+
+    private func validateRepairFortification(
+        defenderId: String,
+        targetRegionId: RegionId,
+        in state: GameState
+    ) -> CommandValidation {
+        let unitValidation = validateUnitCommand(divisionId: defenderId, in: state)
+        guard unitValidation.isValid,
+              let defender = state.division(id: defenderId) else {
+            return unitValidation
+        }
+
+        guard let region = state.map.region(id: targetRegionId) else {
+            return .invalid(.regionNotFound)
+        }
+
+        guard region.isPassable,
+              isSiegeTarget(region, in: state) else {
+            return .invalid(.invalidSiegeTarget)
+        }
+
+        guard region.controller == defender.faction else {
+            return .invalid(.invalidTargetFaction)
+        }
+
+        guard defender.location(in: state.map) == targetRegionId else {
+            return .invalid(.invalidRegionForHex)
+        }
+
+        guard let record = state.siegeState.record(for: targetRegionId),
+              record.defenderFaction == defender.faction else {
+            return .invalid(.noActiveSiege)
+        }
+
+        guard record.fortification < record.maxFortification else {
+            return .invalid(.fortificationAlreadyFull)
         }
 
         return .valid
