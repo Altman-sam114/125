@@ -14,6 +14,7 @@ struct CommandPanelView: View {
     let repairFortificationTargetName: String?
     let relieveSiegeTargetName: String?
     let demandSurrenderTargetName: String?
+    let submissionTargetName: String?
     let onHold: () -> Void
     let onAllowRetreat: () -> Void
     let onResupply: () -> Void
@@ -21,6 +22,7 @@ struct CommandPanelView: View {
     let onRepairFortification: () -> Void
     let onRelieveSiege: () -> Void
     let onDemandSurrender: () -> Void
+    let onProposeSubmission: () -> Void
     let onEndTurn: () -> Void
 
     var body: some View {
@@ -79,6 +81,13 @@ struct CommandPanelView: View {
             .buttonStyle(.bordered)
             .disabled(!canDemandSurrender)
 
+            Button(action: onProposeSubmission) {
+                Label(submissionButtonTitle, systemImage: "seal")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .disabled(!canProposeSubmission)
+
             Button(action: onEndTurn) {
                 Label(isTangSongScenario ? "结束回合" : "End Turn", systemImage: "forward.end")
                     .frame(maxWidth: .infinity)
@@ -135,6 +144,10 @@ struct CommandPanelView: View {
         canCommandSelectedUnit && demandSurrenderTargetName != nil
     }
 
+    private var canProposeSubmission: Bool {
+        canCommandSelectedUnit && submissionTargetName != nil
+    }
+
     private var besiegeButtonTitle: String {
         guard let besiegeTargetName else {
             return isTangSongScenario ? "围城" : "Besiege"
@@ -167,6 +180,15 @@ struct CommandPanelView: View {
         return isTangSongScenario
             ? "招降 \(demandSurrenderTargetName)"
             : "Demand \(demandSurrenderTargetName)"
+    }
+
+    private var submissionButtonTitle: String {
+        guard let submissionTargetName else {
+            return isTangSongScenario ? "招抚" : "Propose Submission"
+        }
+        return isTangSongScenario
+            ? "招抚 \(submissionTargetName)"
+            : "Propose \(submissionTargetName)"
     }
 
     private var statusText: String {

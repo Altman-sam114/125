@@ -348,7 +348,7 @@ isCoreZone
 
 这层是 AI 调度能否“看见部队”的关键。历史上的“AI 看起来不动”根因之一就是突破后的单位被误判成 garrison，从 `unitsFront` 调度池消失。现在前线/敌区/敌控 hex 会强制把这种单位归到 front。
 
-### 1.7 后续统治者层预留与 v5.6a 外交合同
+### 1.7 后续统治者层预留与 v5.6 外交/天命入口
 
 v0.5 当前不接入统治者层。工作树中存在 `WWIIHexV0/Core/DiplomacyState.swift`、`WWIIHexV0/Agents/RulerAgent.swift` 等其他版本方向文件，但 `TurnManager` 当前不调用 `RulerAgent`。v5.6a 已把最小外交归附合同接入规则层，但这不等于统治者 agent 已接入主链路。
 
@@ -360,7 +360,26 @@ v5.6a 当前已落地：
 - 唐宋默认剧本由 `DataLoader` 初始化宋/割据的天命分数。
 - `Command.proposeSubmission(negotiatorId:targetCountryId:targetRegionIds:)` 通过 `CommandValidator` 校验 phase、谈判军队、国家关系、目标州府、天命阈值、低 warSupport 或围城压力，再由 `CommandExecutor` 写入 `DiplomacyState`、`MandateState` 和 diplomacy 日志。
 
-v5.6a 当前没有做：
+v5.6b 当前已落地：
+
+- `CommandPanelView` 提供玩家“招抚”按钮，但它不直接写外交状态。
+- `AppContainer.proposeSubmissionSelected()` 将按钮操作转换为 `Command.proposeSubmission` 并交给 `submit -> RuleEngine`。
+- `AppContainer.selectedSubmissionTarget` 只从外国首府 region 推断目标国家；优先使用当前选中首府，否则自动扫描当前可通过 `CommandValidator` 的首府候选。
+- `DiplomacyPanelView` 只读展示 `MandateState` 和最近 `PacificationRecord`，唐宋场景下显示外交、天命、诸国、集团、关系和归附记录。
+
+v5.6b 的 UI 到规则链路：
+
+```text
+CommandPanelView
+  -> AppContainer.proposeSubmissionSelected
+  -> Command.proposeSubmission
+  -> RuleEngine
+  -> CommandValidator / CommandExecutor
+  -> DiplomacyState + MandateState
+  -> DiplomacyPanelView read-only
+```
+
+v5.6a/v5.6b 当前没有做：
 
 - 不改变 `TurnOrderState.relations` 的 `.allies/.germany` 全局战争关系。
 - 不交割 hex / region controller，不转换或删除部队，不刷新 theater/front/deploy。

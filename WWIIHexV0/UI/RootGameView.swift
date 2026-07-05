@@ -163,6 +163,7 @@ struct RootGameView: View {
                         repairFortificationTargetName: container.selectedRepairFortificationTargetName,
                         relieveSiegeTargetName: container.selectedRelieveSiegeTargetName,
                         demandSurrenderTargetName: container.selectedDemandSurrenderTargetName,
+                        submissionTargetName: container.selectedSubmissionTargetName,
                         onHold: container.holdSelected,
                         onAllowRetreat: container.allowRetreatSelected,
                         onResupply: container.resupplySelected,
@@ -170,6 +171,7 @@ struct RootGameView: View {
                         onRepairFortification: container.repairFortificationSelected,
                         onRelieveSiege: container.relieveSiegeSelected,
                         onDemandSurrender: container.demandSurrenderSelected,
+                        onProposeSubmission: container.proposeSubmissionSelected,
                         onEndTurn: container.advanceOrRunAI
                     )
                     GeneralCommandPanelView(
@@ -221,7 +223,10 @@ struct RootGameView: View {
                 case .diplomacy:
                     DiplomacyPanelView(
                         diplomacyState: container.gameState.diplomacyState,
-                        activeFaction: container.gameState.activeFaction
+                        activeFaction: container.gameState.activeFaction,
+                        mandateState: container.gameState.mandateState,
+                        isTangSongScenario: container.gameState.isTangSongScenario,
+                        factionDisplayName: { container.gameState.displayName(for: $0) }
                     )
                 case .agent:
                     AgentPanelView(

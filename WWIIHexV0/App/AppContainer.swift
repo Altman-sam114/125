@@ -254,6 +254,26 @@ final class AppContainer: ObservableObject {
         submit(.demandSurrender(negotiatorId: division.id, targetRegionId: target.id))
     }
 
+    func proposeSubmissionSelected() {
+        guard let division = selectedActionDivision else {
+            appendInteractionEvent("Submission rejected: no active allied unit selected.")
+            return
+        }
+
+        guard let target = selectedSubmissionTarget else {
+            appendInteractionEvent("Submission rejected: no eligible foreign capital selected.")
+            return
+        }
+
+        submit(
+            .proposeSubmission(
+                negotiatorId: division.id,
+                targetCountryId: target.country.id,
+                targetRegionIds: [target.region.id]
+            )
+        )
+    }
+
     func orderSelectedGeneralHoldLine() {
         guard let zone = selectedGeneralCommandZone else {
             appendInteractionEvent("General order rejected: no allied front zone selected.")
@@ -457,6 +477,13 @@ final class AppContainer: ObservableObject {
         selectedDemandSurrenderTarget.map(siegeTargetName)
     }
 
+    var selectedSubmissionTargetName: String? {
+        guard let target = selectedSubmissionTarget else {
+            return nil
+        }
+        return target.country.name
+    }
+
     private var selectedActionDivision: Division? {
         guard !observerModeEnabled else {
             return nil
@@ -563,6 +590,65 @@ final class AppContainer: ObservableObject {
                 return lhs.id.rawValue < rhs.id.rawValue
             }
             .first
+    }
+
+    private var selectedSubmissionTarget: (country: CountryProfile, region: RegionNode)? {
+        guard let division = selectedActionDivision else {
+            return nil
+        }
+
+        if let selectedRegionId,
+           let selectedRegion = gameState.map.region(id: selectedRegionId),
+           let target = submissionTarget(for: division, region: selectedRegion) {
+            return target
+        }
+
+        return gameState.diplomacyState.countries
+            .filter { $0.faction != division.faction }
+            .compactMap { country -> (country: CountryProfile, region: RegionNode)? in
+                guard let capitalRegionId = country.capitalRegionId,
+                      let region = gameState.map.region(id: capitalRegionId) else {
+                    return nil
+                }
+                return submissionTarget(for: division, country: country, region: region)
+            }
+            .sorted {
+                if $0.country.warSupport != $1.country.warSupport {
+                    return $0.country.warSupport < $1.country.warSupport
+                }
+                return $0.country.id.rawValue < $1.country.id.rawValue
+            }
+            .first
+    }
+
+    private func submissionTarget(
+        for division: Division,
+        region: RegionNode
+    ) -> (country: CountryProfile, region: RegionNode)? {
+        guard let targetCountry = gameState.diplomacyState.countries.first(where: {
+            $0.faction != division.faction && $0.capitalRegionId == region.id
+        }) else {
+            return nil
+        }
+
+        return submissionTarget(for: division, country: targetCountry, region: region)
+    }
+
+    private func submissionTarget(
+        for division: Division,
+        country: CountryProfile,
+        region: RegionNode
+    ) -> (country: CountryProfile, region: RegionNode)? {
+        let command = Command.proposeSubmission(
+            negotiatorId: division.id,
+            targetCountryId: country.id,
+            targetRegionIds: [region.id]
+        )
+        guard CommandValidator().validate(command, in: gameState).isValid else {
+            return nil
+        }
+
+        return (country, region)
     }
 
     private var canIssuePlayerDirective: Bool {

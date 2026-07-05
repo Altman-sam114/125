@@ -11,12 +11,14 @@ flowchart TD
     H2T["hexToTheater<br/>运行时动态战区权威"]:::authority
     FRONT["FrontLine / FrontSegment<br/>按动态 theater 的真实 hex 邻接生成"]:::derived
     DEPLOY["WarDeploymentState<br/>hexToFrontZone 权威<br/>FRONT / DEPTH / GARRISON"]:::derived
+    ECO["EconomyState / EconomyRules<br/>收入 / 生产 / 补员"]:::economy
+    DIP["DiplomacyState + MandateState<br/>国家关系 / 归附记录 / 天命"]:::state
 
-    PLAYER["玩家操作<br/>tap / move / attack / endTurn"]:::input
+    PLAYER["玩家操作<br/>tap / move / attack / proposeSubmission / endTurn"]:::input
     AI["AI / 将领<br/>TheaterCommanderPool<br/>ZoneCommanderAgent"]:::input
     ZD["ZoneDirective<br/>attack / defend<br/>category / tactic / target"]:::command
     WCE["WarCommandExecutor<br/>directive -> Command"]:::command
-    CMD["Command<br/>move / attack / hold / resupply / endTurn"]:::command
+    CMD["Command<br/>move / attack / besiege / demandSurrender / proposeSubmission / endTurn"]:::command
     RE["RuleEngine<br/>CommandValidator -> CommandExecutor"]:::rules
     SYNC["StrategicStateSynchronizer<br/>Region -> Theater -> Front -> Deploy"]:::rules
 
@@ -26,15 +28,21 @@ flowchart TD
     ME --> JSON --> DL --> GS
     GS --> HEX
     HEX --> REGION
+    HEX --> ECO
+    REGION --> ECO
     REGION --> INIT
     INIT --> R2T
     R2T -.-> H2T
     HEX --> H2T
     H2T --> FRONT --> DEPLOY
+    GS --> ECO
+    GS --> DIP
 
     PLAYER --> CMD
     AI --> ZD --> WCE --> CMD
     CMD --> RE --> HEX
+    RE --> ECO
+    RE --> DIP
     RE --> SYNC
     SYNC --> REGION
     SYNC --> H2T
@@ -48,6 +56,8 @@ flowchart TD
     H2T --> UI
     FRONT --> UI
     DEPLOY --> UI
+    ECO --> UI
+    DIP --> UI
     RE --> LOG
     WCE --> LOG
 
@@ -59,6 +69,7 @@ flowchart TD
     classDef derived fill:#dcfce7,stroke:#16a34a,color:#052e16
     classDef snapshot fill:#e0f2fe,stroke:#0284c7,color:#082f49
     classDef input fill:#fef3c7,stroke:#d97706,color:#1f1600
+    classDef economy fill:#fef9c3,stroke:#ca8a04,color:#292107
     classDef command fill:#fae8ff,stroke:#a21caf,color:#2a0a2f
     classDef rules fill:#ccfbf1,stroke:#0f766e,color:#042f2e
     classDef ui fill:#e5e7eb,stroke:#4b5563,color:#111827
