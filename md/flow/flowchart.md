@@ -283,21 +283,24 @@ flowchart TD
     classDef warn fill:#ffedd5,stroke:#f97316,color:#431407
 ```
 
-## 3.7 v5.3 唐宋围城城防与修城首轮
+## 3.7 v5.3 唐宋围城城防、修城与解围首轮
 
-这张图看 v5.3 的围城最小闭环。围城和修城都是底层 `Command`，仍经 `RuleEngine` 校验执行；围城记录压力与城防，城防归零后才在回合结算压低守军补给，不直接占领 hex 或改 region controller。
+这张图看 v5.3 的围城最小闭环。围城、修城和解围都是底层 `Command`，仍经 `RuleEngine` 校验执行；围城记录压力与城防，城防归零后才在回合结算压低守军补给，解围只削减 pressure 或移除 SiegeRecord，不直接占领 hex 或改 region controller。
 
 ```mermaid
 flowchart TD
-    UI["玩家命令面板<br/>CommandPanelView<br/>选择可行动军队后发起围城或修城"]:::ui
+    UI["玩家命令面板<br/>CommandPanelView<br/>选择可行动军队后发起围城、修城或解围"]:::ui
     CMD["围城命令<br/>Command.besiege<br/>attackerId + targetRegionId"]:::command
     VALID["统一校验<br/>CommandValidator.validateBesiege<br/>敌对城池/关隘/粮仓州府 + 距离合法"]:::rules
     REPAIR["修城命令<br/>Command.repairFortification<br/>守方军队 + 被围目标州府"]:::command
     RVALID["修城校验<br/>CommandValidator.validateRepairFortification<br/>己控、被围、军队在州府内、城防未满"]:::rules
+    RELIEVE["解围命令<br/>Command.relieveSiege<br/>友军 + 被围目标州府"]:::command
+    LVALID["解围校验<br/>CommandValidator.validateRelieveSiege<br/>己控、被围、军队在州府内或距离内"]:::rules
     PASS{"校验通过?"}:::decision
     REJECT["拒绝命令<br/>CommandResult rejected<br/>GameState 不变"]:::stop
     EXEC["执行围城<br/>CommandExecutor.executeBesiege<br/>标记军队 hasActed，累积 pressure，损耗 fortification"]:::rules
     REXEC["执行修城<br/>CommandExecutor.executeRepairFortification<br/>标记军队 hasActed，恢复 fortification"]:::rules
+    LEXEC["执行解围<br/>CommandExecutor.executeRelieveSiege<br/>标记军队 hasActed，削减 pressure；归零则解除记录"]:::rules
     STATE["围城记录<br/>GameState.siegeState / SiegeRecord<br/>目标州府、攻守方、压力、城防、围城军队"]:::state
     LOG["围城日志<br/>GameLogCategory.siege<br/>EventLog / RegionInspector 可见"]:::ui
     END["结束回合<br/>CommandExecutor.executeEndTurn<br/>补给刷新后处理围城压力"]:::rules
@@ -311,9 +314,11 @@ flowchart TD
 
     UI --> CMD --> VALID --> PASS
     UI --> REPAIR --> RVALID --> PASS
+    UI --> RELIEVE --> LVALID --> PASS
     PASS -->|否| REJECT
     PASS -->|围城| EXEC --> STATE --> LOG
     PASS -->|修城| REXEC --> STATE
+    PASS -->|解围| LEXEC --> STATE
     STATE --> END --> HOLD
     HOLD -->|否| LIFT
     HOLD -->|是| PRESS

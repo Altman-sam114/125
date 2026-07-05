@@ -1115,9 +1115,9 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久和修城首轮已通过 `Command.besiege` / `Command.repairFortification` 和 `SiegeState` 落地，但自动破城、招降、完整漕运、AI 主动围城和唐宋专用胜利规则仍未实现。
+这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城和解围首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` 和 `SiegeState` 落地，但自动破城、招降、完整漕运、AI 主动围城和唐宋专用胜利规则仍未实现。
 
-v5.3 围城城防与修城首轮：
+v5.3 围城城防、修城与解围首轮：
 
 ```text
 Command.besiege(attackerId, targetRegionId)
@@ -1137,6 +1137,14 @@ Command.repairFortification(defenderId, targetRegionId)
   -> CommandExecutor.executeRepairFortification
   -> 消耗该军队行动，恢复 SiegeRecord.fortification
 
+Command.relieveSiege(relieverId, targetRegionId)
+  -> CommandValidator.validateRelieveSiege
+  -> 解围军队必须属于原守方，目标州府必须己控且有活跃 SiegeRecord
+  -> 解围军队可在目标州府内，或位于目标 display hex 的 range 距离内
+  -> CommandExecutor.executeRelieveSiege
+  -> 消耗该军队行动，按攻防、骑军/禁军、补给状态削减 SiegeRecord.pressure
+  -> pressure 降为 0 时移除 SiegeRecord
+
 SiegeRecord
   -> targetRegionId
   -> attackerFaction / defenderFaction
@@ -1146,7 +1154,7 @@ SiegeRecord
   -> besiegingDivisionIds
 ```
 
-围城压力和城防损耗不会直接改 `HexTile.controller`、`RegionNode.controller`、`hexToTheater` 或 `hexToFrontZone`。若后续要破城，仍必须通过合法移动/占领规则落到 hex。`SiegeRecord` 新增城防字段时使用 `decodeIfPresent` 兼容旧存档；旧围城记录缺少城防时按默认城防和既有 pressure 推导。
+围城压力、城防损耗和解围不会直接改 `HexTile.controller`、`RegionNode.controller`、`hexToTheater` 或 `hexToFrontZone`，也不会删除敌军。若后续要破城，仍必须通过合法移动/占领规则落到 hex。`SiegeRecord` 新增城防字段时使用 `decodeIfPresent` 兼容旧存档；旧围城记录缺少城防时按默认城防和既有 pressure 推导。
 
 结束回合：
 

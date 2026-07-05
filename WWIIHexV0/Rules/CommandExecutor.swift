@@ -22,6 +22,8 @@ struct CommandExecutor {
             executeBesiege(attackerId: attackerId, targetRegionId: targetRegionId, in: &nextState)
         case .repairFortification(let defenderId, let targetRegionId):
             executeRepairFortification(defenderId: defenderId, targetRegionId: targetRegionId, in: &nextState)
+        case .relieveSiege(let relieverId, let targetRegionId):
+            executeRelieveSiege(relieverId: relieverId, targetRegionId: targetRegionId, in: &nextState)
         case .hold(let divisionId):
             executeHold(divisionId: divisionId, in: &nextState)
         case .allowRetreat(let divisionId):
@@ -196,6 +198,46 @@ struct CommandExecutor {
                 : "\(defender.name) repaired \(siegeTargetName(region)) fortification: +\(repairGain), now \(record.fortification)/\(record.maxFortification).",
             category: .siege
         )
+    }
+
+    private func executeRelieveSiege(relieverId: String, targetRegionId: RegionId, in state: inout GameState) {
+        guard let relieverIndex = state.divisionIndex(id: relieverId),
+              let region = state.map.region(id: targetRegionId) else {
+            return
+        }
+
+        let reliever = state.divisions[relieverIndex]
+        let relief = siegeRelief(for: reliever, targetRegion: region, in: state)
+        guard let record = state.siegeState.reducePressure(
+            targetRegionId: targetRegionId,
+            defenderFaction: reliever.faction,
+            turn: state.turn,
+            relief: relief
+        ) else {
+            return
+        }
+
+        if let targetHex = closestHex(in: region, to: reliever.coord),
+           let direction = reliever.coord.direction(to: targetHex) {
+            state.divisions[relieverIndex].facing = direction
+        }
+        state.divisions[relieverIndex].hasActed = true
+
+        if record.pressure == 0 {
+            state.appendEvent(
+                state.isTangSongScenario
+                    ? "\(reliever.name)驰援\(siegeTargetName(region))：解围力度 \(relief)，围城解除。"
+                    : "\(reliever.name) relieved \(siegeTargetName(region)): relief \(relief), siege lifted.",
+                category: .siege
+            )
+        } else {
+            state.appendEvent(
+                state.isTangSongScenario
+                    ? "\(reliever.name)驰援\(siegeTargetName(region))：围城压力 -\(relief)，当前 \(record.pressure)。"
+                    : "\(reliever.name) relieved \(siegeTargetName(region)): pressure -\(relief), now \(record.pressure).",
+                category: .siege
+            )
+        }
     }
 
     private func executeHold(divisionId: String, in state: inout GameState) {
@@ -585,6 +627,30 @@ struct CommandExecutor {
         }
 
         return max(1, repair)
+    }
+
+    private func siegeRelief(for reliever: Division, targetRegion region: RegionNode, in state: GameState) -> Int {
+        var relief = max(2, (reliever.attack + reliever.defense) / 3)
+        let roles = reliever.tangSongCombatRoles
+
+        if state.isTangSongScenario {
+            if roles.contains(.cavalry) {
+                relief += 2
+            }
+            if roles.contains(.imperialGuard) {
+                relief += 1
+            }
+            if reliever.location(in: state.map) == region.id {
+                relief += 1
+            }
+            if reliever.supplyState == .lowSupply {
+                relief -= 1
+            } else if reliever.supplyState == .encircled {
+                relief -= 2
+            }
+        }
+
+        return max(1, relief)
     }
 
     private func maxFortification(for region: RegionNode, in state: GameState) -> Int {

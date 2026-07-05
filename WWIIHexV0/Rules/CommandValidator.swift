@@ -14,6 +14,8 @@ struct CommandValidator {
             return validateBesiege(attackerId: attackerId, targetRegionId: targetRegionId, in: state)
         case .repairFortification(let defenderId, let targetRegionId):
             return validateRepairFortification(defenderId: defenderId, targetRegionId: targetRegionId, in: state)
+        case .relieveSiege(let relieverId, let targetRegionId):
+            return validateRelieveSiege(relieverId: relieverId, targetRegionId: targetRegionId, in: state)
         case .hold(let divisionId):
             return validateUnitCommand(divisionId: divisionId, in: state)
         case .allowRetreat(let divisionId):
@@ -53,6 +55,37 @@ struct CommandValidator {
 
         guard movementRules.shortestPath(for: division, to: destination, in: state) != nil else {
             return .invalid(.noPath)
+        }
+
+        return .valid
+    }
+
+    private func validateRelieveSiege(
+        relieverId: String,
+        targetRegionId: RegionId,
+        in state: GameState
+    ) -> CommandValidation {
+        let unitValidation = validateUnitCommand(divisionId: relieverId, in: state)
+        guard unitValidation.isValid,
+              let reliever = state.division(id: relieverId) else {
+            return unitValidation
+        }
+
+        guard let region = state.map.region(id: targetRegionId) else {
+            return .invalid(.regionNotFound)
+        }
+
+        guard let record = state.siegeState.record(for: targetRegionId),
+              record.defenderFaction == reliever.faction else {
+            return .invalid(.noActiveSiege)
+        }
+
+        guard region.controller == reliever.faction else {
+            return .invalid(.invalidTargetFaction)
+        }
+
+        guard canRelieve(reliever, targetRegion: region, in: state) else {
+            return .invalid(.targetOutOfRange)
         }
 
         return .valid
@@ -234,6 +267,17 @@ struct CommandValidator {
         let maxDistance = max(1, attacker.range)
         return region.displayHexes.contains { targetHex in
             attacker.coord.distance(to: targetHex) <= maxDistance
+        }
+    }
+
+    private func canRelieve(_ reliever: Division, targetRegion region: RegionNode, in state: GameState) -> Bool {
+        if reliever.location(in: state.map) == region.id {
+            return true
+        }
+
+        let maxDistance = max(1, reliever.range)
+        return region.displayHexes.contains { targetHex in
+            reliever.coord.distance(to: targetHex) <= maxDistance
         }
     }
 }

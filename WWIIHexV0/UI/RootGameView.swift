@@ -160,11 +160,13 @@ struct RootGameView: View {
                         isTangSongScenario: container.gameState.isTangSongScenario,
                         besiegeTargetName: container.selectedBesiegeTargetName,
                         repairFortificationTargetName: container.selectedRepairFortificationTargetName,
+                        relieveSiegeTargetName: container.selectedRelieveSiegeTargetName,
                         onHold: container.holdSelected,
                         onAllowRetreat: container.allowRetreatSelected,
                         onResupply: container.resupplySelected,
                         onBesiege: container.besiegeSelected,
                         onRepairFortification: container.repairFortificationSelected,
+                        onRelieveSiege: container.relieveSiegeSelected,
                         onEndTurn: container.advanceOrRunAI
                     )
                     GeneralCommandPanelView(

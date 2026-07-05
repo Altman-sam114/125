@@ -217,6 +217,34 @@ struct SiegeState: Codable, Equatable {
     mutating func removeRecord(for regionId: RegionId) {
         records.removeAll { $0.targetRegionId == regionId }
     }
+
+    @discardableResult
+    mutating func reducePressure(
+        targetRegionId: RegionId,
+        defenderFaction: Faction,
+        turn: Int,
+        relief: Int
+    ) -> SiegeRecord? {
+        guard let index = records.firstIndex(where: { $0.targetRegionId == targetRegionId }) else {
+            return nil
+        }
+
+        var record = records[index]
+        guard record.defenderFaction == defenderFaction else {
+            return nil
+        }
+
+        record.lastUpdatedTurn = max(1, turn)
+        record.pressure = SiegeRecord.clampPressure(record.pressure - max(0, relief))
+        if record.pressure == 0 {
+            records.remove(at: index)
+            return record
+        }
+
+        records[index] = record
+        records.sort { $0.targetRegionId.rawValue < $1.targetRegionId.rawValue }
+        return record
+    }
 }
 
 struct GameState: Codable, Equatable {

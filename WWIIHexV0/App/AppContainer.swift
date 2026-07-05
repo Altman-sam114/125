@@ -226,6 +226,20 @@ final class AppContainer: ObservableObject {
         submit(.repairFortification(defenderId: division.id, targetRegionId: target.id))
     }
 
+    func relieveSiegeSelected() {
+        guard let division = selectedActionDivision else {
+            appendInteractionEvent("Relieve siege rejected: no active allied unit selected.")
+            return
+        }
+
+        guard let target = selectedRelieveSiegeTarget else {
+            appendInteractionEvent("Relieve siege rejected: no friendly besieged city in range.")
+            return
+        }
+
+        submit(.relieveSiege(relieverId: division.id, targetRegionId: target.id))
+    }
+
     func orderSelectedGeneralHoldLine() {
         guard let zone = selectedGeneralCommandZone else {
             appendInteractionEvent("General order rejected: no allied front zone selected.")
@@ -421,6 +435,10 @@ final class AppContainer: ObservableObject {
         selectedRepairFortificationTarget.map(siegeTargetName)
     }
 
+    var selectedRelieveSiegeTargetName: String? {
+        selectedRelieveSiegeTarget.map(siegeTargetName)
+    }
+
     private var selectedActionDivision: Division? {
         guard !observerModeEnabled else {
             return nil
@@ -479,6 +497,31 @@ final class AppContainer: ObservableObject {
         return currentRegion
     }
 
+    private var selectedRelieveSiegeTarget: RegionNode? {
+        guard let division = selectedActionDivision else {
+            return nil
+        }
+
+        if let selectedRegionId,
+           let selectedRegion = gameState.map.region(id: selectedRegionId),
+           canRelieveSiege(division: division, targetRegion: selectedRegion) {
+            return selectedRegion
+        }
+
+        return gameState.siegeState.records
+            .compactMap { gameState.map.region(id: $0.targetRegionId) }
+            .filter { canRelieveSiege(division: division, targetRegion: $0) }
+            .sorted { lhs, rhs in
+                let lhsDistance = siegeDistance(from: division, to: lhs)
+                let rhsDistance = siegeDistance(from: division, to: rhs)
+                if lhsDistance != rhsDistance {
+                    return lhsDistance < rhsDistance
+                }
+                return lhs.id.rawValue < rhs.id.rawValue
+            }
+            .first
+    }
+
     private var canIssuePlayerDirective: Bool {
         !observerModeEnabled &&
             gameState.effectiveTurnOrderState.allowsCommands(activeFaction: playerFaction, phase: gameState.phase)
@@ -515,6 +558,20 @@ final class AppContainer: ObservableObject {
         }
 
         return record.fortification < record.maxFortification
+    }
+
+    private func canRelieveSiege(division: Division, targetRegion region: RegionNode) -> Bool {
+        guard region.controller == division.faction,
+              let record = gameState.siegeState.record(for: region.id),
+              record.defenderFaction == division.faction else {
+            return false
+        }
+
+        if division.location(in: gameState.map) == region.id {
+            return true
+        }
+
+        return siegeDistance(from: division, to: region) <= max(1, division.range)
     }
 
     private func isSiegeTarget(_ region: RegionNode) -> Bool {

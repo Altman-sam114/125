@@ -1260,6 +1260,7 @@ struct WarCommandExecutor {
         case .move(let divisionId, _),
              .besiege(let divisionId, _),
              .repairFortification(let divisionId, _),
+             .relieveSiege(let divisionId, _),
              .hold(let divisionId),
              .allowRetreat(let divisionId),
              .resupply(let divisionId):
@@ -1290,6 +1291,8 @@ struct WarCommandExecutor {
         case .besiege(_, let targetRegionId):
             return [targetRegionId]
         case .repairFortification(_, let targetRegionId):
+            return [targetRegionId]
+        case .relieveSiege(_, let targetRegionId):
             return [targetRegionId]
         default:
             return []
