@@ -460,11 +460,22 @@ struct GameState: Codable, Equatable {
 
     var phaseDisplayName: String {
         guard phase != .resolution else {
-            return phase.displayName
+            return phase.displayName(isTangSongScenario: isTangSongScenario)
         }
 
         guard let profile = effectiveTurnOrderState.profile(for: activeFaction.powerId) else {
-            return phase.displayName
+            return phase.displayName(isTangSongScenario: isTangSongScenario)
+        }
+
+        if isTangSongScenario {
+            switch profile.controlMode {
+            case .human:
+                return "\(profile.shortName)行动"
+            case .ai:
+                return "\(profile.shortName)军议"
+            case .inactive:
+                return "\(profile.shortName)待命"
+            }
         }
 
         switch profile.controlMode {

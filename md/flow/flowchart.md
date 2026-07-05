@@ -501,8 +501,9 @@ flowchart TD
 ```mermaid
 flowchart TD
     STATE["运行时状态<br/>GameState + EventLog + WarDirectiveRecord"]:::state
-    ROOT["主界面<br/>RootGameView<br/>HUD + Info tabs"]:::ui
-    LOG["日志面板<br/>EventLogView<br/>最近 60 条 LogDisplayEntry"]:::ui
+    ROOT["主界面<br/>RootGameView<br/>唐宋场景显示图层、观战、面板与 compact tabs"]:::ui
+    HUD["顶部 HUD<br/>HUDView + GameState.phaseDisplayName<br/>显示回合、政权、阶段、胜负、资源、队列"]:::ui
+    LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报、战斗、围城、粮道等分类"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
     BOARD["地图场景<br/>BoardScene<br/>缓存 unit display hex 后排序绘制"]:::ui
     MARSHAL["模拟元帅 / MockAI<br/>MarshalAgent + SimulatedMarshalLLMClient"]:::ai
@@ -512,6 +513,7 @@ flowchart TD
     PLAYTEST["初版试玩记录<br/>观察 UI、图层、AI diagnostics、拒绝原因"]:::doc
 
     STATE --> ROOT
+    ROOT --> HUD
     ROOT --> LOG
     ROOT --> AIUI
     ROOT --> BOARD

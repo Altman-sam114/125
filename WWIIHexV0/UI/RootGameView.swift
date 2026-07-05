@@ -9,6 +9,7 @@ struct RootGameView: View {
     var body: some View {
         GeometryReader { proxy in
             let isLandscape = proxy.size.width > proxy.size.height
+            let isTangSongScenario = container.gameState.isTangSongScenario
 
             ZStack(alignment: .bottomTrailing) {
                 boardView
@@ -25,12 +26,12 @@ struct RootGameView: View {
                     .padding(.top, 8)
                     .padding(.horizontal, 8)
 
-                    Picker("Map Layer", selection: Binding(
+                    Picker(isTangSongScenario ? "图层" : "Map Layer", selection: Binding(
                         get: { container.mapDisplayLayer },
                         set: { container.setMapDisplayLayer($0) }
                     )) {
                         ForEach(MapDisplayLayer.allCases) { layer in
-                            Text(layer.displayName).tag(layer)
+                            Text(layer.displayName(isTangSongScenario: isTangSongScenario)).tag(layer)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -38,7 +39,7 @@ struct RootGameView: View {
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
                     .padding(.horizontal, 8)
 
-                    Toggle("Observer", isOn: Binding(
+                    Toggle(isTangSongScenario ? "观战" : "Observer", isOn: Binding(
                         get: { container.observerModeEnabled },
                         set: { container.setObserverModeEnabled($0) }
                     ))
@@ -59,7 +60,7 @@ struct RootGameView: View {
                 Button {
                     isInfoExpanded.toggle()
                 } label: {
-                    Text("[ INFO ]")
+                    Label(isTangSongScenario ? "面板" : "Info", systemImage: "sidebar.left")
                         .font(.caption.weight(.semibold))
                         .lineLimit(1)
                 }
@@ -83,7 +84,7 @@ struct RootGameView: View {
                     onClose: { isGeneralProfilePresented = false }
                 )
             } else {
-                Text("No general selected.")
+                Text(container.gameState.isTangSongScenario ? "未选择将领。" : "No general selected.")
                     .font(.headline)
                     .padding()
             }
@@ -95,7 +96,7 @@ struct RootGameView: View {
             renderState: BoardSceneAdapter.renderState(from: container),
             onHexTapped: container.handleBoardTap
         )
-        .accessibilityLabel("\(container.gameState.scenarioDisplayName) hex board")
+        .accessibilityLabel(boardAccessibilityLabel)
     }
 
     private func infoOverlay(isLandscape: Bool, size: CGSize) -> some View {
@@ -121,9 +122,9 @@ struct RootGameView: View {
 
     private var compactPanelWithTabs: some View {
         VStack(spacing: 0) {
-            Picker("Panel", selection: $selectedCompactPanel) {
+            Picker(container.gameState.isTangSongScenario ? "面板" : "Panel", selection: $selectedCompactPanel) {
                 ForEach(CompactInfoPanel.allCases) { panel in
-                    Text(panel.rawValue).tag(panel)
+                    Text(panel.displayName(isTangSongScenario: container.gameState.isTangSongScenario)).tag(panel)
                 }
             }
             .pickerStyle(.segmented)
@@ -205,7 +206,11 @@ struct RootGameView: View {
                         onAttackRegion: container.orderSelectedGeneralAttackRegion
                     )
                 case .log:
-                    EventLogView(entries: container.displayEventLog)
+                    EventLogView(
+                        entries: container.displayEventLog,
+                        isTangSongScenario: container.gameState.isTangSongScenario,
+                        factionDisplayName: { container.gameState.displayName(for: $0) }
+                    )
                 case .economy:
                     EconomyPanelView(
                         gameState: container.gameState,
@@ -231,6 +236,13 @@ struct RootGameView: View {
             .padding(.bottom, 10)
         }
     }
+
+    private var boardAccessibilityLabel: String {
+        if container.gameState.isTangSongScenario {
+            return "\(container.gameState.scenarioDisplayName) 六角地图"
+        }
+        return "\(container.gameState.scenarioDisplayName) hex board"
+    }
 }
 
 private enum CompactInfoPanel: String, CaseIterable, Identifiable {
@@ -244,5 +256,27 @@ private enum CompactInfoPanel: String, CaseIterable, Identifiable {
 
     var id: String {
         rawValue
+    }
+
+    func displayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .unit:
+                return "军队"
+            case .region:
+                return "州府"
+            case .general:
+                return "将领"
+            case .log:
+                return "战报"
+            case .economy:
+                return "府库"
+            case .diplomacy:
+                return "外交"
+            case .agent:
+                return "军议"
+            }
+        }
+        return rawValue
     }
 }

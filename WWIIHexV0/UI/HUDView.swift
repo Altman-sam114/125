@@ -20,11 +20,11 @@ struct HUDView: View {
                 Spacer()
 
                 if let onNewGame {
-                    NewGameButton(action: onNewGame)
+                    NewGameButton(action: onNewGame, isTangSongScenario: gameState.isTangSongScenario)
                 }
 
                 Button(action: onEndTurn) {
-                    Label("End Turn", systemImage: "forward.end")
+                    Label(endTurnLabel, systemImage: "forward.end")
                         .font(.caption.weight(.semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.65)
@@ -34,13 +34,13 @@ struct HUDView: View {
 
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 8) {
                 GridRow {
-                    metric("Turn", "\(gameState.turn) / \(gameState.maxTurns)")
-                    metric("Power", gameState.displayName(for: gameState.activeFaction))
+                    metric(turnLabel, "\(gameState.turn) / \(gameState.maxTurns)")
+                    metric(powerLabel, gameState.displayName(for: gameState.activeFaction))
                 }
 
                 GridRow {
-                    metric("Phase", gameState.phaseDisplayName)
-                    metric("Victory", victoryText)
+                    metric(phaseLabel, gameState.phaseDisplayName)
+                    metric(victoryLabel, victoryText)
                 }
 
                 GridRow {
@@ -50,7 +50,7 @@ struct HUDView: View {
 
                 GridRow {
                     metric(suppliesLabel, "\(activeLedger.stockpile.supplies)")
-                    metric("Queue", "\(activeLedger.productionQueue.count)")
+                    metric(queueLabel, "\(activeLedger.productionQueue.count)")
                 }
             }
         }
@@ -75,7 +75,10 @@ struct HUDView: View {
 
     private var victoryText: String {
         guard let winner = gameState.victoryState.winner else {
-            return "Ongoing"
+            return gameState.isTangSongScenario ? "未定" : "Ongoing"
+        }
+        if gameState.isTangSongScenario {
+            return "\(gameState.displayName(for: winner))胜利"
         }
         return "\(gameState.displayName(for: winner)) Victory"
     }
@@ -94,5 +97,29 @@ struct HUDView: View {
 
     private var suppliesLabel: String {
         gameState.isTangSongScenario ? "粮草" : "Supplies"
+    }
+
+    private var endTurnLabel: String {
+        gameState.isTangSongScenario ? "结束回合" : "End Turn"
+    }
+
+    private var turnLabel: String {
+        gameState.isTangSongScenario ? "回合" : "Turn"
+    }
+
+    private var powerLabel: String {
+        gameState.isTangSongScenario ? "政权" : "Power"
+    }
+
+    private var phaseLabel: String {
+        gameState.isTangSongScenario ? "阶段" : "Phase"
+    }
+
+    private var victoryLabel: String {
+        gameState.isTangSongScenario ? "胜负" : "Victory"
+    }
+
+    private var queueLabel: String {
+        gameState.isTangSongScenario ? "队列" : "Queue"
     }
 }

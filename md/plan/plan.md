@@ -66,7 +66,7 @@ displayName: 建隆元年：陈桥兵变与山河一统
 
 ## 3. 当前迁移进度快照
 
-截至当前工作树，唐宋迁移已经进入 v5.3 小切片迭代：
+截至当前工作树，唐宋迁移已经进入 v5.5 主界面术语桥接小切片：
 
 - v5.0 已建立迁移总提示词和审计合同，明确首发 960 剧本、架构边界、版本路线、禁止项和验收标准。
 - v5.1 已加入 `PowerId` / `PowerProfile` / `PowerRelation` / `TurnOrderState` / `WarRelationRules` 兼容地基，回合和 AI 控制权主路径开始脱离硬编码 Germany/Allies。
@@ -76,15 +76,16 @@ displayName: 建隆元年：陈桥兵变与山河一统
 - v5.3 已加入粮道供给与读法首轮：唐宋场景下受控高 `supplyValue` 州府/粮仓可作为补给源，道路、城关、山林、跨河成本会影响 `SupplyRules` 补给判定；单位详情可读粮道通断、路径成本/上限、最近粮源和安全退路数。
 - v5.3 已加入围城城防、修城、解围、招降、地图围城 overlay 与 AI 围城/招降指令首轮：`Command.besiege` 经 `RuleEngine` 登记 `SiegeState` 并损耗 `fortification`；`Command.repairFortification` 让守方军队在被围州府内消耗行动修城；`Command.relieveSiege` 让守方或友军削减围城 pressure，pressure 降到 0 时解除围城记录；`Command.demandSurrender` 让围城方在 pressure 达标、城防归零且守军不再 `supplied` 后，经规则层移除纳降守军、交割目标州府可占 hex 并刷新 Region / Theater / FrontLine / WarDeployment；`ZoneDirective.attack -> WarCommandExecutor` 可在目标敌控州府满足纳降条件时生成底层 `Command.demandSurrender`，否则在目标可围且无可攻击单位时生成底层 `Command.besiege`；Region 面板可读围城压力和城防，地图可从 `SiegeState` 只读绘制围城圈、压力和城防标签。
 - v5.4 已完成 AI 军议显示桥、simulated marshal 文案唐宋化与解释字段首轮：`DirectiveType`、`CommandCategory`、`TacticName` 提供唐宋场景感知显示名；`AgentPanelView` 在唐宋场景下显示军议、诏令朝议、方面军令、进军、骑军突进、合围、弓弩压制和死守城关等读法；`MarshalBattlefieldSummary` 携带 `scenarioId`、首都、围城、粮道优先和招抚候选 region 摘要，让 `SimulatedMarshalLLMClient` 在唐宋场景下输出宋枢密院/割据行营、州府、粮道口径的 strategicIntent、summary、rationale，以及 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 可选解释字段；`TurnManager` 会把这些字段复制到 `AgentDecisionRecord.theaterDirectiveSummary`，AI 面板只读显示诏令、朝议、招抚、转运和摘要；`GameAgent.defaultCommander` 在唐宋场景下使用宋枢密院/割据行营作为默认 AI issuer，不再把默认唐宋主路径记录成 Guderian 或 Allied Mock Commander；底层 raw case 和 `ZoneDirective -> WarCommandExecutor -> RuleEngine` 权限边界不变。
+- v5.5 已完成默认唐宋主界面术语桥首轮：`MapDisplayLayer`、`GamePhase` 和 `GameState.phaseDisplayName` 提供唐宋场景显示名；`RootGameView` 的图层、观战、面板按钮、compact tabs、棋盘 accessibility label 改为唐宋口径；`HUDView` 显示回合、政权、阶段、胜负、资源、队列、新局和结束回合；`CommandPanelView` 显示军令、固守、可退、整补和唐宋状态提示；`EventLogView` 显示战报与战斗、退却、整补、合围、围城、粮道、前线、方面、州府、外交等分类。底层 raw case、命令、日志结构和规则执行不变。
 
 仍未完成的关键项：
 
 - `Faction` 底层仍是 `.allies` / `.germany` legacy 桥，真实多政权数据驱动未收口。
 - `ProductionKind`、`EconomyResources`、`Division`、`ComponentType` 的 Codable schema 仍保留二战兼容名。
-- 自动破城、完整外交归附、完整漕运/粮队/仓储容量、唐宋专用胜利规则、天命/治理和发布级 UI 仍未落地。
+- 自动破城、完整外交归附、完整漕运/粮队/仓储容量、唐宋专用胜利规则、天命/治理和完整发布级 UI 美术/截图验收仍未落地。
 - AI 默认 issuer 与 simulated rationale 的唐宋主路径首轮已迁移，但完整皇帝/朝廷/枢密/节度使/转运使/州府守臣/外交使者 schema、真实多 Agent JSON 和真 LLM 接入仍待后续；legacy Agent D、阿登数据与测试中的 Guderian/Rundstedt/Eisenhower 仍保留作兼容参考。
 
-下一轮优先继续 v5.4 或 v5.3 小切片：完整 Agent schema 分层 / 漕运深化 / 围城结果显示与胜利结算择一推进，仍必须走 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不得让事件或 Agent 直接改 `GameState`。
+下一轮可在 v5.5 继续做地图视觉 token / 棋子符号 / 粮道线 / 围城计划箭头，或回到 v5.6 外交天命治理；仍必须走 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不得让 UI、事件或 Agent 直接改 `GameState`。
 
 ## 4. md 目录职责
 
@@ -138,7 +139,7 @@ md/
 | v5.2 | 首发剧本数据与 MapEditor 语义 | 已完成首轮 | 默认数据迁到 `jianlong_960_unification`，MapEditor 术语迁到地块/州府/方面/军队/人物 | `v5.2_scenario_mapeditor_record.md` |
 | v5.3 | 古代军制、粮草、围城与经济 | 进行中 | 兵种、生产、补给、粮道、围城最小闭环，资源显示迁为丁口/钱帛/粮草 | `v5.3_rules_siege_grain_record.md` |
 | v5.4 | 唐宋 AI Agent 分层 | 进行中 | 皇帝/朝廷/枢密/节度使/转运使/州府守臣/外交使者分层，保留 directive 管线 | `v5.4_agent_schema_record.md` |
-| v5.5 | 发布级 UI 与地图视觉 | 未开始 | 第一屏地图、HUD、军令、州府、府库、外交、战报、军议可读；移除默认二战文案 | `v5.5_ui_visual_record.md` |
+| v5.5 | 发布级 UI 与地图视觉 | 已完成术语桥首轮 | 第一屏地图、HUD、军令、州府、府库、外交、战报、军议可读；移除默认二战文案 | `v5.5_ui_visual_record.md` |
 | v5.6 | 外交、归附、天命与治理 | 未开始 | 多政权关系、归附、天命/国威、治理和事件闭环 | `v5.6_diplomacy_mandate_record.md` |
 | v5.7 | 教程、剧本包装与可玩闭环 | 未开始 | 开局引导、势力选择、战报、新局/重置，让普通玩家能完成首发剧本 | `v5.7_playable_loop_record.md` |
 | v5.8 | 发布候选硬化 | 未开始 | 玩家可见残留扫描、资源授权、性能和文档口径收口 | `v5.8_release_candidate_audit.md` |
@@ -226,7 +227,7 @@ md/prompt/v5.0-唐宋迁移/
 ├── v5.2_scenario_mapeditor_record.md       # 已创建：唐宋默认剧本数据、MapEditor 资源桥与术语迁移
 ├── v5.3_rules_siege_grain_record.md        # 已创建：生产/府库、兵种战斗、粮道供给、围城城防、修城、解围和招降首轮
 ├── v5.4_agent_schema_record.md
-├── v5.5_ui_visual_record.md
+├── v5.5_ui_visual_record.md              # 已创建：默认唐宋主界面术语桥首轮
 ├── v5.6_diplomacy_mandate_record.md
 ├── v5.7_playable_loop_record.md
 ├── v5.8_release_candidate_audit.md

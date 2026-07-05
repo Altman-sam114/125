@@ -788,21 +788,22 @@ handleBoardTap(coord)
 主界面元素：
 
 - `BoardSceneView`：SpriteKit 地图。
-- `HUDView`：回合、下一步、新游戏。
+- `HUDView`：剧本、回合、当前政权、阶段、胜负、资源、队列、结束回合、新局。
 - `MapDisplayLayer` segmented picker：
-  - `Hex`
-  - `Province`
-  - `Initial`
-  - `Dynamic`
-  - `Front`
-  - `Deploy`
-- `Observer` toggle。
-- `[ INFO ]` 面板，内含：
-  - Unit + Region + Command
-  - Region
-  - Log
-  - AI
+  - legacy 显示：`Hex` / `Province` / `Initial` / `Dynamic` / `Front` / `Deploy`
+  - 唐宋显示：`地块` / `州府` / `初始方面` / `动态方面` / `前线` / `部署`
+- `Observer` toggle；唐宋场景显示为 `观战`。
+- Info / 面板按钮，内含 compact panel：
+  - legacy tabs：`Unit` / `Region` / `General` / `Log` / `Economy` / `Diplomacy` / `AI`
+  - 唐宋 tabs：`军队` / `州府` / `将领` / `战报` / `府库` / `外交` / `军议`
 - `UnitTooltipView`。
+
+v5.5 首轮术语桥只改变唐宋场景的玩家可见读法：
+
+- `GameState.phaseDisplayName` 在唐宋场景下按当前 `PowerProfile.shortName` 显示为“宋行动”“割据军议”等，不再在 HUD/命令状态中显示 `Player Command` / `AI Command`。
+- `CommandPanelView` 在唐宋场景下显示 `军令`、`固守`、`可退`、`整补`、`结束回合` 和对应不可下令原因；底层命令仍是 `Command`。
+- `EventLogView` 在唐宋场景下显示 `战报`，分类显示为战斗、退却、整补、合围、围城、粮道、前线、方面、州府、外交、事件；日志数据结构不变。
+- 这不是完整发布级 UI 收口，尚未做运行时截图、布局烟测、地图美术重绘或正式可访问性验收。
 
 当前开局不会在 `RootGameView` 自动 `.task { runAIIfNeeded() }`。AI 行动由 `advanceOrRunAI()` 或命令提交后的 `runAIIfNeeded()` 触发。
 
@@ -1683,6 +1684,8 @@ dynamicTheater
 frontLine
 deployment
 ```
+
+`MapDisplayLayer.displayName(isTangSongScenario:)` 只提供显示桥，raw case 和存档/图层逻辑不变。唐宋主路径把 `province` 读作州府，把 `initialTheater` / `dynamicTheater` 读作初始方面 / 动态方面。
 
 bucket 来源：
 

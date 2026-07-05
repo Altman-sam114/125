@@ -25,7 +25,7 @@ struct CommandPanelView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Commands")
+            Text(isTangSongScenario ? "军令" : "Commands")
                 .font(.headline)
 
             Text(statusText)
@@ -35,17 +35,17 @@ struct CommandPanelView: View {
 
             HStack(spacing: 8) {
                 Button(action: onHold) {
-                    Label("Hold", systemImage: "shield.fill")
+                    Label(isTangSongScenario ? "固守" : "Hold", systemImage: "shield.fill")
                 }
                 .disabled(!canSetHold)
 
                 Button(action: onAllowRetreat) {
-                    Label("Retreat OK", systemImage: "arrow.uturn.backward.circle")
+                    Label(isTangSongScenario ? "可退" : "Retreat OK", systemImage: "arrow.uturn.backward.circle")
                 }
                 .disabled(!canSetRetreatable)
 
                 Button(action: onResupply) {
-                    Label("Reinforce", systemImage: "cross.circle")
+                    Label(isTangSongScenario ? "整补" : "Reinforce", systemImage: "cross.circle")
                 }
                 .disabled(!canCommandSelectedUnit)
             }
@@ -80,7 +80,7 @@ struct CommandPanelView: View {
             .disabled(!canDemandSurrender)
 
             Button(action: onEndTurn) {
-                Label("End Turn", systemImage: "forward.end")
+                Label(isTangSongScenario ? "结束回合" : "End Turn", systemImage: "forward.end")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
@@ -171,25 +171,25 @@ struct CommandPanelView: View {
 
     private var statusText: String {
         if observerModeEnabled {
-            return "Observer mode: commands disabled."
+            return isTangSongScenario ? "观战模式：军令停用。" : "Observer mode: commands disabled."
         }
 
         guard let selectedDivision else {
-            return "No active unit selected."
+            return isTangSongScenario ? "未选择可行动军队。" : "No active unit selected."
         }
 
         guard selectedDivision.faction == playerFaction else {
-            return "Enemy unit selected. Commands disabled."
+            return isTangSongScenario ? "已选择敌军，军令停用。" : "Enemy unit selected. Commands disabled."
         }
 
         guard activeFaction == playerFaction, commandsAllowed else {
-            return "Commands unavailable during \(phaseDisplayName)."
+            return isTangSongScenario ? "\(phaseDisplayName)不可下令。" : "Commands unavailable during \(phaseDisplayName)."
         }
 
         guard !selectedDivision.hasActed else {
-            return "Selected unit has acted."
+            return isTangSongScenario ? "该军队本回合已行动。" : "Selected unit has acted."
         }
 
-        return "Move/Attack ready."
+        return isTangSongScenario ? "可行军或进攻。" : "Move/Attack ready."
     }
 }

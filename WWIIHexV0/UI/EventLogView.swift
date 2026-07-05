@@ -2,22 +2,24 @@ import SwiftUI
 
 struct EventLogView: View {
     let entries: [GameLogEntry]
+    var isTangSongScenario = false
+    var factionDisplayName: ((Faction) -> String)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Event Log")
+            Text(isTangSongScenario ? "战报" : "Event Log")
                 .font(.headline)
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
                     if recentEntries.isEmpty {
-                        Text("No events yet.")
+                        Text(isTangSongScenario ? "暂无战报。" : "No events yet.")
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(recentEntries) { item in
                             VStack(alignment: .leading, spacing: 2) {
                                 HStack(spacing: 6) {
-                                    Text(item.category.displayName)
+                                    Text(item.category.displayName(isTangSongScenario: isTangSongScenario))
                                         .font(.caption.weight(.semibold))
                                         .foregroundStyle(item.category.foregroundStyle)
                                         .padding(.horizontal, 6)
@@ -55,12 +57,15 @@ struct EventLogView: View {
     }
 
     private func metadata(for entry: GameLogEntry) -> String {
-        let faction = entry.faction?.displayName ?? "System"
-        let phase = entry.phase?.displayName ?? "Setup"
+        let faction = entry.faction.map { factionDisplayName?($0) ?? $0.displayName } ??
+            (isTangSongScenario ? "系统" : "System")
+        let phase = entry.phase?.displayName(isTangSongScenario: isTangSongScenario) ??
+            (isTangSongScenario ? "开局" : "Setup")
+        let turnLabel = isTangSongScenario ? "回合" : "Turn"
         if let relatedRecordId = entry.relatedRecordId {
-            return "Turn \(entry.turn) - \(faction) - \(phase) - \(relatedRecordId)"
+            return "\(turnLabel) \(entry.turn) - \(faction) - \(phase) - \(relatedRecordId)"
         }
-        return "Turn \(entry.turn) - \(faction) - \(phase)"
+        return "\(turnLabel) \(entry.turn) - \(faction) - \(phase)"
     }
 }
 
@@ -125,24 +130,56 @@ private enum LogDisplayCategory {
         let message = entry.message
         let text = message.lowercased()
 
-        if text.contains("retreat") || text.contains("routed") || text.contains("routing") {
+        if text.contains("retreat") || text.contains("routed") || text.contains("routing") ||
+            message.contains("退却") || message.contains("撤退") {
             self = .retreat
-        } else if text.contains("reinforce") || text.contains("replacement") || text.contains("replenish") {
+        } else if text.contains("reinforce") || text.contains("replacement") || text.contains("replenish") ||
+            message.contains("整补") || message.contains("补员") {
             self = .reinforcement
-        } else if text.contains("siege") || text.contains("besiege") || text.contains("围城") {
+        } else if text.contains("siege") || text.contains("besiege") ||
+            message.contains("围城") || message.contains("解围") || message.contains("招降") {
             self = .siege
-        } else if text.contains("encircle") || text.contains("encircled") {
+        } else if text.contains("encircle") || text.contains("encircled") || message.contains("合围") {
             self = .encirclement
-        } else if text.contains("attack") || text.contains("damage") || text.contains("combat") || text.contains("hit") {
+        } else if text.contains("attack") || text.contains("damage") || text.contains("combat") ||
+            text.contains("hit") || message.contains("进攻") || message.contains("攻击") || message.contains("战斗") {
             self = .combat
-        } else if text.contains("supply") || text.contains("supplied") {
+        } else if text.contains("supply") || text.contains("supplied") ||
+            message.contains("粮道") || message.contains("粮草") || message.contains("补给") {
             self = .supply
         } else {
             self = .event
         }
     }
 
-    var displayName: String {
+    func displayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .combat:
+                return "战斗"
+            case .retreat:
+                return "退却"
+            case .reinforcement:
+                return "整补"
+            case .encirclement:
+                return "合围"
+            case .siege:
+                return "围城"
+            case .supply:
+                return "粮道"
+            case .frontChange:
+                return "前线"
+            case .theaterChange:
+                return "方面"
+            case .regionOwnerChange:
+                return "州府"
+            case .diplomacy:
+                return "外交"
+            case .event:
+                return "事件"
+            }
+        }
+
         switch self {
         case .combat:
             return "Combat"
