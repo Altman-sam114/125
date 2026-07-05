@@ -1115,7 +1115,7 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城和解围首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` 和 `SiegeState` 落地，但自动破城、招降、完整漕运、AI 主动围城和唐宋专用胜利规则仍未实现。
+这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围和地图围城 overlay 首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege`、`SiegeState` 和只读 `SiegeOverlayState` 落地，但自动破城、招降、完整漕运、AI 主动围城和唐宋专用胜利规则仍未实现。
 
 v5.3 围城城防、修城与解围首轮：
 
@@ -1152,6 +1152,11 @@ SiegeRecord
   -> pressure
   -> fortification / maxFortification
   -> besiegingDivisionIds
+
+MapDisplayAdapter.siegeOverlays(viewerFaction)
+  -> 从 GameState.siegeState.records 派生只读 SiegeOverlayState
+  -> 只在观察者模式、相关攻守方或可见州府中显示
+  -> BoardScene.drawSiegeOverlays 绘制围城 hex 描边、代表点圆环和“围 pressure / 城防”短标签
 ```
 
 围城压力、城防损耗和解围不会直接改 `HexTile.controller`、`RegionNode.controller`、`hexToTheater` 或 `hexToFrontZone`，也不会删除敌军。若后续要破城，仍必须通过合法移动/占领规则落到 hex。`SiegeRecord` 新增城防字段时使用 `decodeIfPresent` 兼容旧存档；旧围城记录缺少城防时按默认城防和既有 pressure 推导。

@@ -285,7 +285,7 @@ flowchart TD
 
 ## 3.7 v5.3 唐宋围城城防、修城与解围首轮
 
-这张图看 v5.3 的围城最小闭环。围城、修城和解围都是底层 `Command`，仍经 `RuleEngine` 校验执行；围城记录压力与城防，城防归零后才在回合结算压低守军补给，解围只削减 pressure 或移除 SiegeRecord，不直接占领 hex 或改 region controller。
+这张图看 v5.3 的围城最小闭环。围城、修城和解围都是底层 `Command`，仍经 `RuleEngine` 校验执行；围城记录压力与城防，城防归零后才在回合结算压低守军补给，解围只削减 pressure 或移除 SiegeRecord，不直接占领 hex 或改 region controller。地图围城 overlay 只从 `SiegeState` 派生显示，不参与规则写入。
 
 ```mermaid
 flowchart TD
@@ -302,6 +302,7 @@ flowchart TD
     REXEC["执行修城<br/>CommandExecutor.executeRepairFortification<br/>标记军队 hasActed，恢复 fortification"]:::rules
     LEXEC["执行解围<br/>CommandExecutor.executeRelieveSiege<br/>标记军队 hasActed，削减 pressure；归零则解除记录"]:::rules
     STATE["围城记录<br/>GameState.siegeState / SiegeRecord<br/>目标州府、攻守方、压力、城防、围城军队"]:::state
+    DISPLAY["地图围城 overlay<br/>MapDisplayAdapter.siegeOverlays + BoardScene<br/>围城圈、压力、城防标签"]:::ui
     LOG["围城日志<br/>GameLogCategory.siege<br/>EventLog / RegionInspector 可见"]:::ui
     END["结束回合<br/>CommandExecutor.executeEndTurn<br/>补给刷新后处理围城压力"]:::rules
     HOLD{"围城仍有效?<br/>目标仍由原守方控制，围城军队仍在距离内"}:::decision
@@ -319,6 +320,7 @@ flowchart TD
     PASS -->|围城| EXEC --> STATE --> LOG
     PASS -->|修城| REXEC --> STATE
     PASS -->|解围| LEXEC --> STATE
+    STATE --> DISPLAY
     STATE --> END --> HOLD
     HOLD -->|否| LIFT
     HOLD -->|是| PRESS
@@ -327,6 +329,7 @@ flowchart TD
     WALL -->|是| LOW --> HEX
     PRESS -->|否| HEX
     STATE -.守住.-> HEX
+    DISPLAY -.只读.-> HEX
 
     classDef ui fill:#e5e7eb,stroke:#4b5563,color:#111827
     classDef command fill:#fae8ff,stroke:#a21caf,color:#2a0a2f

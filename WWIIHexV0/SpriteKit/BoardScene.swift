@@ -222,6 +222,7 @@ final class BoardScene: SKScene {
         drawRegionOverlays(renderState: renderState, layout: layout)
         drawRoads(map: state.map, layout: layout)
         drawRivers(map: state.map, layout: layout)
+        drawSiegeOverlays(renderState: renderState, layout: layout)
         drawPlannedOperations(renderState: renderState, layout: layout)
         drawUnits(renderState: renderState, layout: layout)
     }
@@ -318,6 +319,90 @@ final class BoardScene: SKScene {
                 addChild(river)
             }
         }
+    }
+
+    private func drawSiegeOverlays(renderState: BoardRenderState, layout: HexLayout) {
+        guard renderState.mapDisplayLayer != .frontLine else {
+            return
+        }
+
+        for overlay in renderState.displayAdapter.siegeOverlays(viewerFaction: renderState.viewerFaction) {
+            drawSiegeRegionOverlay(overlay, layout: layout)
+        }
+    }
+
+    private func drawSiegeRegionOverlay(_ overlay: SiegeOverlayState, layout: HexLayout) {
+        let strokeColor = siegeStrokeColor(for: overlay)
+        let fillColor = strokeColor.withAlphaComponent(0.07)
+        let path = siegeHexPath(layout: layout)
+
+        for hex in overlay.displayHexes {
+            let outline = SKShapeNode(path: path)
+            outline.position = layout.hexToPixel(hex)
+            outline.fillColor = fillColor
+            outline.strokeColor = strokeColor
+            outline.lineWidth = max(2.2, layout.hexSize * 0.075)
+            outline.lineJoin = .round
+            outline.zPosition = 23
+            addChild(outline)
+        }
+
+        let center = layout.hexToPixel(overlay.representativeHex)
+        let ring = SKShapeNode(circleOfRadius: max(12, layout.hexSize * 0.44))
+        ring.position = center
+        ring.fillColor = SKColor.black.withAlphaComponent(0.20)
+        ring.strokeColor = strokeColor
+        ring.lineWidth = max(2.5, layout.hexSize * 0.08)
+        ring.zPosition = 24
+        addChild(ring)
+
+        drawSiegeLabel(overlay.labelText, at: center, color: strokeColor, layout: layout)
+    }
+
+    private func drawSiegeLabel(_ text: String, at center: CGPoint, color: SKColor, layout: HexLayout) {
+        let label = SKLabelNode(text: text)
+        label.fontName = "AvenirNext-DemiBold"
+        label.fontSize = max(10, layout.hexSize * 0.30)
+        label.fontColor = .white
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.zPosition = 26
+
+        let labelSize = CGSize(
+            width: max(78, CGFloat(text.count) * label.fontSize * 0.66),
+            height: max(22, label.fontSize + 10)
+        )
+        let background = SKShapeNode(rectOf: labelSize, cornerRadius: 5)
+        background.fillColor = SKColor.black.withAlphaComponent(0.74)
+        background.strokeColor = color.withAlphaComponent(0.95)
+        background.lineWidth = 1.5
+        background.position = CGPoint(x: center.x, y: center.y + layout.hexSize * 0.72)
+        background.zPosition = 25
+        addChild(background)
+
+        label.position = background.position
+        addChild(label)
+    }
+
+    private func siegeStrokeColor(for overlay: SiegeOverlayState) -> SKColor {
+        if overlay.fortification == 0 {
+            return SKColor(red: 0.92, green: 0.18, blue: 0.12, alpha: 0.94)
+        }
+        if overlay.fortificationRatio <= 0.35 {
+            return SKColor(red: 0.96, green: 0.48, blue: 0.14, alpha: 0.94)
+        }
+        return SKColor(red: 0.93, green: 0.70, blue: 0.22, alpha: 0.94)
+    }
+
+    private func siegeHexPath(layout: HexLayout) -> CGPath {
+        let points = layout.polygonPoints(center: .zero)
+        let path = CGMutablePath()
+        path.move(to: points[0])
+        for point in points.dropFirst() {
+            path.addLine(to: point)
+        }
+        path.closeSubpath()
+        return path
     }
 
     private func drawPlannedOperations(renderState: BoardRenderState, layout: HexLayout) {

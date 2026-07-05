@@ -27,6 +27,26 @@ struct UnitDisplayPlacement: Equatable {
     let stackCount: Int
 }
 
+struct SiegeOverlayState: Equatable {
+    let regionId: RegionId
+    let displayHexes: [HexCoord]
+    let representativeHex: HexCoord
+    let pressure: Int
+    let fortification: Int
+    let maxFortification: Int
+    let attackerFaction: Faction
+    let defenderFaction: Faction
+    let besiegerCount: Int
+
+    var labelText: String {
+        "围\(pressure) 城\(fortification)/\(maxFortification)"
+    }
+
+    var fortificationRatio: Double {
+        Double(fortification) / Double(max(maxFortification, 1))
+    }
+}
+
 extension UnitDisplayPlacement {
     static func == (lhs: UnitDisplayPlacement, rhs: UnitDisplayPlacement) -> Bool {
         lhs.divisionId == rhs.divisionId &&
@@ -183,6 +203,32 @@ struct MapDisplayAdapter {
             return false
         }
         return visibility(for: displayHex, faction: viewerFaction) == .visible
+    }
+
+    func siegeOverlays(viewerFaction: Faction) -> [SiegeOverlayState] {
+        let visibleRegionIds = revealAll ? nil : RegionVisibilityRules().visibleRegions(for: viewerFaction, in: state)
+        return state.siegeState.records.compactMap { record in
+            guard let region = state.map.region(id: record.targetRegionId) else {
+                return nil
+            }
+
+            let involvedFaction = record.attackerFaction == viewerFaction || record.defenderFaction == viewerFaction
+            guard revealAll || involvedFaction || visibleRegionIds?.contains(region.id) == true else {
+                return nil
+            }
+
+            return SiegeOverlayState(
+                regionId: region.id,
+                displayHexes: region.displayHexes,
+                representativeHex: state.map.representativeHex(for: region.id) ?? region.representativeHex,
+                pressure: record.pressure,
+                fortification: record.fortification,
+                maxFortification: record.maxFortification,
+                attackerFaction: record.attackerFaction,
+                defenderFaction: record.defenderFaction,
+                besiegerCount: record.besiegingDivisionIds.count
+            )
+        }
     }
 
     func inspectorState(for regionId: RegionId, selectedHex: HexCoord? = nil, viewerFaction: Faction) -> RegionInspectorState? {

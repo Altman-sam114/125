@@ -1,6 +1,6 @@
 # WWIIHexV0 — 唐宋迁移中的 iOS / macOS AI 战略战棋
 
-> **当前状态：v5.3 唐宋生产/府库显示桥、古代兵种战斗修正、粮道供给、围城城防、修城与解围首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源；生产、府库和经济规则日志在唐宋路径下显示为军备、丁口、钱帛、粮草、禁军/厢军/骑军/攻城器械营；唐宋场景下骑军、弓弩守军、攻城器械营和守军已有最小战斗差异；受控高补给州府/粮仓、道路、山林和跨河成本已影响补给判定；玩家可通过统一 `Command.besiege -> RuleEngine` 对敌方城池/关隘/粮仓州府登记围城压力并损耗城防，守方可通过 `Command.repairFortification -> RuleEngine` 消耗军队行动修城，也可通过 `Command.relieveSiege -> RuleEngine` 让州府内或近旁友军削减围城压力直至解围；城防归零后回合结算才会把被围守军压为缺粮。阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
+> **当前状态：v5.3 唐宋生产/府库显示桥、古代兵种战斗修正、粮道供给、围城城防、修城、解围与地图围城 overlay 首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源；生产、府库和经济规则日志在唐宋路径下显示为军备、丁口、钱帛、粮草、禁军/厢军/骑军/攻城器械营；唐宋场景下骑军、弓弩守军、攻城器械营和守军已有最小战斗差异；受控高补给州府/粮仓、道路、山林和跨河成本已影响补给判定；玩家可通过统一 `Command.besiege -> RuleEngine` 对敌方城池/关隘/粮仓州府登记围城压力并损耗城防，守方可通过 `Command.repairFortification -> RuleEngine` 消耗军队行动修城，也可通过 `Command.relieveSiege -> RuleEngine` 让州府内或近旁友军削减围城压力直至解围；地图从 `SiegeState` 只读绘制围城圈、压力和城防标签；城防归零后回合结算才会把被围守军压为缺粮。阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
 
 ---
 
