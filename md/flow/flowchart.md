@@ -376,13 +376,15 @@ flowchart TD
     WCE["指令执行器<br/>WarCommandExecutor.execute<br/>按战术 profile 选择单位、目标和 fallback"]:::command
     BOTTOM["具体单位命令<br/>Command<br/>attack / move / hold / allowRetreat"]:::command
     RE["统一规则校验执行<br/>RuleEngine<br/>AI 和玩家共用同一套规则"]:::rules
-    RECORD["指令复盘记录<br/>WarDirectiveRecord<br/>记录 tactic、target、结果、拒绝原因"]:::ui
+    RECORD["指令复盘记录<br/>AgentDecisionRecord + WarDirectiveRecord<br/>保存诏令朝议摘要、tactic、target、结果、拒绝原因"]:::ui
+    PANEL["AI 面板<br/>AgentPanelView<br/>显示军议、诏令/朝议、招抚/转运和方面军令"]:::ui
     END["AI 自动结束回合<br/>RuleEngine.execute(.endTurn)<br/>切换 activeFaction / phase"]:::rules
 
     START --> CHECK
     CHECK -->|否| STOP
     CHECK -->|是| REFRESH --> TM --> SUM --> LLM --> DEC --> COMP --> ENV
     ENV --> TACTIC --> WCE --> BOTTOM --> RE --> RECORD --> END
+    RECORD --> PANEL
 
     FALLBACK["Fallback 将军池<br/>TheaterCommanderPool + ZoneCommanderAgent<br/>元帅 JSON 无效或某 zone 无指令时使用"]:::ai
     DEC -.解码失败.-> FALLBACK --> ENV
@@ -501,7 +503,7 @@ flowchart TD
     STATE["运行时状态<br/>GameState + EventLog + WarDirectiveRecord"]:::state
     ROOT["主界面<br/>RootGameView<br/>HUD + Info tabs"]:::ui
     LOG["日志面板<br/>EventLogView<br/>最近 60 条 LogDisplayEntry"]:::ui
-    AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、方面军令、唐宋战术名"]:::ui
+    AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
     BOARD["地图场景<br/>BoardScene<br/>缓存 unit display hex 后排序绘制"]:::ui
     MARSHAL["模拟元帅 / MockAI<br/>MarshalAgent + SimulatedMarshalLLMClient"]:::ai
     ZD["战区指令<br/>ZoneDirective<br/>tactic / focus / intensity"]:::command

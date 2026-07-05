@@ -240,6 +240,7 @@ struct TurnManager {
                 contextSummary: contextSummary,
                 rawJSON: rawJSON,
                 parsedIntent: resolution.theaterEnvelope?.strategicIntent ?? "marshal directives",
+                theaterDirectiveSummary: resolution.theaterEnvelope.map(Self.theaterDirectiveSummary),
                 providerSuffix: "MarshalDirective",
                 additionalDiagnostics: diagnostics + resolution.diagnostics
             )
@@ -278,6 +279,7 @@ struct TurnManager {
         contextSummary: String,
         rawJSON: String,
         parsedIntent: String,
+        theaterDirectiveSummary: TheaterDirectiveExplanationSummary? = nil,
         providerSuffix: String,
         additionalDiagnostics: [String]
     ) -> AgentTurnOutcome {
@@ -372,7 +374,8 @@ struct TurnManager {
                 rawJSON: rawJSON,
                 parsedIntent: parsedIntent,
                 commandResults: commandResults,
-                errors: errors
+                errors: errors,
+                theaterDirectiveSummary: theaterDirectiveSummary
             ),
             directiveRecords: directiveRecords
         )
@@ -435,5 +438,18 @@ struct TurnManager {
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let data = try encoder.encode(envelope)
         return String(decoding: data, as: UTF8.self)
+    }
+
+    static func theaterDirectiveSummary(
+        _ envelope: TheaterDirectiveEnvelope
+    ) -> TheaterDirectiveExplanationSummary {
+        TheaterDirectiveExplanationSummary(
+            strategicIntent: envelope.strategicIntent,
+            mandateIntent: envelope.mandateIntent,
+            courtPolicy: envelope.courtPolicy,
+            pacificationTargets: envelope.pacificationTargets ?? [],
+            supplyPriorities: envelope.supplyPriorities ?? [],
+            summary: envelope.summary
+        )
     }
 }

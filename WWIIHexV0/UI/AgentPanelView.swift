@@ -58,6 +58,55 @@ struct AgentPanelView: View {
                 }
             }
 
+            if isTangSongScenario,
+               let theaterSummary = record?.theaterDirectiveSummary,
+               theaterSummary.hasDisplayableContent {
+                Text("诏令朝议")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    if let mandateIntent = displayText(theaterSummary.mandateIntent) {
+                        LabeledContent("诏令") {
+                            Text(mandateIntent)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+
+                    if let courtPolicy = displayText(theaterSummary.courtPolicy) {
+                        LabeledContent("朝议") {
+                            Text(courtPolicy)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+
+                    if !theaterSummary.pacificationTargets.isEmpty {
+                        LabeledContent("招抚") {
+                            Text(regionList(theaterSummary.pacificationTargets))
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+
+                    if !theaterSummary.supplyPriorities.isEmpty {
+                        LabeledContent("转运") {
+                            Text(regionList(theaterSummary.supplyPriorities))
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+
+                    if let summary = displayText(theaterSummary.summary) {
+                        LabeledContent("摘要") {
+                            Text(summary)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+                }
+                .font(.caption)
+                .padding(6)
+                .background(PlatformStyles.tertiarySystemBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+
             if let record, !record.commandResults.isEmpty {
                 Text(isTangSongScenario ? "军令结果" : "Command Results")
                     .font(.caption)
@@ -185,6 +234,17 @@ struct AgentPanelView: View {
         }
 
         return result.message
+    }
+
+    private func displayText(_ value: String?) -> String? {
+        guard let text = value?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else {
+            return nil
+        }
+        return text
+    }
+
+    private func regionList(_ regionIds: [RegionId]) -> String {
+        regionIds.map(\.rawValue).joined(separator: ", ")
     }
 
     private var rawJSONPlaceholder: String {

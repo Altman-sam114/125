@@ -89,6 +89,54 @@ struct CommandResultSummary: Identifiable, Codable, Equatable {
     }
 }
 
+struct TheaterDirectiveExplanationSummary: Codable, Equatable {
+    let strategicIntent: String?
+    let mandateIntent: String?
+    let courtPolicy: String?
+    let pacificationTargets: [RegionId]
+    let supplyPriorities: [RegionId]
+    let summary: String?
+
+    init(
+        strategicIntent: String? = nil,
+        mandateIntent: String? = nil,
+        courtPolicy: String? = nil,
+        pacificationTargets: [RegionId] = [],
+        supplyPriorities: [RegionId] = [],
+        summary: String? = nil
+    ) {
+        self.strategicIntent = strategicIntent
+        self.mandateIntent = mandateIntent
+        self.courtPolicy = courtPolicy
+        self.pacificationTargets = Self.uniqueRegionIds(pacificationTargets)
+        self.supplyPriorities = Self.uniqueRegionIds(supplyPriorities)
+        self.summary = summary
+    }
+
+    var hasDisplayableContent: Bool {
+        Self.hasText(mandateIntent)
+            || Self.hasText(courtPolicy)
+            || !pacificationTargets.isEmpty
+            || !supplyPriorities.isEmpty
+            || Self.hasText(summary)
+    }
+
+    private static func hasText(_ value: String?) -> Bool {
+        guard let value else { return false }
+        return !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private static func uniqueRegionIds(_ regionIds: [RegionId]) -> [RegionId] {
+        var seen: Set<RegionId> = []
+        var result: [RegionId] = []
+        for regionId in regionIds.sorted(by: { $0.rawValue < $1.rawValue }) where !seen.contains(regionId) {
+            seen.insert(regionId)
+            result.append(regionId)
+        }
+        return result
+    }
+}
+
 struct AgentDecisionRecord: Identifiable, Codable, Equatable {
     let id: String
     let turn: Int
@@ -99,4 +147,29 @@ struct AgentDecisionRecord: Identifiable, Codable, Equatable {
     let parsedIntent: String?
     let commandResults: [CommandResultSummary]
     let errors: [String]
+    let theaterDirectiveSummary: TheaterDirectiveExplanationSummary?
+
+    init(
+        id: String,
+        turn: Int,
+        agentId: String,
+        provider: String,
+        contextSummary: String,
+        rawJSON: String?,
+        parsedIntent: String?,
+        commandResults: [CommandResultSummary],
+        errors: [String],
+        theaterDirectiveSummary: TheaterDirectiveExplanationSummary? = nil
+    ) {
+        self.id = id
+        self.turn = turn
+        self.agentId = agentId
+        self.provider = provider
+        self.contextSummary = contextSummary
+        self.rawJSON = rawJSON
+        self.parsedIntent = parsedIntent
+        self.commandResults = commandResults
+        self.errors = errors
+        self.theaterDirectiveSummary = theaterDirectiveSummary
+    }
 }
