@@ -1013,22 +1013,7 @@ final class AppContainer: ObservableObject {
             return GeneralDispatcher(registry: registry).commanderPool(for: state)
         }
 
-        let agents: [any ZoneCommanderProviding] = state.warDeploymentState.frontZones.values
-            .sorted { $0.id.rawValue < $1.id.rawValue }
-            .map { zone in
-                let style: ZoneCommanderAgentConfig.CommandStyle = zone.faction == .germany ? .aggressive : .balanced
-                let factionName = zone.faction == .germany ? "German" : "Allied"
-                let config = ZoneCommanderAgentConfig(
-                    id: "auto_\(zone.id.rawValue)",
-                    name: "\(factionName) Commander (\(zone.id.rawValue))",
-                    faction: zone.faction,
-                    assignedZoneId: zone.id,
-                    skills: [],
-                    commandStyle: style
-                )
-                return ZoneCommanderAgent(config: config)
-            }
-        return TheaterCommanderPool(commanders: agents)
+        return TheaterCommanderPool.automatic(for: state)
     }
 
     private static func buildMarshalAgent(faction: Faction, state: GameState) -> MarshalAgent {

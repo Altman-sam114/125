@@ -1280,6 +1280,8 @@ TheaterDirective
   rationale
 ```
 
+v5.4 起，`MarshalBattlefieldSummary` 额外携带 `scenarioId`。`MarshalAgentConfig.automatic` 在唐宋默认剧本下把 legacy `.allies` / `.germany` 桥显示为“宋枢密院”与“割据行营”，`SimulatedMarshalLLMClient` 会把 `strategicIntent`、envelope `summary` 和每条 `TheaterDirective.rationale` 写成军议、州府、粮道口径；非唐宋场景仍保持 legacy 英文元帅名和模拟 JSON 文案。该变化只影响上游 JSON 文案和解释字段，不改变 `TheaterDirectiveEnvelope` schema、decoder 校验、compiler 降级或后续规则执行。
+
 `TheaterDirectiveDecoder` 负责从模拟 LLM 文本中提取 fenced JSON，使用 `JSONDecoder` 解码，并校验 schemaVersion、issuerId、turn、faction、zone 存在性、zone 阵营、region id、target theater/front zone 与 tactic/category 一致性。解码或校验失败时，不执行半成品 JSON，`MarshalAgent` fallback 到 `TheaterCommanderPool`。
 
 `TheaterDirectiveCompiler` 把元帅意图降级到现有 `ZoneDirective`：
@@ -1585,7 +1587,7 @@ commanderAgentId
 commandTarget
 ```
 
-直接调用 `WarCommandExecutor.execute` 不会自动写 `WarDirectiveRecord`；记录职责在 `TurnManager.runDirectiveTurn` 外层。v5.4 起，唐宋场景的 `DirectiveType`、`CommandCategory` 和 `TacticName` 通过 `displayName(isTangSongScenario:)` 显示为军议口径，例如进军、固守、骑军突进、合围、弓弩压制和死守城关；底层 raw case、Codable schema 和执行权限不变。
+直接调用 `WarCommandExecutor.execute` 不会自动写 `WarDirectiveRecord`；记录职责在 `TurnManager.runDirectiveTurn` 外层。v5.4 起，唐宋场景的 `DirectiveType`、`CommandCategory` 和 `TacticName` 通过 `displayName(isTangSongScenario:)` 显示为军议口径，例如进军、固守、骑军突进、合围、弓弩压制和死守城关；simulated marshal raw JSON 的 `strategicIntent`、`summary` 与 `rationale` 也改用宋枢密院/割据行营、州府和粮道读法。底层 raw case、Codable schema 和执行权限不变。
 
 ---
 
@@ -1845,7 +1847,7 @@ MapEditorGameResourceBridge.loadDefaultDocument
 
 ## 10. 当前已知边界
 
-- 真 LLM 尚未接入；当前只用 `SimulatedMarshalLLMClient` 模拟 fenced JSON 输出和解码流程。
+- 真 LLM 尚未接入；当前只用 `SimulatedMarshalLLMClient` 模拟 fenced JSON 输出和解码流程，唐宋场景下仅做 deterministic 军议文案分支。
 - 默认 AI 上游已是 `MarshalAgent -> TheaterDirectiveEnvelope -> TheaterDirectiveDecoder -> TheaterDirectiveCompiler`，下游执行必须是 `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
 - 元帅层不能直接输出底层 `Command`，不能直接修改地图、单位、hex controller 或动态战区权威。
 - 统治者层只作为未来方向预留，当前 v0.5 不在主链路调用。

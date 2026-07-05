@@ -820,7 +820,9 @@ struct TheaterCommanderPool {
             .filter { $0.faction == faction && !$0.frontSegments.isEmpty }
             .sorted { $0.id.rawValue < $1.id.rawValue }
             .compactMap { zone -> ZoneDirective? in
-                let commander = commanders[zone.id] ?? ZoneCommanderAgent(config: Self.defaultConfig(for: zone))
+                let commander = commanders[zone.id] ?? ZoneCommanderAgent(
+                    config: Self.defaultConfig(for: zone, isTangSongScenario: state.isTangSongScenario)
+                )
                 return commander.makeDirective(for: zone, in: state)
             }
 
@@ -829,7 +831,11 @@ struct TheaterCommanderPool {
             turn: state.turn,
             directives: directives,
             commanderAgentId: issuerId,
-            theaterContext: contextSummary(for: faction, directives: directives)
+            theaterContext: contextSummary(
+                for: faction,
+                directives: directives,
+                isTangSongScenario: state.isTangSongScenario
+            )
         )
     }
 
@@ -837,16 +843,24 @@ struct TheaterCommanderPool {
         TheaterCommanderPool(
             commanders: state.warDeploymentState.frontZones.values
                 .sorted { $0.id.rawValue < $1.id.rawValue }
-                .map { ZoneCommanderAgent(config: defaultConfig(for: $0)) }
+                .map { ZoneCommanderAgent(config: defaultConfig(for: $0, isTangSongScenario: state.isTangSongScenario)) }
         )
     }
 
-    static func defaultConfig(for zone: FrontZone) -> ZoneCommanderAgentConfig {
+    static func defaultConfig(for zone: FrontZone, isTangSongScenario: Bool = false) -> ZoneCommanderAgentConfig {
         let style: ZoneCommanderAgentConfig.CommandStyle = zone.faction == .germany ? .aggressive : .balanced
-        let factionName = zone.faction == .germany ? "German" : "Allied"
+        let factionName: String
+        if isTangSongScenario {
+            factionName = zone.faction == .germany ? "割据方面主将" : "宋方面主将"
+        } else {
+            factionName = zone.faction == .germany ? "German" : "Allied"
+        }
+        let displayName = isTangSongScenario
+            ? "\(factionName)（\(zone.id.rawValue)）"
+            : "\(factionName) Commander (\(zone.id.rawValue))"
         return ZoneCommanderAgentConfig(
             id: "auto_\(zone.id.rawValue)",
-            name: "\(factionName) Commander (\(zone.id.rawValue))",
+            name: displayName,
             faction: zone.faction,
             assignedZoneId: zone.id,
             skills: [],
@@ -854,7 +868,15 @@ struct TheaterCommanderPool {
         )
     }
 
-    private func contextSummary(for faction: Faction, directives: [ZoneDirective]) -> String {
+    private func contextSummary(
+        for faction: Faction,
+        directives: [ZoneDirective],
+        isTangSongScenario: Bool
+    ) -> String {
+        if isTangSongScenario {
+            let factionName = faction == .germany ? "割据诸政权" : "宋"
+            return "\(factionName)：\(directives.count) 条方面军令。"
+        }
         "\(faction.displayName): \(directives.count) zone directive(s)."
     }
 }
@@ -893,6 +915,29 @@ struct MarshalAgentConfig: Codable, Equatable, Identifiable {
         let zoneIds = state.warDeploymentState.frontZones.values
             .filter { $0.faction == faction }
             .map(\.id)
+        if state.isTangSongScenario {
+            switch faction {
+            case .germany:
+                return MarshalAgentConfig(
+                    id: "marshal_separatist_command",
+                    name: "割据行营",
+                    faction: .germany,
+                    personality: "行营谋主；依托州府城关、粮道与辽援压力，择机牵制宋军。",
+                    strategicBias: .offensive,
+                    theaterGroupZoneIds: zoneIds
+                )
+            case .allies:
+                return MarshalAgentConfig(
+                    id: "marshal_song_privy_council",
+                    name: "宋枢密院",
+                    faction: .allies,
+                    personality: "枢密院议军；重视粮道、州府控制与集中优势方面进军。",
+                    strategicBias: .balanced,
+                    theaterGroupZoneIds: zoneIds
+                )
+            }
+        }
+
         switch faction {
         case .germany:
             return MarshalAgentConfig(
@@ -918,6 +963,7 @@ struct MarshalAgentConfig: Codable, Equatable, Identifiable {
 
 struct MarshalBattlefieldSummary: Codable, Equatable {
     let schemaVersion: Int
+    let scenarioId: String
     let turn: Int
     let faction: Faction
     let marshalId: String
@@ -991,6 +1037,7 @@ struct MarshalBattlefieldSummarizer {
 
         return MarshalBattlefieldSummary(
             schemaVersion: 5,
+            scenarioId: state.scenarioId,
             turn: state.turn,
             faction: faction,
             marshalId: config.id,
@@ -1201,6 +1248,7 @@ struct SimulatedMarshalLLMClient: MarshalLLMClient {
         summary: MarshalBattlefieldSummary,
         config: MarshalAgentConfig
     ) throws -> String {
+        let isTangSongScenario = isTangSongScenario(summary)
         let directives = summary.fronts.map { front -> TheaterDirective in
             let shouldAttack = shouldAttack(front: front, bias: config.strategicBias)
             if shouldAttack {
@@ -1221,7 +1269,11 @@ struct SimulatedMarshalLLMClient: MarshalLLMClient {
                     intensity: front.strengthRatio >= 1.8 ? .allOut : .limitedCounter,
                     maxCommittedUnits: front.frontUnitCount + max(0, front.depthUnitCount / 2),
                     exploitDepth: front.strengthRatio >= 1.8 ? 1 : 0,
-                    rationale: "Simulated marshal JSON: \(tactic.rawValue) selected from strength ratio \(String(format: "%.2f", front.strengthRatio))."
+                    rationale: offensiveRationale(
+                        tactic: tactic,
+                        front: front,
+                        isTangSongScenario: isTangSongScenario
+                    )
                 )
             }
 
@@ -1237,7 +1289,11 @@ struct SimulatedMarshalLLMClient: MarshalLLMClient {
                 supportRegionIds: front.enemyRegionIds,
                 reserveBias: max(1, min(3, front.depthUnitCount)),
                 maxCommittedUnits: front.frontUnitCount,
-                rationale: "Simulated marshal JSON: \(tactic.rawValue) selected for front status \(front.status)."
+                rationale: defensiveRationale(
+                    tactic: tactic,
+                    front: front,
+                    isTangSongScenario: isTangSongScenario
+                )
             )
         }
 
@@ -1245,9 +1301,17 @@ struct SimulatedMarshalLLMClient: MarshalLLMClient {
             issuerId: summary.marshalId,
             turn: summary.turn,
             faction: summary.faction,
-            strategicIntent: strategicIntent(summary: summary, bias: config.strategicBias),
+            strategicIntent: strategicIntent(
+                summary: summary,
+                bias: config.strategicBias,
+                isTangSongScenario: isTangSongScenario
+            ),
             directives: directives,
-            summary: "\(summary.marshalName): \(directives.count) theater directive(s) from summarized fronts."
+            summary: envelopeSummary(
+                summary: summary,
+                directiveCount: directives.count,
+                isTangSongScenario: isTangSongScenario
+            )
         )
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -1325,10 +1389,94 @@ struct SimulatedMarshalLLMClient: MarshalLLMClient {
         return .holdPosition
     }
 
+    private func isTangSongScenario(_ summary: MarshalBattlefieldSummary) -> Bool {
+        summary.scenarioId == "jianlong_960_unification"
+    }
+
+    private func offensiveRationale(
+        tactic: TacticName,
+        front: MarshalFrontSummary,
+        isTangSongScenario: Bool
+    ) -> String {
+        let ratio = String(format: "%.2f", front.strengthRatio)
+        guard isTangSongScenario else {
+            return "Simulated marshal JSON: \(tactic.rawValue) selected from strength ratio \(ratio)."
+        }
+
+        let focus = front.enemyRegionIds.first?.rawValue ?? "敌前州府"
+        let supplyClause = front.supplyWarningCount > 0 ? "粮道吃紧，须限兵推进" : "粮道尚可支应"
+        return "军议：\(tactic.displayName(isTangSongScenario: true))，兵势比 \(ratio)，先取 \(focus)，\(supplyClause)。"
+    }
+
+    private func defensiveRationale(
+        tactic: TacticName,
+        front: MarshalFrontSummary,
+        isTangSongScenario: Bool
+    ) -> String {
+        guard isTangSongScenario else {
+            return "Simulated marshal JSON: \(tactic.rawValue) selected for front status \(front.status)."
+        }
+
+        let reserves = max(0, front.depthUnitCount)
+        return "军议：\(tactic.displayName(isTangSongScenario: true))，\(frontStatusDisplay(front.status))；保州府与粮道，预留 \(reserves) 支后备。"
+    }
+
+    private func frontStatusDisplay(_ status: String) -> String {
+        switch status {
+        case "supply_warning":
+            return "粮道吃紧"
+        case "under_pressure":
+            return "方面受压"
+        case "advantage":
+            return "兵势占优"
+        case "outnumbered":
+            return "敌众我寡"
+        case "stable_contact":
+            return "前线相持"
+        default:
+            return status
+        }
+    }
+
+    private func tangSongSupplyClause(_ summary: MarshalBattlefieldSummary) -> String {
+        switch summary.overallSupply {
+        case "encircled_risk":
+            return "先救被围断粮处"
+        case "strained":
+            return "粮道吃紧处留守"
+        default:
+            return "粮草可支处择机用兵"
+        }
+    }
+
+    private func envelopeSummary(
+        summary: MarshalBattlefieldSummary,
+        directiveCount: Int,
+        isTangSongScenario: Bool
+    ) -> String {
+        if isTangSongScenario {
+            return "\(summary.marshalName)：生成 \(directiveCount) 条方面军令。"
+        }
+        return "\(summary.marshalName): \(directiveCount) theater directive(s) from summarized fronts."
+    }
+
     private func strategicIntent(
         summary: MarshalBattlefieldSummary,
-        bias: MarshalAgentConfig.StrategicBias
+        bias: MarshalAgentConfig.StrategicBias,
+        isTangSongScenario: Bool
     ) -> String {
+        if isTangSongScenario {
+            let supplyClause = tangSongSupplyClause(summary)
+            switch bias {
+            case .offensive:
+                return "枢密院令：集中优势方面进军，\(supplyClause)。"
+            case .balanced:
+                return "枢密院令：稳固州府与粮道，择敌弱处进军，\(supplyClause)。"
+            case .defensive:
+                return "枢密院令：以守城保粮为先，只在优势明显时进军，\(supplyClause)。"
+            }
+        }
+
         switch bias {
         case .offensive:
             return "Concentrate active fronts with favorable odds; hold strained fronts with minimal reserves."
