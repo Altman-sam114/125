@@ -7,6 +7,8 @@ enum VictoryReason: String, Codable, Equatable {
     case bastogneHeldByAlliesAtFinalTurn
     case germanUnitsDestroyed
     case germanArmorUnsupplied
+    case tangSongUnificationByMandate
+    case tangSongSeparatistSurvival
 }
 
 struct VictoryState: Codable, Equatable {

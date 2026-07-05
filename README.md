@@ -4,13 +4,17 @@
 
 > **v5.6c 状态补充：** AI 元帅 `pacificationTargets` 现在可由 `TurnManager` 在 `.endTurn` 前尝试生成辅助 `Command.proposeSubmission`，仍通过 `RuleEngine -> CommandValidator -> CommandExecutor` 决定成败，并把成功、规则拒绝或跳过写入 `AgentDecisionRecord.commandResults`。该桥不改 `TheaterDirectiveCompiler` 或 `WarCommandExecutor`，不交割控制权、不转换部队、不改全局战争关系。
 
+> **v5.6d 状态补充：** 唐宋场景下 `VictoryRules` 已有首轮天命/国威胜利评价桥：宋控制开封、洛阳、太原、金陵、成都、杭州中的至少四处且天命不低于 60 时胜利；割据阵营若到最大回合仍控制太原、金陵、成都中的至少两处且天命不低于 35，则判定割据生存。阿登 legacy 胜利逻辑保持原样。
+
 > **v5.5 前序小切片：** 默认唐宋主界面的 HUD、图层、观战、面板 tabs、军令按钮和战报分类已加入唐宋场景显示桥，显示为回合、政权、阶段、胜负、地块、州府、方面、军队、将领、战报、府库、军议、固守、整补、围城和粮道等读法；SpriteKit 地图新增唐宋视觉 token，唐宋场景使用墨绿底、绢帛/青绿/石青/铜/朱印色系、赭石道路、石青河流、朱印/青绿势力色，棋子从 NATO 符号切为内置军旗轮廓和禁/骑/弩/械/守/军兵种字标，并从 `SupplyRules.supplyRouteSummary` 只读绘制友方可见军队到最近可见粮源的抽象粮道虚线。该切片只改玩家可见术语与视觉读法，不改变底层 raw case、命令、日志结构、补给判定或规则执行；完整截图、布局验收、外部美术资产和授权清单仍待后续。
 
 > **v5.6a 前序小切片：** 新增外交归附与天命规则合同首轮。`DiplomacyState` 支持 `tributary`、`submitting`、`negotiating` 并保存 `PacificationRecord`；`GameState` 新增向后兼容的 `MandateState`；唐宋默认剧本初始化宋/割据天命分数；`Command.proposeSubmission -> CommandValidator -> CommandExecutor -> RuleEngine` 可在满足国家关系、天命、目标州府、低 warSupport 或围城压力条件后，把目标国家关系写为 `submitting`、记录招抚并增加天命。该切片不交割 hex/region 控制权，不转换部队，不改变 `.allies/.germany` 全局战争关系，也不把 AI `pacificationTargets` 自动执行为归附命令。
 
 > **v5.6b 前序小切片：** 玩家命令面板新增“招抚”按钮，只提交 `Command.proposeSubmission -> RuleEngine`，目标优先取当前选中外国首府，若未选中合法首府则自动扫描当前可招抚首府；开局理论上可对低 warSupport 的吴越发起归附提议。外交面板只读显示天命分数和最近归附记录，并在唐宋场景下显示为外交、天命、诸国、集团、关系和归附记录。该切片仍不交割 hex/region 控制权、不转换部队、不改全局战争关系，也不让天命影响胜利。
 
-> **v5.6c 最新小切片：** AI 元帅 envelope 的 `pacificationTargets` 进入安全编译桥：`TurnManager` 在战争 `ZoneDirective` 执行后、`.endTurn` 前，把合法首府候选尝试生成辅助 `Command.proposeSubmission`，仍通过 `RuleEngine -> CommandValidator -> CommandExecutor` 决定成败，并把成功、规则拒绝或跳过记录进 `AgentDecisionRecord.commandResults`。每个 AI 回合最多 1 个成功招抚提议；该切片不改 `TheaterDirectiveCompiler`、不让 `WarCommandExecutor` 承担外交语义、不交割控制权、不转换部队、不改 `TurnOrderState.relations`，也不让天命影响胜利。
+> **v5.6c 前序小切片：** AI 元帅 envelope 的 `pacificationTargets` 进入安全编译桥：`TurnManager` 在战争 `ZoneDirective` 执行后、`.endTurn` 前，把合法首府候选尝试生成辅助 `Command.proposeSubmission`，仍通过 `RuleEngine -> CommandValidator -> CommandExecutor` 决定成败，并把成功、规则拒绝或跳过记录进 `AgentDecisionRecord.commandResults`。每个 AI 回合最多 1 个成功招抚提议；该切片不改 `TheaterDirectiveCompiler`、不让 `WarCommandExecutor` 承担外交语义、不交割控制权、不转换部队、不改 `TurnOrderState.relations`。
+
+> **v5.6d 最新小切片：** `VictoryRules.updateVictoryState` 在唐宋场景先走唐宋专用判定，不再套用 Bastogne / St. Vith legacy 条件；宋统一胜利同时要求关键州府控制与天命阈值，割据生存胜利同时要求核心都城保有与割据天命阈值。该切片不新增治理政策、不改变 `MandateState` 调整来源、不改 UI 胜利面板结构，也不做归附后的控制权或部队交割。
 
 ---
 
@@ -142,7 +146,7 @@ WWIIHexV0/
 `MarshalBattlefieldSummarizer` 把 `GameState` 降维为元帅摘要，只包含 front zone、strength ratio、补给警告、目标和事件，不把全量 hex 网格喂给模型；v5.4 起摘要携带 `scenarioId`、首都 region、被威胁首都、围城 region、粮道优先 region 和招抚候选 region，让 simulated marshal 在唐宋场景用宋枢密院/割据行营、州府、粮道和军议口径生成 strategicIntent、summary、rationale 与可选解释字段。`GameAgent.defaultCommander` 让唐宋默认 `TurnManager` issuer 与 `MarshalAgentConfig` 对齐为宋枢密院或割据行营；`TurnManager` 会把这些解释字段复制进 `AgentDecisionRecord.theaterDirectiveSummary`，让 AI 面板结构化展示诏令、朝议、招抚和转运。v5.6c 起 `TurnManager` 还会把唐宋 `pacificationTargets` 在 `.endTurn` 前尝试生成辅助 `Command.proposeSubmission`，仍经 `RuleEngine` 校验执行。`SimulatedMarshalLLMClient` 生成 fenced JSON 形式的 `TheaterDirectiveEnvelope`；`TheaterDirectiveDecoder` 提取并校验 JSON；`TheaterDirectiveCompiler` 把元帅意图编译成现有 `ZoneDirective`。v0.7 后 `TheaterDirective` 可携带 `convergenceRegionId` / `coordinatedZoneIds` 支持钳形会师意图；解码或编译失败时 fallback 到 `TheaterCommanderPool`，不执行半成品 LLM 输出。
 
 **后续 Ruler / Diplomacy 边界：**
-统治者 agent 不在 v0.5 当前主链路中。v5.6a 已先建立 `MandateState`、`PacificationRecord` 和 `Command.proposeSubmission` 规则合同，v5.6b 补玩家“招抚”入口与外交面板只读展示，v5.6c 补 AI `pacificationTargets -> Command.proposeSubmission` 安全桥；国家级外交关系仍是 `DiplomacyState` 投影，战术敌我仍由 legacy `Faction.germany` / `Faction.allies` 与 `TurnOrderState.relations` 决定。后续如要加入统治者 agent、单国 tactical neutral、完整纳土或治理政策，仍必须保持底层战争规则收口到 `Command` / `ZoneDirective`、`WarCommandExecutor` 和 `RuleEngine`。
+统治者 agent 不在 v0.5 当前主链路中。v5.6a 已先建立 `MandateState`、`PacificationRecord` 和 `Command.proposeSubmission` 规则合同，v5.6b 补玩家“招抚”入口与外交面板只读展示，v5.6c 补 AI `pacificationTargets -> Command.proposeSubmission` 安全桥，v5.6d 让唐宋 `VictoryRules` 同时读取关键州府控制与天命阈值；国家级外交关系仍是 `DiplomacyState` 投影，战术敌我仍由 legacy `Faction.germany` / `Faction.allies` 与 `TurnOrderState.relations` 决定。后续如要加入统治者 agent、单国 tactical neutral、完整纳土或治理政策，仍必须保持底层战争规则收口到 `Command` / `ZoneDirective`、`WarCommandExecutor` 和 `RuleEngine`。
 
 ---
 

@@ -87,7 +87,7 @@ playerCommandState
 - `warDeploymentState` 从动态战区/前线/单位位置派生，供 AI 调度单位。
 - `economyState` 保存 manpower、industry、supplies、生产队列、上回合收入/维护费/补员消耗，不直接改变战术占领权。
 - `diplomacyState` 保存国家、集团、国家间关系、统治者记录和 v5.6a 的 `PacificationRecord`；它是外交/AI/UI 的国家级投影，不替代战术敌我判断。
-- `mandateState` 保存 faction 级天命/合法性分数；v5.6a 只由 `Command.proposeSubmission` 调整，不参与胜利结算。
+- `mandateState` 保存 faction 级天命/合法性分数；v5.6a 起由 `Command.proposeSubmission` 调整，v5.6d 起参与唐宋专用胜利评价。
 - `siegeState` 保存围城压力、城防和围城军队记录。
 - `turnOrderState` 保存 `PowerId` / `PowerProfile` / `PowerRelation` / power order。旧状态缺失时由 `TurnOrderState.legacy(...)` 从 `activeFaction`、`phase` 和当前 turn 派生。
 - `eventLog` 给 UI 和调试看。
@@ -376,6 +376,13 @@ v5.6c 当前已落地：
 - 辅助命令仍通过 `commandHandler.execute -> RuleEngine -> CommandValidator -> CommandExecutor` 决定成败；成功、规则拒绝或跳过都会写入 `AgentDecisionRecord.commandResults`。
 - 每个 AI 回合最多 1 个成功招抚提议，避免单轮把多个国家关系同时推进。
 
+v5.6d 当前已落地：
+
+- `VictoryReason` 新增唐宋专用 `tangSongUnificationByMandate` 和 `tangSongSeparatistSurvival`。
+- `VictoryRules.updateVictoryState` 在唐宋场景先进入 `updateTangSongVictoryState`，不会套用 Bastogne / St. Vith legacy 胜利条件。
+- 宋胜利要求控制开封、洛阳、太原、金陵、成都、杭州中的至少四处，且宋天命不低于 60。
+- 割据生存要求到最大回合仍控制太原、金陵、成都中的至少两处，且割据天命不低于 35。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -401,12 +408,12 @@ TheaterDirectiveEnvelope.pacificationTargets
   -> DiplomacyState + MandateState on success
 ```
 
-v5.6a/v5.6b/v5.6c 当前没有做：
+v5.6a/v5.6b/v5.6c/v5.6d 当前没有做：
 
 - 不改变 `TurnOrderState.relations` 的 `.allies/.germany` 全局战争关系。
 - 不交割 hex / region controller，不转换或删除部队，不刷新 theater/front/deploy。
 - 不让 `TheaterDirectiveEnvelope.pacificationTargets` 自动纳土、停战或改变控制权；v5.6c 只尝试生成经规则校验的归附提议命令。
-- 不让天命影响 `VictoryRules`。
+- 不实现完整治理政策、民心、治安、税粮、叛乱或归附后的纳土交割；v5.6d 只让天命参与胜利评价，不改变天命调整来源。
 
 后续若加入统治者层，必须满足这些边界：
 
@@ -1186,7 +1193,7 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地；v5.6a 另行新增 `Command.proposeSubmission` 作为外交归附规则合同首轮，但它只写外交记录和天命，不交割地图控制权。自动破城、完整外交归附、完整漕运和唐宋专用胜利规则仍未实现。
+这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地；v5.6a 另行新增 `Command.proposeSubmission` 作为外交归附规则合同首轮，但它只写外交记录和天命，不交割地图控制权；v5.6d 已新增唐宋专用胜利评价桥。自动破城、完整外交归附、完整漕运和数据驱动胜利规则仍未实现。
 
 v5.3 围城城防、修城、解围与招降首轮：
 
@@ -1267,6 +1274,10 @@ EconomyRules.resolveFactionTurn(for: activeFaction)
 SupplyRules.advanceRetreats
 SupplyRules.applyEncirclementAttrition
 VictoryRules.updateVictoryState
+  -> 唐宋场景：读取关键 objective 控制方与 MandateState
+     -> 宋控 6 个关键州府中的 4 个且天命 >= 60，则宋统一胜利
+     -> 最大回合时割据仍控太原/金陵/成都中的 2 个且天命 >= 35，则割据生存
+  -> 非唐宋场景：沿用 Bastogne / St. Vith / 单位损失 / 装甲断补 legacy 条件
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId
