@@ -438,6 +438,44 @@ struct DiplomacyState: Codable, Equatable {
         return hostileCountryIds.sorted { $0.rawValue < $1.rawValue }
     }
 
+    func projectedPowerRelationStatus(between lhs: Faction, and rhs: Faction) -> PowerRelationStatus? {
+        guard lhs != rhs else {
+            return .allied
+        }
+
+        let lhsCountryIds = Set(countries(for: lhs).map(\.id))
+        let rhsCountryIds = Set(countries(for: rhs).map(\.id))
+        guard !lhsCountryIds.isEmpty, !rhsCountryIds.isEmpty else {
+            return nil
+        }
+
+        let crossFactionStatuses = relations.compactMap { relation -> DiplomaticStatus? in
+            let lhsToRhs = lhsCountryIds.contains(relation.firstCountryId) &&
+                rhsCountryIds.contains(relation.secondCountryId)
+            let rhsToLhs = rhsCountryIds.contains(relation.firstCountryId) &&
+                lhsCountryIds.contains(relation.secondCountryId)
+            return lhsToRhs || rhsToLhs ? relation.status : nil
+        }
+
+        guard !crossFactionStatuses.isEmpty else {
+            return nil
+        }
+
+        if crossFactionStatuses.contains(where: \.isHostile) {
+            return .atWar
+        }
+        if crossFactionStatuses.allSatisfy({ $0 == .tributary || $0 == .allied || $0 == .coBelligerent }) {
+            return crossFactionStatuses.contains(.tributary) ? .tributary : .allied
+        }
+        if crossFactionStatuses.contains(.submitting) {
+            return .submitting
+        }
+        if crossFactionStatuses.contains(.negotiating) {
+            return .negotiating
+        }
+        return .neutral
+    }
+
     func summary(for faction: Faction) -> String {
         let countryNames = countries(for: faction).map(\.name).joined(separator: ", ")
         let hostileCount = hostileCountryIds(to: faction).count

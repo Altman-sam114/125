@@ -75,6 +75,7 @@ flowchart TD
     GS --> ECO
     GS --> DIP
     GS --> TURN
+    DIP -->|v5.6e 保守投影| TURN
 
     TURN --> PLAYER
     TURN --> AI

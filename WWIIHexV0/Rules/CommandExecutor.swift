@@ -350,6 +350,11 @@ struct CommandExecutor {
             tension: max(0, previousTension - 25),
             turn: state.turn
         )
+        syncProjectedPowerRelation(
+            between: actorCountry.faction,
+            and: targetCountry.faction,
+            in: &state
+        )
 
         let record = PacificationRecord(
             id: pacificationRecordId(
@@ -391,6 +396,25 @@ struct CommandExecutor {
             category: .diplomacy,
             relatedRecordId: record.id
         )
+    }
+
+    private func syncProjectedPowerRelation(
+        between lhs: Faction,
+        and rhs: Faction,
+        in state: inout GameState
+    ) {
+        guard let projectedStatus = state.diplomacyState.projectedPowerRelationStatus(between: lhs, and: rhs) else {
+            return
+        }
+
+        var turnOrderState = state.effectiveTurnOrderState
+        turnOrderState.setRelationStatus(
+            between: lhs.powerId,
+            and: rhs.powerId,
+            status: projectedStatus,
+            turn: state.turn
+        )
+        state.turnOrderState = turnOrderState
     }
 
     private func executeHold(divisionId: String, in state: inout GameState) {

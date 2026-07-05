@@ -383,6 +383,13 @@ v5.6d 当前已落地：
 - 宋胜利要求控制开封、洛阳、太原、金陵、成都、杭州中的至少四处，且宋天命不低于 60。
 - 割据生存要求到最大回合仍控制太原、金陵、成都中的至少两处，且割据天命不低于 35。
 
+v5.6e 当前已落地：
+
+- `DiplomacyState.projectedPowerRelationStatus(between:and:)` 会把国家级外交关系聚合为 legacy power 级 `PowerRelationStatus`。
+- 聚合规则保守：只要两个 legacy faction 之间仍有任一国家关系为 `hostile` / `atWar`，投影结果就是 `.atWar`。
+- `TurnOrderState.setRelationStatus` 提供排序稳定的关系 upsert。
+- `CommandExecutor.executeProposeSubmission` 成功写入国家关系后，会同步投影到 `TurnOrderState.relations`，供 `WarRelationRules.canTarget` 继续读取。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -406,11 +413,12 @@ TheaterDirectiveEnvelope.pacificationTargets
   -> CommandValidator / CommandExecutor
   -> AgentDecisionRecord.commandResults
   -> DiplomacyState + MandateState on success
+  -> v5.6e conservative projection to TurnOrderState.relations
 ```
 
-v5.6a/v5.6b/v5.6c/v5.6d 当前没有做：
+v5.6a/v5.6b/v5.6c/v5.6d/v5.6e 当前没有做：
 
-- 不改变 `TurnOrderState.relations` 的 `.allies/.germany` 全局战争关系。
+- 不实现吴越、南唐、后蜀、北汉等单国 tactical neutral；v5.6e 只同步 legacy `.allies/.germany` power 级保守投影。
 - 不交割 hex / region controller，不转换或删除部队，不刷新 theater/front/deploy。
 - 不让 `TheaterDirectiveEnvelope.pacificationTargets` 自动纳土、停战或改变控制权；v5.6c 只尝试生成经规则校验的归附提议命令。
 - 不实现完整治理政策、民心、治安、税粮、叛乱或归附后的纳土交割；v5.6d 只让天命参与胜利评价，不改变天命调整来源。
@@ -422,7 +430,7 @@ v5.6a/v5.6b/v5.6c/v5.6d 当前没有做：
 - 统治者不得直接修改 `HexTile.controller`、`Division.coord`、`regionToTheater`、`hexToTheater` 或 `hexToFrontZone`。
 - 若需要审计记录，必须单独设计数据 schema，并在 `md/flow/*`、`README.md`、`update_log.md` 中同步说明。
 
-当前唐宋地图、部队和战术敌我仍通过 legacy 二元 `Faction` 桥运行。`DiplomacyState` 是国家级投影，`TurnOrderState.relations` 是当前 `WarRelationRules` 读取的 power 级战争合法性来源。吴越等国家虽然能在外交记录中进入 `submitting`，但在完成更细粒度 `PowerId` / `CountryId` 归属迁移前，不能宣称其已经获得 tactical neutral 或独立战争关系。
+当前唐宋地图、部队和战术敌我仍通过 legacy 二元 `Faction` 桥运行。`DiplomacyState` 是国家级投影，`TurnOrderState.relations` 是当前 `WarRelationRules` 读取的 power 级战争合法性来源。v5.6e 会把国家关系保守聚合回 power 关系，避免外交记录和战术敌我长期分叉；但吴越等国家虽然能在外交记录中进入 `submitting`，在完成更细粒度 `PowerId` / `CountryId` 归属迁移前，仍不能宣称其已经获得 tactical neutral 或独立战争关系。
 
 ### 1.8 EconomyState / EconomyRules
 

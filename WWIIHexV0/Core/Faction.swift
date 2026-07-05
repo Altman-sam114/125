@@ -263,6 +263,33 @@ struct TurnOrderState: Codable, Equatable {
         }
         return profile.controlMode == .ai ? .germanAI : .alliedPlayer
     }
+
+    @discardableResult
+    mutating func setRelationStatus(
+        between lhs: PowerId,
+        and rhs: PowerId,
+        status: PowerRelationStatus,
+        turn: Int
+    ) -> Bool {
+        let updatedRelation = PowerRelation(
+            firstPowerId: lhs,
+            secondPowerId: rhs,
+            status: status,
+            sinceTurn: turn
+        )
+
+        if let index = relations.firstIndex(where: { $0.id == updatedRelation.id }) {
+            guard relations[index].status != status else {
+                return false
+            }
+            relations[index].status = status
+            relations[index].sinceTurn = max(1, turn)
+        } else {
+            relations.append(updatedRelation)
+        }
+        relations.sort { $0.id < $1.id }
+        return true
+    }
 }
 
 struct WarRelationRules {
