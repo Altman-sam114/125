@@ -345,6 +345,13 @@ struct WarCommandExecutor {
                 state: nextState
             ) {
                 command = .attack(attackerId: division.id, targetId: target.id)
+            } else if let siegeCommand = siegeCommand(
+                for: division,
+                targetRegionId: targetRegionId,
+                zone: zone,
+                state: nextState
+            ) {
+                command = siegeCommand
             } else if profile.attackOnly {
                 command = .hold(divisionId: division.id)
             } else if let destination = tacticalDestination(
@@ -921,6 +928,48 @@ struct WarCommandExecutor {
             }
         }
         return false
+    }
+
+    private func siegeCommand(
+        for division: Division,
+        targetRegionId: RegionId,
+        zone: FrontZone,
+        state: GameState
+    ) -> Command? {
+        guard let region = state.map.region(id: targetRegionId),
+              region.isPassable,
+              isSiegeTarget(region, in: state),
+              WarRelationRules().canTarget(attacker: zone.faction, target: region.controller, in: state),
+              division.faction == zone.faction,
+              division.canAct,
+              canInvest(division, targetRegion: region) else {
+            return nil
+        }
+
+        return .besiege(attackerId: division.id, targetRegionId: targetRegionId)
+    }
+
+    private func isSiegeTarget(_ region: RegionNode, in state: GameState) -> Bool {
+        if region.city != nil || region.terrain == .fortress || region.supplyValue >= 4 {
+            return true
+        }
+
+        return region.displayHexes.contains { coord in
+            guard let tile = state.map.tile(at: coord) else {
+                return false
+            }
+            return tile.baseTerrain == .city ||
+                tile.baseTerrain == .fortress ||
+                tile.cityName != nil ||
+                tile.fortressName != nil
+        }
+    }
+
+    private func canInvest(_ division: Division, targetRegion region: RegionNode) -> Bool {
+        let maxDistance = max(1, division.range)
+        return region.displayHexes.contains { targetHex in
+            division.coord.distance(to: targetHex) <= maxDistance
+        }
     }
 
     private func hasEnemyPresence(
