@@ -877,7 +877,7 @@ struct TheaterCommanderPool {
             let factionName = faction == .germany ? "割据诸政权" : "宋"
             return "\(factionName)：\(directives.count) 条方面军令。"
         }
-        "\(faction.displayName): \(directives.count) zone directive(s)."
+        return "\(faction.displayName): \(directives.count) zone directive(s)."
     }
 }
 
