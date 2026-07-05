@@ -975,6 +975,11 @@ struct MarshalBattlefieldSummary: Codable, Equatable {
     let friendlyEncircledCount: Int
     let objectivesHeld: [String]
     let objectivesLost: [String]
+    let capitalRegionIds: [RegionId]
+    let threatenedCapitalRegionIds: [RegionId]
+    let siegeRegionIds: [RegionId]
+    let supplyPriorityRegionIds: [RegionId]
+    let pacificationCandidateRegionIds: [RegionId]
     let fronts: [MarshalFrontSummary]
     let recentEvents: [String]
 }
@@ -1049,6 +1054,15 @@ struct MarshalBattlefieldSummarizer {
             friendlyEncircledCount: encircledCount,
             objectivesHeld: heldObjectives,
             objectivesLost: lostObjectives,
+            capitalRegionIds: capitalRegionIds(for: faction, state: state),
+            threatenedCapitalRegionIds: threatenedCapitalRegionIds(for: faction, state: state),
+            siegeRegionIds: siegeRegionIds(for: faction, state: state),
+            supplyPriorityRegionIds: supplyPriorityRegionIds(
+                fronts: frontSummaries,
+                faction: faction,
+                state: state
+            ),
+            pacificationCandidateRegionIds: pacificationCandidateRegionIds(for: faction, state: state),
             fronts: frontSummaries,
             recentEvents: recentEvents
         )
@@ -1225,6 +1239,92 @@ struct MarshalBattlefieldSummarizer {
         return "stable_contact"
     }
 
+    private func capitalRegionIds(for faction: Faction, state: GameState) -> [RegionId] {
+        guard state.isTangSongScenario else {
+            return []
+        }
+        return stableUnique(
+            state.diplomacyState.countries
+                .filter { $0.faction == faction }
+                .compactMap { $0.capitalRegionId }
+        )
+    }
+
+    private func threatenedCapitalRegionIds(for faction: Faction, state: GameState) -> [RegionId] {
+        capitalRegionIds(for: faction, state: state).filter { regionId in
+            guard let region = state.map.region(id: regionId) else {
+                return false
+            }
+            if region.controller != faction {
+                return true
+            }
+            return state.siegeState.record(for: regionId) != nil
+        }
+    }
+
+    private func siegeRegionIds(for faction: Faction, state: GameState) -> [RegionId] {
+        guard state.isTangSongScenario else {
+            return []
+        }
+        return state.siegeState.records
+            .filter { $0.attackerFaction == faction || $0.defenderFaction == faction }
+            .map(\.targetRegionId)
+            .sorted { $0.rawValue < $1.rawValue }
+    }
+
+    private func supplyPriorityRegionIds(
+        fronts: [MarshalFrontSummary],
+        faction: Faction,
+        state: GameState
+    ) -> [RegionId] {
+        guard state.isTangSongScenario else {
+            return []
+        }
+        let strainedFronts = fronts.filter {
+            $0.supplyWarningCount > 0 || $0.status == "supply_warning" || $0.status == "under_pressure"
+        }
+        let frontRegions = strainedFronts.flatMap { Array($0.frontRegionIds.prefix(2)) }
+        let besiegedRegions = state.siegeState.records
+            .filter { $0.attackerFaction == faction || $0.defenderFaction == faction }
+            .map(\.targetRegionId)
+        return stableUnique(frontRegions + besiegedRegions)
+    }
+
+    private func pacificationCandidateRegionIds(for faction: Faction, state: GameState) -> [RegionId] {
+        guard state.isTangSongScenario else {
+            return []
+        }
+        let ownCountryIds = state.diplomacyState.countries
+            .filter { $0.faction == faction }
+            .map(\.id)
+
+        let candidates = state.diplomacyState.countries.filter { country in
+            guard country.faction != faction,
+                  country.capitalRegionId != nil else {
+                return false
+            }
+            if country.warSupport <= 60 {
+                return true
+            }
+            return hasNegotiableRelation(countryId: country.id, ownCountryIds: ownCountryIds, state: state)
+        }
+        return stableUnique(candidates.compactMap { $0.capitalRegionId })
+    }
+
+    private func hasNegotiableRelation(
+        countryId: CountryId,
+        ownCountryIds: [CountryId],
+        state: GameState
+    ) -> Bool {
+        state.diplomacyState.relations.contains { relation in
+            guard relation.contains(countryId),
+                  ownCountryIds.contains(where: { relation.contains($0) }) else {
+                return false
+            }
+            return relation.status == .neutral || relation.status == .hostile
+        }
+    }
+
     private func stableUnique<T: Hashable>(_ values: [T]) -> [T] {
         var seen: Set<T> = []
         var result: [T] = []
@@ -1304,6 +1404,23 @@ struct SimulatedMarshalLLMClient: MarshalLLMClient {
             strategicIntent: strategicIntent(
                 summary: summary,
                 bias: config.strategicBias,
+                isTangSongScenario: isTangSongScenario
+            ),
+            mandateIntent: mandateIntent(
+                summary: summary,
+                isTangSongScenario: isTangSongScenario
+            ),
+            courtPolicy: courtPolicy(
+                summary: summary,
+                bias: config.strategicBias,
+                isTangSongScenario: isTangSongScenario
+            ),
+            pacificationTargets: pacificationTargets(
+                summary: summary,
+                isTangSongScenario: isTangSongScenario
+            ),
+            supplyPriorities: supplyPriorities(
+                summary: summary,
                 isTangSongScenario: isTangSongScenario
             ),
             directives: directives,
@@ -1458,6 +1575,69 @@ struct SimulatedMarshalLLMClient: MarshalLLMClient {
             return "\(summary.marshalName)：生成 \(directiveCount) 条方面军令。"
         }
         return "\(summary.marshalName): \(directiveCount) theater directive(s) from summarized fronts."
+    }
+
+    private func mandateIntent(
+        summary: MarshalBattlefieldSummary,
+        isTangSongScenario: Bool
+    ) -> String? {
+        guard isTangSongScenario else {
+            return nil
+        }
+        if !summary.threatenedCapitalRegionIds.isEmpty {
+            return "护持国本：先稳都城与要害州府，再议进取。"
+        }
+        if !summary.pacificationCandidateRegionIds.isEmpty {
+            return "修明正朔：以兵威与招抚并行，促成南方州府归附。"
+        }
+        if summary.objectivesLost.count > summary.objectivesHeld.count {
+            return "恢复州府：优先夺回失控要地，稳住天命声望。"
+        }
+        return "山河一统：以州府控制、粮道安全和方面推进巩固正朔。"
+    }
+
+    private func courtPolicy(
+        summary: MarshalBattlefieldSummary,
+        bias: MarshalAgentConfig.StrategicBias,
+        isTangSongScenario: Bool
+    ) -> String? {
+        guard isTangSongScenario else {
+            return nil
+        }
+        if summary.friendlyEncircledCount > 0 {
+            return "中书枢密合议：先解围保粮，暂缓远攻。"
+        }
+        if !summary.supplyPriorityRegionIds.isEmpty {
+            return "中书枢密合议：转运粮草优先支应受压方面。"
+        }
+        switch bias {
+        case .offensive:
+            return "中书枢密合议：许优势方面进军，仍需守住州府粮道。"
+        case .balanced:
+            return "中书枢密合议：攻守并用，择弱进军，稳住府库与民心。"
+        case .defensive:
+            return "中书枢密合议：先固守城关，伺机反击。"
+        }
+    }
+
+    private func pacificationTargets(
+        summary: MarshalBattlefieldSummary,
+        isTangSongScenario: Bool
+    ) -> [RegionId]? {
+        guard isTangSongScenario else {
+            return nil
+        }
+        return summary.pacificationCandidateRegionIds
+    }
+
+    private func supplyPriorities(
+        summary: MarshalBattlefieldSummary,
+        isTangSongScenario: Bool
+    ) -> [RegionId]? {
+        guard isTangSongScenario else {
+            return nil
+        }
+        return summary.supplyPriorityRegionIds
     }
 
     private func strategicIntent(

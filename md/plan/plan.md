@@ -75,7 +75,7 @@ displayName: 建隆元年：陈桥兵变与山河一统
 - v5.3 已加入唐宋场景专用古代兵种战斗修正首轮：骑军平原/道路进攻、弓弩守军守城、攻城器械攻城/野战差异和守军城防差异已经由 `CombatRules` 处理。
 - v5.3 已加入粮道供给与读法首轮：唐宋场景下受控高 `supplyValue` 州府/粮仓可作为补给源，道路、城关、山林、跨河成本会影响 `SupplyRules` 补给判定；单位详情可读粮道通断、路径成本/上限、最近粮源和安全退路数。
 - v5.3 已加入围城城防、修城、解围、招降、地图围城 overlay 与 AI 围城/招降指令首轮：`Command.besiege` 经 `RuleEngine` 登记 `SiegeState` 并损耗 `fortification`；`Command.repairFortification` 让守方军队在被围州府内消耗行动修城；`Command.relieveSiege` 让守方或友军削减围城 pressure，pressure 降到 0 时解除围城记录；`Command.demandSurrender` 让围城方在 pressure 达标、城防归零且守军不再 `supplied` 后，经规则层移除纳降守军、交割目标州府可占 hex 并刷新 Region / Theater / FrontLine / WarDeployment；`ZoneDirective.attack -> WarCommandExecutor` 可在目标敌控州府满足纳降条件时生成底层 `Command.demandSurrender`，否则在目标可围且无可攻击单位时生成底层 `Command.besiege`；Region 面板可读围城压力和城防，地图可从 `SiegeState` 只读绘制围城圈、压力和城防标签。
-- v5.4 已完成 AI 军议显示桥与 simulated marshal 文案唐宋化首轮：`DirectiveType`、`CommandCategory`、`TacticName` 提供唐宋场景感知显示名；`AgentPanelView` 在唐宋场景下显示军议、方面军令、进军、骑军突进、合围、弓弩压制和死守城关等读法；`MarshalBattlefieldSummary.scenarioId` 让 `SimulatedMarshalLLMClient` 在唐宋场景下输出宋枢密院/割据行营、州府、粮道口径的 strategicIntent、summary 和 rationale；底层 raw case、Codable schema 和 `ZoneDirective -> WarCommandExecutor -> RuleEngine` 权限边界不变。
+- v5.4 已完成 AI 军议显示桥、simulated marshal 文案唐宋化与解释字段首轮：`DirectiveType`、`CommandCategory`、`TacticName` 提供唐宋场景感知显示名；`AgentPanelView` 在唐宋场景下显示军议、方面军令、进军、骑军突进、合围、弓弩压制和死守城关等读法；`MarshalBattlefieldSummary` 携带 `scenarioId`、首都、围城、粮道优先和招抚候选 region 摘要，让 `SimulatedMarshalLLMClient` 在唐宋场景下输出宋枢密院/割据行营、州府、粮道口径的 strategicIntent、summary、rationale，以及 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 可选解释字段；底层 raw case 和 `ZoneDirective -> WarCommandExecutor -> RuleEngine` 权限边界不变。
 
 仍未完成的关键项：
 

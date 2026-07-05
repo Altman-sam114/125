@@ -390,6 +390,10 @@ struct TheaterDirectiveEnvelope: Codable, Equatable {
     let turn: Int
     let faction: Faction
     let strategicIntent: String
+    let mandateIntent: String?
+    let courtPolicy: String?
+    let pacificationTargets: [RegionId]?
+    let supplyPriorities: [RegionId]?
     let directives: [TheaterDirective]
     let summary: String?
 
@@ -399,6 +403,10 @@ struct TheaterDirectiveEnvelope: Codable, Equatable {
         turn: Int,
         faction: Faction,
         strategicIntent: String,
+        mandateIntent: String? = nil,
+        courtPolicy: String? = nil,
+        pacificationTargets: [RegionId]? = nil,
+        supplyPriorities: [RegionId]? = nil,
         directives: [TheaterDirective],
         summary: String? = nil
     ) {
@@ -407,6 +415,10 @@ struct TheaterDirectiveEnvelope: Codable, Equatable {
         self.turn = turn
         self.faction = faction
         self.strategicIntent = strategicIntent
+        self.mandateIntent = mandateIntent
+        self.courtPolicy = courtPolicy
+        self.pacificationTargets = pacificationTargets.map(Self.uniqueRegionIds)
+        self.supplyPriorities = supplyPriorities.map(Self.uniqueRegionIds)
         self.directives = directives.sorted {
             if $0.priority == $1.priority {
                 return $0.zoneId.rawValue < $1.zoneId.rawValue
@@ -414,6 +426,16 @@ struct TheaterDirectiveEnvelope: Codable, Equatable {
             return $0.priority > $1.priority
         }
         self.summary = summary
+    }
+
+    private static func uniqueRegionIds(_ regionIds: [RegionId]) -> [RegionId] {
+        var seen: Set<RegionId> = []
+        var result: [RegionId] = []
+        for regionId in regionIds.sorted(by: { $0.rawValue < $1.rawValue }) where !seen.contains(regionId) {
+            seen.insert(regionId)
+            result.append(regionId)
+        }
+        return result
     }
 }
 
@@ -621,6 +643,11 @@ struct TheaterDirectiveDecoder {
     }
 
     private func validate(_ envelope: TheaterDirectiveEnvelope, state: GameState) throws {
+        let envelopeRegionIds = (envelope.pacificationTargets ?? []) + (envelope.supplyPriorities ?? [])
+        for regionId in envelopeRegionIds where state.map.region(id: regionId) == nil {
+            throw TheaterDirectiveDecoderError.missingRegion(regionId)
+        }
+
         for directive in envelope.directives {
             guard let zone = state.warDeploymentState.frontZones[directive.zoneId] else {
                 throw TheaterDirectiveDecoderError.missingZone(directive.zoneId)

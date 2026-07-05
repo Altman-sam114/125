@@ -1266,6 +1266,8 @@ TheaterDirectiveEnvelope
   schemaVersion = 5
   issuerId / turn / faction
   strategicIntent
+  mandateIntent / courtPolicy
+  pacificationTargets / supplyPriorities
   directives: [TheaterDirective]
 
 TheaterDirective
@@ -1280,7 +1282,16 @@ TheaterDirective
   rationale
 ```
 
-v5.4 起，`MarshalBattlefieldSummary` 额外携带 `scenarioId`。`MarshalAgentConfig.automatic` 在唐宋默认剧本下把 legacy `.allies` / `.germany` 桥显示为“宋枢密院”与“割据行营”，`SimulatedMarshalLLMClient` 会把 `strategicIntent`、envelope `summary` 和每条 `TheaterDirective.rationale` 写成军议、州府、粮道口径；非唐宋场景仍保持 legacy 英文元帅名和模拟 JSON 文案。该变化只影响上游 JSON 文案和解释字段，不改变 `TheaterDirectiveEnvelope` schema、decoder 校验、compiler 降级或后续规则执行。
+v5.4 起，`MarshalBattlefieldSummary` 额外携带 `scenarioId`、首都 region、被威胁首都、围城 region、粮道优先 region 和招抚候选 region。`MarshalAgentConfig.automatic` 在唐宋默认剧本下把 legacy `.allies` / `.germany` 桥显示为“宋枢密院”与“割据行营”，`SimulatedMarshalLLMClient` 会把 `strategicIntent`、envelope `summary` 和每条 `TheaterDirective.rationale` 写成军议、州府、粮道口径，并填充可选解释字段：
+
+```text
+mandateIntent        # 天命/正朔意图，只解释统一、护都、恢复州府或招抚方向
+courtPolicy          # 中书枢密方针，只解释粮道、府库、攻守节奏
+pacificationTargets  # 招抚候选州府 region id，不直接改变外交或控制权
+supplyPriorities     # 粮道优先支应 region id，不直接改变补给状态
+```
+
+这些字段进入 `TheaterDirectiveDecoder` 的 region 存在性校验；`TheaterDirectiveCompiler` 和 `WarCommandExecutor` 当前不读取它们。非唐宋场景仍保持 legacy 英文元帅名和模拟 JSON 文案。该变化只影响上游 JSON 解释字段，不改变 decoder 主校验、compiler 降级或后续规则执行。
 
 `TheaterDirectiveDecoder` 负责从模拟 LLM 文本中提取 fenced JSON，使用 `JSONDecoder` 解码，并校验 schemaVersion、issuerId、turn、faction、zone 存在性、zone 阵营、region id、target theater/front zone 与 tactic/category 一致性。解码或校验失败时，不执行半成品 JSON，`MarshalAgent` fallback 到 `TheaterCommanderPool`。
 
