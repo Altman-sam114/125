@@ -3,6 +3,7 @@ import Foundation
 enum Command: Codable, Equatable {
     case move(divisionId: String, destination: HexCoord)
     case attack(attackerId: String, targetId: String)
+    case besiege(attackerId: String, targetRegionId: RegionId)
     case hold(divisionId: String)
     case allowRetreat(divisionId: String)
     case resupply(divisionId: String)
@@ -28,6 +29,8 @@ enum Command: Codable, Equatable {
                 return "行军(\(divisionId) -> \(destination.q),\(destination.r))"
             case .attack(let attackerId, let targetId):
                 return "进攻(\(attackerId) -> \(targetId))"
+            case .besiege(let attackerId, let targetRegionId):
+                return "围城(\(attackerId) -> \(targetRegionId.rawValue))"
             case .hold(let divisionId):
                 return "固守(\(divisionId))"
             case .allowRetreat(let divisionId):
@@ -46,6 +49,8 @@ enum Command: Codable, Equatable {
             return "Move(\(divisionId) -> \(destination.q),\(destination.r))"
         case .attack(let attackerId, let targetId):
             return "Attack(\(attackerId) -> \(targetId))"
+        case .besiege(let attackerId, let targetRegionId):
+            return "Besiege(\(attackerId) -> \(targetRegionId.rawValue))"
         case .hold(let divisionId):
             return "Hold(\(divisionId))"
         case .allowRetreat(let divisionId):
@@ -62,6 +67,7 @@ enum Command: Codable, Equatable {
     var actingDivisionId: String? {
         switch self {
         case .move(let divisionId, _),
+             .besiege(let divisionId, _),
              .hold(let divisionId),
              .allowRetreat(let divisionId),
              .resupply(let divisionId):
@@ -81,6 +87,7 @@ enum Command: Codable, Equatable {
             return true
         case .move,
              .attack,
+             .besiege,
              .hold,
              .allowRetreat,
              .queueProduction,

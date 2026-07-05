@@ -6,7 +6,9 @@ struct CommandExecutor {
     private let supplyRules = SupplyRules()
     private let occupationRules = OccupationRules()
     private let strategicSynchronizer = StrategicStateSynchronizer()
+    private let warRelationRules = WarRelationRules()
     private let retreatLossThreshold = 0.35
+    private let siegeSupplyPressureThreshold = 10
 
     func execute(_ command: Command, in state: GameState) -> GameState {
         var nextState = state
@@ -16,6 +18,8 @@ struct CommandExecutor {
             executeMove(divisionId: divisionId, destination: destination, in: &nextState)
         case .attack(let attackerId, let targetId):
             executeAttack(attackerId: attackerId, targetId: targetId, in: &nextState)
+        case .besiege(let attackerId, let targetRegionId):
+            executeBesiege(attackerId: attackerId, targetRegionId: targetRegionId, in: &nextState)
         case .hold(let divisionId):
             executeHold(divisionId: divisionId, in: &nextState)
         case .allowRetreat(let divisionId):
@@ -126,6 +130,38 @@ struct CommandExecutor {
         }
     }
 
+    private func executeBesiege(attackerId: String, targetRegionId: RegionId, in state: inout GameState) {
+        guard let attackerIndex = state.divisionIndex(id: attackerId),
+              let region = state.map.region(id: targetRegionId) else {
+            return
+        }
+
+        let attacker = state.divisions[attackerIndex]
+        let pressureGain = siegePressure(for: attacker, targetRegion: region, in: state)
+        let record = state.siegeState.startOrUpdate(
+            targetRegionId: targetRegionId,
+            attackerFaction: attacker.faction,
+            defenderFaction: region.controller,
+            turn: state.turn,
+            pressureGain: pressureGain,
+            besiegingDivisionId: attacker.id
+        )
+
+        if let targetHex = closestHex(in: region, to: attacker.coord),
+           let direction = attacker.coord.direction(to: targetHex) {
+            state.divisions[attackerIndex].facing = direction
+        }
+        state.divisions[attackerIndex].hasActed = true
+
+        let targetName = siegeTargetName(region)
+        state.appendEvent(
+            state.isTangSongScenario
+                ? "\(attacker.name)围困\(targetName)：围城压力 +\(pressureGain)，当前 \(record.pressure)。"
+                : "\(attacker.name) besieged \(targetName): pressure +\(pressureGain), now \(record.pressure).",
+            category: .siege
+        )
+    }
+
     private func executeHold(divisionId: String, in state: inout GameState) {
         guard let index = state.divisionIndex(id: divisionId) else {
             return
@@ -173,6 +209,7 @@ struct CommandExecutor {
         let economyRules = EconomyRules()
 
         supplyRules.updateSupplyStates(in: &state)
+        applySiegeSupplyPressure(in: &state)
         economyRules.resolveFactionTurn(for: state.activeFaction, in: &state)
         supplyRules.advanceRetreats(in: &state)
         supplyRules.applyEncirclementAttrition(in: &state)
@@ -341,6 +378,135 @@ struct CommandExecutor {
         }
 
         return false
+    }
+
+    private func applySiegeSupplyPressure(in state: inout GameState) {
+        guard !state.siegeState.records.isEmpty else {
+            return
+        }
+
+        var retainedRecords: [SiegeRecord] = []
+        for record in state.siegeState.records.sorted(by: { $0.targetRegionId.rawValue < $1.targetRegionId.rawValue }) {
+            guard let region = state.map.region(id: record.targetRegionId),
+                  region.controller == record.defenderFaction else {
+                state.appendEvent(
+                    state.isTangSongScenario
+                        ? "围城解除：\(record.targetRegionId.rawValue) 已不由原守方控制。"
+                        : "Siege lifted: \(record.targetRegionId.rawValue) is no longer controlled by the original defender.",
+                    category: .siege
+                )
+                continue
+            }
+
+            let maintainers = record.besiegingDivisionIds
+                .compactMap { state.division(id: $0) }
+                .filter { canMaintainSiege($0, record: record, region: region, in: state) }
+                .sorted { $0.id < $1.id }
+
+            guard !maintainers.isEmpty else {
+                state.appendEvent(
+                    state.isTangSongScenario
+                        ? "围城解除：\(siegeTargetName(region)) 外无有效围困军队。"
+                        : "Siege lifted: no effective besieging unit remains around \(siegeTargetName(region)).",
+                    category: .siege
+                )
+                continue
+            }
+
+            var updatedRecord = record
+            updatedRecord.lastUpdatedTurn = state.turn
+            updatedRecord.besiegingDivisionIds = maintainers.map(\.id)
+
+            if updatedRecord.pressure >= siegeSupplyPressureThreshold {
+                let affectedCount = applySiegeLowSupply(record: updatedRecord, in: &state)
+                if affectedCount > 0 {
+                    state.appendEvent(
+                        state.isTangSongScenario
+                            ? "\(siegeTargetName(region))被围断粮：\(affectedCount) 支守军降为缺粮。"
+                            : "\(siegeTargetName(region)) is under siege supply pressure: \(affectedCount) defender(s) degraded to low supply.",
+                        category: .siege
+                    )
+                }
+            }
+
+            retainedRecords.append(updatedRecord)
+        }
+
+        state.siegeState = SiegeState(records: retainedRecords)
+    }
+
+    private func applySiegeLowSupply(record: SiegeRecord, in state: inout GameState) -> Int {
+        var affectedCount = 0
+        for index in state.divisions.indices {
+            let division = state.divisions[index]
+            guard division.faction == record.defenderFaction,
+                  division.location(in: state.map) == record.targetRegionId,
+                  division.supplyState == .supplied else {
+                continue
+            }
+
+            state.divisions[index].supplyState = .lowSupply
+            affectedCount += 1
+        }
+        return affectedCount
+    }
+
+    private func canMaintainSiege(
+        _ division: Division,
+        record: SiegeRecord,
+        region: RegionNode,
+        in state: GameState
+    ) -> Bool {
+        guard division.faction == record.attackerFaction,
+              !division.isDestroyed,
+              warRelationRules.canTarget(attacker: division.faction, target: record.defenderFaction, in: state) else {
+            return false
+        }
+
+        let maximumDistance = max(1, division.range)
+        return region.displayHexes.contains { division.coord.distance(to: $0) <= maximumDistance }
+    }
+
+    private func siegePressure(for attacker: Division, targetRegion region: RegionNode, in state: GameState) -> Int {
+        var pressure = max(2, attacker.attack / 2)
+        let roles = attacker.tangSongCombatRoles
+
+        if state.isTangSongScenario {
+            if roles.contains(.siegeEngine) {
+                pressure += 4
+            }
+            if roles.contains(.imperialGuard) {
+                pressure += 1
+            }
+            if attacker.supplyState == .lowSupply {
+                pressure -= 1
+            } else if attacker.supplyState == .encircled {
+                pressure -= 2
+            }
+            if region.terrain == .fortress {
+                pressure = max(2, pressure - 1)
+            }
+        }
+
+        return max(1, pressure)
+    }
+
+    private func closestHex(in region: RegionNode, to origin: HexCoord) -> HexCoord? {
+        region.displayHexes.min {
+            let lhsDistance = origin.distance(to: $0)
+            let rhsDistance = origin.distance(to: $1)
+            if lhsDistance != rhsDistance {
+                return lhsDistance < rhsDistance
+            }
+            if $0.q != $1.q {
+                return $0.q < $1.q
+            }
+            return $0.r < $1.r
+        }
+    }
+
+    private func siegeTargetName(_ region: RegionNode) -> String {
+        region.city?.name ?? region.name
     }
 
     private func combatLog(

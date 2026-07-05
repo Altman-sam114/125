@@ -9,9 +9,12 @@ struct CommandPanelView: View {
     let commandsAllowed: Bool
     let phaseDisplayName: String
     let lastCommandMessage: String?
+    let isTangSongScenario: Bool
+    let besiegeTargetName: String?
     let onHold: () -> Void
     let onAllowRetreat: () -> Void
     let onResupply: () -> Void
+    let onBesiege: () -> Void
     let onEndTurn: () -> Void
 
     var body: some View {
@@ -41,6 +44,13 @@ struct CommandPanelView: View {
                 .disabled(!canCommandSelectedUnit)
             }
             .buttonStyle(.bordered)
+
+            Button(action: onBesiege) {
+                Label(besiegeButtonTitle, systemImage: "scope")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .disabled(!canBesiege)
 
             Button(action: onEndTurn) {
                 Label("End Turn", systemImage: "forward.end")
@@ -80,6 +90,17 @@ struct CommandPanelView: View {
 
     private var canSetRetreatable: Bool {
         canCommandSelectedUnit && selectedDivision?.retreatMode != .retreatable
+    }
+
+    private var canBesiege: Bool {
+        canCommandSelectedUnit && besiegeTargetName != nil
+    }
+
+    private var besiegeButtonTitle: String {
+        guard let besiegeTargetName else {
+            return isTangSongScenario ? "围城" : "Besiege"
+        }
+        return isTangSongScenario ? "围城 \(besiegeTargetName)" : "Besiege \(besiegeTargetName)"
     }
 
     private var statusText: String {

@@ -198,6 +198,20 @@ final class AppContainer: ObservableObject {
         submit(.resupply(divisionId: division.id))
     }
 
+    func besiegeSelected() {
+        guard let division = selectedActionDivision else {
+            appendInteractionEvent("Besiege rejected: no active allied unit selected.")
+            return
+        }
+
+        guard let target = selectedBesiegeTarget else {
+            appendInteractionEvent("Besiege rejected: no adjacent enemy city, pass, or granary selected.")
+            return
+        }
+
+        submit(.besiege(attackerId: division.id, targetRegionId: target.id))
+    }
+
     func orderSelectedGeneralHoldLine() {
         guard let zone = selectedGeneralCommandZone else {
             appendInteractionEvent("General order rejected: no allied front zone selected.")
@@ -385,6 +399,10 @@ final class AppContainer: ObservableObject {
         selectedActionDivision != nil
     }
 
+    var selectedBesiegeTargetName: String? {
+        selectedBesiegeTarget.map(siegeTargetName)
+    }
+
     private var selectedActionDivision: Division? {
         guard !observerModeEnabled else {
             return nil
@@ -397,6 +415,30 @@ final class AppContainer: ObservableObject {
         }
 
         return division
+    }
+
+    private var selectedBesiegeTarget: RegionNode? {
+        guard let division = selectedActionDivision else {
+            return nil
+        }
+
+        if let selectedRegionId,
+           let selectedRegion = gameState.map.region(id: selectedRegionId),
+           canBesiege(division: division, targetRegion: selectedRegion) {
+            return selectedRegion
+        }
+
+        return gameState.map.regions.values
+            .filter { canBesiege(division: division, targetRegion: $0) }
+            .sorted { lhs, rhs in
+                let lhsDistance = siegeDistance(from: division, to: lhs)
+                let rhsDistance = siegeDistance(from: division, to: rhs)
+                if lhsDistance != rhsDistance {
+                    return lhsDistance < rhsDistance
+                }
+                return lhs.id.rawValue < rhs.id.rawValue
+            }
+            .first
     }
 
     private var canIssuePlayerDirective: Bool {
@@ -412,6 +454,42 @@ final class AppContainer: ObservableObject {
             return nil
         }
         return (region, targetZone)
+    }
+
+    private func canBesiege(division: Division, targetRegion region: RegionNode) -> Bool {
+        guard region.isPassable,
+              isSiegeTarget(region),
+              WarRelationRules().canTarget(attacker: division.faction, target: region.controller, in: gameState) else {
+            return false
+        }
+
+        return siegeDistance(from: division, to: region) <= max(1, division.range)
+    }
+
+    private func isSiegeTarget(_ region: RegionNode) -> Bool {
+        if region.city != nil || region.terrain == .fortress || region.supplyValue >= 4 {
+            return true
+        }
+
+        return region.displayHexes.contains { coord in
+            guard let tile = gameState.map.tile(at: coord) else {
+                return false
+            }
+            return tile.baseTerrain == .city ||
+                tile.baseTerrain == .fortress ||
+                tile.cityName != nil ||
+                tile.fortressName != nil
+        }
+    }
+
+    private func siegeDistance(from division: Division, to region: RegionNode) -> Int {
+        region.displayHexes
+            .map { division.coord.distance(to: $0) }
+            .min() ?? Int.max
+    }
+
+    private func siegeTargetName(_ region: RegionNode) -> String {
+        region.city?.name ?? region.name
     }
 
     private var mapDisplayAdapter: MapDisplayAdapter {

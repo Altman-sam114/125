@@ -78,6 +78,7 @@ private enum LogDisplayCategory {
     case retreat
     case reinforcement
     case encirclement
+    case siege
     case supply
     case frontChange
     case theaterChange
@@ -98,6 +99,9 @@ private enum LogDisplayCategory {
             return
         case .encircle:
             self = .encirclement
+            return
+        case .siege:
+            self = .siege
             return
         case .supply:
             self = .supply
@@ -125,6 +129,8 @@ private enum LogDisplayCategory {
             self = .retreat
         } else if text.contains("reinforce") || text.contains("replacement") || text.contains("replenish") {
             self = .reinforcement
+        } else if text.contains("siege") || text.contains("besiege") || text.contains("围城") {
+            self = .siege
         } else if text.contains("encircle") || text.contains("encircled") {
             self = .encirclement
         } else if text.contains("attack") || text.contains("damage") || text.contains("combat") || text.contains("hit") {
@@ -146,6 +152,8 @@ private enum LogDisplayCategory {
             return "Reinforce"
         case .encirclement:
             return "Encircle"
+        case .siege:
+            return "Siege"
         case .supply:
             return "Supply"
         case .frontChange:
@@ -171,6 +179,8 @@ private enum LogDisplayCategory {
             return .green
         case .encirclement:
             return .purple
+        case .siege:
+            return .brown
         case .supply:
             return .teal
         case .frontChange:

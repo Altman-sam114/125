@@ -10,6 +10,8 @@ struct CommandValidator {
             return validateMove(divisionId: divisionId, destination: destination, in: state)
         case .attack(let attackerId, let targetId):
             return validateAttack(attackerId: attackerId, targetId: targetId, in: state)
+        case .besiege(let attackerId, let targetRegionId):
+            return validateBesiege(attackerId: attackerId, targetRegionId: targetRegionId, in: state)
         case .hold(let divisionId):
             return validateUnitCommand(divisionId: divisionId, in: state)
         case .allowRetreat(let divisionId):
@@ -70,6 +72,33 @@ struct CommandValidator {
         }
 
         guard attacker.coord.distance(to: target.coord) <= attacker.range else {
+            return .invalid(.targetOutOfRange)
+        }
+
+        return .valid
+    }
+
+    private func validateBesiege(attackerId: String, targetRegionId: RegionId, in state: GameState) -> CommandValidation {
+        let unitValidation = validateUnitCommand(divisionId: attackerId, in: state)
+        guard unitValidation.isValid,
+              let attacker = state.division(id: attackerId) else {
+            return unitValidation
+        }
+
+        guard let region = state.map.region(id: targetRegionId) else {
+            return .invalid(.regionNotFound)
+        }
+
+        guard region.isPassable,
+              isSiegeTarget(region, in: state) else {
+            return .invalid(.invalidSiegeTarget)
+        }
+
+        guard warRelationRules.canTarget(attacker: attacker.faction, target: region.controller, in: state) else {
+            return .invalid(.invalidTargetFaction)
+        }
+
+        guard canInvest(attacker, targetRegion: region) else {
             return .invalid(.targetOutOfRange)
         }
 
@@ -141,5 +170,28 @@ struct CommandValidator {
             activeFaction: state.activeFaction,
             phase: state.phase
         )
+    }
+
+    private func isSiegeTarget(_ region: RegionNode, in state: GameState) -> Bool {
+        if region.city != nil || region.terrain == .fortress || region.supplyValue >= 4 {
+            return true
+        }
+
+        return region.displayHexes.contains { coord in
+            guard let tile = state.map.tile(at: coord) else {
+                return false
+            }
+            return tile.baseTerrain == .city ||
+                tile.baseTerrain == .fortress ||
+                tile.cityName != nil ||
+                tile.fortressName != nil
+        }
+    }
+
+    private func canInvest(_ attacker: Division, targetRegion region: RegionNode) -> Bool {
+        let maxDistance = max(1, attacker.range)
+        return region.displayHexes.contains { targetHex in
+            attacker.coord.distance(to: targetHex) <= maxDistance
+        }
     }
 }

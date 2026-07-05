@@ -157,9 +157,12 @@ struct RootGameView: View {
                         ),
                         phaseDisplayName: container.gameState.phaseDisplayName,
                         lastCommandMessage: container.lastCommandMessage,
+                        isTangSongScenario: container.gameState.isTangSongScenario,
+                        besiegeTargetName: container.selectedBesiegeTargetName,
                         onHold: container.holdSelected,
                         onAllowRetreat: container.allowRetreatSelected,
                         onResupply: container.resupplySelected,
+                        onBesiege: container.besiegeSelected,
                         onEndTurn: container.advanceOrRunAI
                     )
                     GeneralCommandPanelView(

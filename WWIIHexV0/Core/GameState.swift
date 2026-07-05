@@ -1,5 +1,111 @@
 import Foundation
 
+struct SiegeRecord: Codable, Equatable, Identifiable {
+    var id: String {
+        targetRegionId.rawValue
+    }
+
+    var targetRegionId: RegionId
+    var attackerFaction: Faction
+    var defenderFaction: Faction
+    var startedTurn: Int
+    var lastUpdatedTurn: Int
+    var pressure: Int
+    var besiegingDivisionIds: [String]
+
+    init(
+        targetRegionId: RegionId,
+        attackerFaction: Faction,
+        defenderFaction: Faction,
+        startedTurn: Int,
+        lastUpdatedTurn: Int,
+        pressure: Int,
+        besiegingDivisionIds: [String]
+    ) {
+        self.targetRegionId = targetRegionId
+        self.attackerFaction = attackerFaction
+        self.defenderFaction = defenderFaction
+        self.startedTurn = max(1, startedTurn)
+        self.lastUpdatedTurn = max(1, lastUpdatedTurn)
+        self.pressure = Self.clampPressure(pressure)
+        self.besiegingDivisionIds = Self.normalizedDivisionIds(besiegingDivisionIds)
+    }
+
+    static func clampPressure(_ value: Int) -> Int {
+        max(0, min(100, value))
+    }
+
+    static func normalizedDivisionIds(_ ids: [String]) -> [String] {
+        Array(Set(ids)).sorted()
+    }
+}
+
+struct SiegeState: Codable, Equatable {
+    var records: [SiegeRecord]
+
+    init(records: [SiegeRecord] = []) {
+        self.records = records.sorted { $0.targetRegionId.rawValue < $1.targetRegionId.rawValue }
+    }
+
+    static let empty = SiegeState()
+
+    func record(for regionId: RegionId) -> SiegeRecord? {
+        records.first { $0.targetRegionId == regionId }
+    }
+
+    @discardableResult
+    mutating func startOrUpdate(
+        targetRegionId: RegionId,
+        attackerFaction: Faction,
+        defenderFaction: Faction,
+        turn: Int,
+        pressureGain: Int,
+        besiegingDivisionId: String
+    ) -> SiegeRecord {
+        let normalizedTurn = max(1, turn)
+        if let index = records.firstIndex(where: { $0.targetRegionId == targetRegionId }) {
+            var record = records[index]
+            if record.attackerFaction != attackerFaction || record.defenderFaction != defenderFaction {
+                record = SiegeRecord(
+                    targetRegionId: targetRegionId,
+                    attackerFaction: attackerFaction,
+                    defenderFaction: defenderFaction,
+                    startedTurn: normalizedTurn,
+                    lastUpdatedTurn: normalizedTurn,
+                    pressure: pressureGain,
+                    besiegingDivisionIds: [besiegingDivisionId]
+                )
+            } else {
+                record.lastUpdatedTurn = normalizedTurn
+                record.pressure = SiegeRecord.clampPressure(record.pressure + pressureGain)
+                record.besiegingDivisionIds = SiegeRecord.normalizedDivisionIds(
+                    record.besiegingDivisionIds + [besiegingDivisionId]
+                )
+            }
+            records[index] = record
+            records.sort { $0.targetRegionId.rawValue < $1.targetRegionId.rawValue }
+            return record
+        }
+
+        let record = SiegeRecord(
+            targetRegionId: targetRegionId,
+            attackerFaction: attackerFaction,
+            defenderFaction: defenderFaction,
+            startedTurn: normalizedTurn,
+            lastUpdatedTurn: normalizedTurn,
+            pressure: pressureGain,
+            besiegingDivisionIds: [besiegingDivisionId]
+        )
+        records.append(record)
+        records.sort { $0.targetRegionId.rawValue < $1.targetRegionId.rawValue }
+        return record
+    }
+
+    mutating func removeRecord(for regionId: RegionId) {
+        records.removeAll { $0.targetRegionId == regionId }
+    }
+}
+
 struct GameState: Codable, Equatable {
     var scenarioId: String
     var turn: Int
@@ -13,6 +119,7 @@ struct GameState: Codable, Equatable {
     var warDeploymentState: WarDeploymentState
     var economyState: EconomyState
     var diplomacyState: DiplomacyState
+    var siegeState: SiegeState
     var divisions: [Division]
     var victoryState: VictoryState
     var selectedUnitSummary: String?
@@ -33,6 +140,7 @@ struct GameState: Codable, Equatable {
         warDeploymentState: WarDeploymentState = .empty,
         economyState: EconomyState = .empty,
         diplomacyState: DiplomacyState = .empty,
+        siegeState: SiegeState = .empty,
         divisions: [Division],
         victoryState: VictoryState,
         selectedUnitSummary: String?,
@@ -56,6 +164,7 @@ struct GameState: Codable, Equatable {
         self.warDeploymentState = warDeploymentState
         self.economyState = economyState
         self.diplomacyState = diplomacyState
+        self.siegeState = siegeState
         self.divisions = divisions
         self.victoryState = victoryState
         self.selectedUnitSummary = selectedUnitSummary
@@ -155,6 +264,7 @@ struct GameState: Codable, Equatable {
         case warDeploymentState
         case economyState
         case diplomacyState
+        case siegeState
         case divisions
         case victoryState
         case selectedUnitSummary
@@ -178,6 +288,7 @@ struct GameState: Codable, Equatable {
             warDeploymentState: try container.decodeIfPresent(WarDeploymentState.self, forKey: .warDeploymentState) ?? .empty,
             economyState: try container.decodeIfPresent(EconomyState.self, forKey: .economyState) ?? .empty,
             diplomacyState: try container.decodeIfPresent(DiplomacyState.self, forKey: .diplomacyState) ?? .empty,
+            siegeState: try container.decodeIfPresent(SiegeState.self, forKey: .siegeState) ?? .empty,
             divisions: try container.decode([Division].self, forKey: .divisions),
             victoryState: try container.decode(VictoryState.self, forKey: .victoryState),
             selectedUnitSummary: try container.decodeIfPresent(String.self, forKey: .selectedUnitSummary),

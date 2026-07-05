@@ -1115,12 +1115,37 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、粮道/漕运和唐宋专用胜利规则仍未实现。
+这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态首轮已通过 `Command.besiege` 和 `SiegeState` 落地，但城防耐久、自动破城、修城、招降、完整漕运和唐宋专用胜利规则仍未实现。
+
+v5.3 围城状态首轮：
+
+```text
+Command.besiege(attackerId, targetRegionId)
+  -> CommandValidator.validateBesiege
+  -> 只允许围困敌对控制的城池 / 关隘 / 高 supplyValue 粮仓州府
+  -> 攻击军队必须在目标 region 覆盖 hex 的 range 距离内
+  -> CommandExecutor.executeBesiege
+  -> 写入 GameState.siegeState.records
+  -> 标记攻击军队 hasActed
+  -> EventLog 记 siege 分类
+
+SiegeRecord
+  -> targetRegionId
+  -> attackerFaction / defenderFaction
+  -> startedTurn / lastUpdatedTurn
+  -> pressure
+  -> besiegingDivisionIds
+```
+
+围城压力不会直接改 `HexTile.controller`、`RegionNode.controller`、`hexToTheater` 或 `hexToFrontZone`。若后续要破城，仍必须通过合法移动/占领规则落到 hex。
 
 结束回合：
 
 ```text
 SupplyRules.updateSupplyStates
+CommandExecutor.applySiegeSupplyPressure
+  -> 仍有有效围困军队且 pressure >= 10 时，被围州府内 supplied 守军降为 lowSupply
+  -> 原守方失去控制或围困军队消失时解除 SiegeRecord
 EconomyRules.resolveFactionTurn(for: activeFaction)
   -> 收入入账
   -> 支付战略补给维护费
@@ -1160,7 +1185,7 @@ canSupplyPass / RegionSupplyRules
   -> 不再依赖二元 Faction.opponent
 ```
 
-这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮和包围效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。完整漕运、粮草运输队、仓储容量、围城断粮和 UI 粮道线仍未实现。
+这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城首轮效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。完整漕运、粮草运输队、仓储容量、城防耐久、自动破城和 UI 粮道线仍未实现。
 
 ---
 

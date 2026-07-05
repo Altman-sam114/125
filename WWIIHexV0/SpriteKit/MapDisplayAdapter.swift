@@ -53,6 +53,7 @@ struct RegionInspectorState: Equatable {
     let objectiveStatus: String
     let cityLevel: CityLevel
     let economicOutput: EconomyResources
+    let siegeRecord: SiegeRecord?
 }
 
 struct UnitInspectorStrategicState: Equatable {
@@ -225,7 +226,8 @@ struct MapDisplayAdapter {
             objectiveNames: objectiveNames,
             objectiveStatus: objectiveStatus,
             cityLevel: cityLevel,
-            economicOutput: economicOutput
+            economicOutput: economicOutput,
+            siegeRecord: state.siegeState.record(for: regionId)
         )
     }
 

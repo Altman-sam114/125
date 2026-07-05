@@ -68,6 +68,11 @@ struct RegionInspectorView: View {
                 Text("\(state.region.supplyValue)")
             }
 
+            LabeledContent("Siege") {
+                Text(siegeSummary(state.siegeRecord))
+                    .multilineTextAlignment(.trailing)
+            }
+
             LabeledContent("Factories") {
                 Text("\(state.region.factories)")
             }
@@ -119,5 +124,13 @@ struct RegionInspectorView: View {
             return "None"
         }
         return divisions.map(\.name).joined(separator: ", ")
+    }
+
+    private func siegeSummary(_ record: SiegeRecord?) -> String {
+        guard let record else {
+            return "None"
+        }
+
+        return "围城压力 \(record.pressure), \(record.attackerFaction.displayName) -> \(record.defenderFaction.displayName), \(record.besiegingDivisionIds.count) unit(s)"
     }
 }

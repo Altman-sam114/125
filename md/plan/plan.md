@@ -56,15 +56,16 @@ displayName: 建隆元年：陈桥兵变与山河一统
 - v5.3 已完成生产、府库和经济日志显示桥首轮：唐宋路径显示军备、丁口、钱帛、粮草、禁军、厢军、骑军、攻城器械营。
 - v5.3 已加入唐宋场景专用古代兵种战斗修正首轮：骑军平原/道路进攻、弓弩守军守城、攻城器械攻城/野战差异和守军城防差异已经由 `CombatRules` 处理。
 - v5.3 已加入粮道供给首轮：唐宋场景下受控高 `supplyValue` 州府/粮仓可作为补给源，道路、城关、山林、跨河成本会影响 `SupplyRules` 补给判定。
+- v5.3 已加入围城状态首轮：`Command.besiege` 经 `RuleEngine` 登记 `SiegeState`，Region 面板可读围城压力，结束回合时可把被围州府内守军压为 `lowSupply`。
 
 仍未完成的关键项：
 
 - `Faction` 底层仍是 `.allies` / `.germany` legacy 桥，真实多政权数据驱动未收口。
 - `ProductionKind`、`EconomyResources`、`Division`、`ComponentType` 的 Codable schema 仍保留二战兼容名。
-- 围城状态、完整漕运/粮队/仓储容量、唐宋专用胜利规则、天命/归附/治理和发布级 UI 仍未落地。
+- 完整围城链、城防耐久、修城、招降、完整漕运/粮队/仓储容量、唐宋专用胜利规则、天命/归附/治理和发布级 UI 仍未落地。
 - AI 默认人物和战术 raw case 仍有二战语义残留，需在 v5.4-v5.5 继续迁移。
 
-下一轮优先继续 v5.3 小切片：围城状态或粮道 UI/漕运深化择一推进，仍必须走 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不得让事件或 Agent 直接改 `GameState`。
+下一轮优先继续 v5.3 小切片：城防耐久 / 修城 / AI 围城指令 / 粮道 UI / 漕运深化择一推进，仍必须走 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不得让事件或 Agent 直接改 `GameState`。
 
 ## 4. md 目录职责
 
@@ -155,7 +156,7 @@ md/prompt/v5.0-唐宋迁移/
 ├── v5.0_audit_and_contract.md              # 已创建：当前二战残留审计与 v5.1 合同
 ├── v5.1_powers_turn_order_record.md        # 已创建：Power/TurnOrder/Relation 兼容地基
 ├── v5.2_scenario_mapeditor_record.md       # 已创建：唐宋默认剧本数据、MapEditor 资源桥与术语迁移
-├── v5.3_rules_siege_grain_record.md        # 已创建：生产/府库、兵种战斗和粮道供给首轮，围城待续
+├── v5.3_rules_siege_grain_record.md        # 已创建：生产/府库、兵种战斗、粮道供给和围城状态首轮
 ├── v5.4_agent_schema_record.md
 ├── v5.5_ui_visual_record.md
 ├── v5.6_diplomacy_mandate_record.md

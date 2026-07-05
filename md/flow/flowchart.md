@@ -272,7 +272,7 @@ flowchart TD
     STATE -->|退路不足| ENC
     ECON --> LOW
 
-    WARN["边界<br/>没有新增漕运 UI、粮队、仓储容量或围城断粮<br/>仍复用 SupplyState 三态"]:::warn
+    WARN["边界<br/>没有新增漕运 UI、粮队、仓储容量或城防耐久<br/>仍复用 SupplyState 三态"]:::warn
     SOURCE -.守住.-> WARN
 
     classDef rules fill:#ccfbf1,stroke:#0f766e,color:#042f2e
@@ -281,6 +281,46 @@ flowchart TD
     classDef decision fill:#fff7ed,stroke:#ea580c,color:#1f1300
     classDef economy fill:#fef9c3,stroke:#ca8a04,color:#292107
     classDef warn fill:#ffedd5,stroke:#f97316,color:#431407
+```
+
+## 3.7 v5.3 唐宋围城状态首轮
+
+这张图看 v5.3 的围城最小闭环。围城是底层 `Command`，仍经 `RuleEngine` 校验执行；它只记录围城压力并在回合结算压低守军补给，不直接占领 hex 或改 region controller。
+
+```mermaid
+flowchart TD
+    UI["玩家命令面板<br/>CommandPanelView<br/>选择可行动军队后发起围城"]:::ui
+    CMD["围城命令<br/>Command.besiege<br/>attackerId + targetRegionId"]:::command
+    VALID["统一校验<br/>CommandValidator.validateBesiege<br/>敌对城池/关隘/粮仓州府 + 距离合法"]:::rules
+    PASS{"校验通过?"}:::decision
+    REJECT["拒绝命令<br/>CommandResult rejected<br/>GameState 不变"]:::stop
+    EXEC["执行围城<br/>CommandExecutor.executeBesiege<br/>标记军队 hasActed，累积 pressure"]:::rules
+    STATE["围城记录<br/>GameState.siegeState / SiegeRecord<br/>目标州府、攻守方、压力、围城军队"]:::state
+    LOG["围城日志<br/>GameLogCategory.siege<br/>EventLog / RegionInspector 可见"]:::ui
+    END["结束回合<br/>CommandExecutor.executeEndTurn<br/>补给刷新后处理围城压力"]:::rules
+    HOLD{"围城仍有效?<br/>目标仍由原守方控制，围城军队仍在距离内"}:::decision
+    LIFT["解除围城记录<br/>原守方失控或围城军队离开"]:::state
+    PRESS{"pressure >= 10?"}:::decision
+    LOW["断粮压力<br/>目标州府内 supplied 守军降为 lowSupply"]:::state
+    HEX["边界<br/>不改 HexTile.controller<br/>不改 RegionNode.controller<br/>不推进 hexToTheater / hexToFrontZone"]:::authority
+
+    UI --> CMD --> VALID --> PASS
+    PASS -->|否| REJECT
+    PASS -->|是| EXEC --> STATE --> LOG
+    STATE --> END --> HOLD
+    HOLD -->|否| LIFT
+    HOLD -->|是| PRESS
+    PRESS -->|是| LOW --> HEX
+    PRESS -->|否| HEX
+    STATE -.守住.-> HEX
+
+    classDef ui fill:#e5e7eb,stroke:#4b5563,color:#111827
+    classDef command fill:#fae8ff,stroke:#a21caf,color:#2a0a2f
+    classDef rules fill:#ccfbf1,stroke:#0f766e,color:#042f2e
+    classDef decision fill:#fff7ed,stroke:#ea580c,color:#1f1300
+    classDef stop fill:#fee2e2,stroke:#b91c1c,color:#111827
+    classDef state fill:#ede9fe,stroke:#7c3aed,color:#1f143d
+    classDef authority fill:#fee2e2,stroke:#dc2626,color:#111827
 ```
 
 ## 4. AI / 元帅决策链：AI 怎么下命令

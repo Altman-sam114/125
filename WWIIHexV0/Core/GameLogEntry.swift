@@ -5,6 +5,7 @@ enum GameLogCategory: String, Codable, Equatable {
     case retreat
     case reinforce
     case encircle
+    case siege
     case supply
     case frontChange
     case theaterChange
