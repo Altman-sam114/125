@@ -109,11 +109,11 @@ struct MapDisplayAdapter {
     }
 
     func terrainColor(for hex: HexCoord) -> DisplayColor {
-        TerrainStyle.fillColor(for: terrain(for: hex))
+        TerrainStyle.fillColor(for: terrain(for: hex), isTangSongScenario: state.isTangSongScenario)
     }
 
     func controllerColor(for hex: HexCoord) -> DisplayColor {
-        TerrainStyle.controllerColor(for: controller(for: hex))
+        TerrainStyle.controllerColor(for: controller(for: hex), isTangSongScenario: state.isTangSongScenario)
     }
 
     func unitDisplayHex(for division: Division) -> HexCoord? {

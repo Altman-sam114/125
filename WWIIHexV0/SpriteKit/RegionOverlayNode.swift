@@ -1,7 +1,12 @@
 import SpriteKit
 
 final class RegionOverlayNode: SKNode {
-    init(region: RegionNode, layout: HexLayout, isSelected: Bool) {
+    init(
+        region: RegionNode,
+        layout: HexLayout,
+        isSelected: Bool,
+        isTangSongScenario: Bool = false
+    ) {
         super.init()
         zPosition = 12
 
@@ -10,8 +15,11 @@ final class RegionOverlayNode: SKNode {
             outline.position = layout.hexToPixel(hex)
             outline.fillColor = .clear
             outline.strokeColor = isSelected
-                ? TerrainStyle.selectedStroke
-                : TerrainStyle.controllerColor(for: region.controller).withAlphaComponent(0.42)
+                ? TerrainStyle.selectedStrokeColor(isTangSongScenario: isTangSongScenario)
+                : TerrainStyle.controllerColor(
+                    for: region.controller,
+                    isTangSongScenario: isTangSongScenario
+                ).withAlphaComponent(0.42)
             outline.lineWidth = isSelected ? max(2, layout.hexSize * 0.07) : max(1, layout.hexSize * 0.03)
             outline.zPosition = isSelected ? 13 : 12
             addChild(outline)

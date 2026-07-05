@@ -9,7 +9,8 @@ final class HexNode: SKNode {
         supplySourceFaction: Faction?,
         isSelected: Bool,
         isMoveHighlighted: Bool,
-        isAttackHighlighted: Bool
+        isAttackHighlighted: Bool,
+        isTangSongScenario: Bool = false
     ) {
         self.coord = displayState.coord
         super.init()
@@ -19,34 +20,52 @@ final class HexNode: SKNode {
 
         let path = Self.hexPath(layout: layout)
         let base = SKShapeNode(path: path)
-        base.fillColor = TerrainStyle.fillColor(for: displayState.terrain)
-        base.strokeColor = TerrainStyle.strokeColor(for: displayState.terrain)
+        base.fillColor = TerrainStyle.fillColor(for: displayState.terrain, isTangSongScenario: isTangSongScenario)
+        base.strokeColor = TerrainStyle.strokeColor(for: displayState.terrain, isTangSongScenario: isTangSongScenario)
         base.lineWidth = displayState.terrain == .fortress ? max(2, layout.hexSize * 0.08) : 1
         base.zPosition = 0
         addChild(base)
 
         if let controller = displayState.controller {
-            addControllerOverlay(path: path, controller: controller, layout: layout)
+            addControllerOverlay(
+                path: path,
+                controller: controller,
+                layout: layout,
+                isTangSongScenario: isTangSongScenario
+            )
         }
 
         if isMoveHighlighted {
-            addHighlight(path: path, color: TerrainStyle.movementFill, zPosition: 2)
+            addHighlight(
+                path: path,
+                color: TerrainStyle.movementFillColor(isTangSongScenario: isTangSongScenario),
+                zPosition: 2
+            )
         }
 
         if isAttackHighlighted {
-            addHighlight(path: path, color: TerrainStyle.attackFill, zPosition: 3)
+            addHighlight(
+                path: path,
+                color: TerrainStyle.attackFillColor(isTangSongScenario: isTangSongScenario),
+                zPosition: 3
+            )
         }
 
         if isSelected {
             let selected = SKShapeNode(path: path)
             selected.fillColor = .clear
-            selected.strokeColor = TerrainStyle.selectedStroke
+            selected.strokeColor = TerrainStyle.selectedStrokeColor(isTangSongScenario: isTangSongScenario)
             selected.lineWidth = max(3, layout.hexSize * 0.09)
             selected.zPosition = 5
             addChild(selected)
         }
 
-        addObjectiveLabels(displayState: displayState, supplySourceFaction: supplySourceFaction, layout: layout)
+        addObjectiveLabels(
+            displayState: displayState,
+            supplySourceFaction: supplySourceFaction,
+            layout: layout,
+            isTangSongScenario: isTangSongScenario
+        )
         addFog(for: displayState.visibility, path: path)
     }
 
@@ -62,22 +81,34 @@ final class HexNode: SKNode {
         addChild(highlight)
     }
 
-    private func addControllerOverlay(path: CGPath, controller: Faction, layout: HexLayout) {
+    private func addControllerOverlay(
+        path: CGPath,
+        controller: Faction,
+        layout: HexLayout,
+        isTangSongScenario: Bool
+    ) {
         let overlay = SKShapeNode(path: path)
-        overlay.fillColor = TerrainStyle.controllerColor(for: controller).withAlphaComponent(0.16)
-        overlay.strokeColor = TerrainStyle.controllerColor(for: controller).withAlphaComponent(0.82)
+        let controllerColor = TerrainStyle.controllerColor(for: controller, isTangSongScenario: isTangSongScenario)
+        overlay.fillColor = controllerColor.withAlphaComponent(0.16)
+        overlay.strokeColor = controllerColor.withAlphaComponent(0.82)
         overlay.lineWidth = max(1.5, layout.hexSize * 0.04)
         overlay.zPosition = 1
         addChild(overlay)
     }
 
-    private func addObjectiveLabels(displayState: HexDisplayState, supplySourceFaction: Faction?, layout: HexLayout) {
+    private func addObjectiveLabels(
+        displayState: HexDisplayState,
+        supplySourceFaction: Faction?,
+        layout: HexLayout,
+        isTangSongScenario: Bool
+    ) {
+        let textColor = TerrainStyle.textColor(for: displayState.terrain, isTangSongScenario: isTangSongScenario)
         if let cityName = displayState.cityName {
             addLabel(
                 text: cityName,
                 y: layout.hexSize * 0.04,
                 fontSize: max(7, layout.hexSize * 0.18),
-                color: TerrainStyle.textColor(for: displayState.terrain),
+                color: textColor,
                 zPosition: 6
             )
         }
@@ -87,14 +118,14 @@ final class HexNode: SKNode {
                 text: fortressName,
                 y: layout.hexSize * 0.03,
                 fontSize: max(7, layout.hexSize * 0.16),
-                color: TerrainStyle.textColor(for: displayState.terrain),
+                color: textColor,
                 zPosition: 6
             )
             addLabel(
-                text: "FORT",
+                text: isTangSongScenario ? "关" : "FORT",
                 y: -layout.hexSize * 0.22,
                 fontSize: max(7, layout.hexSize * 0.14),
-                color: TerrainStyle.textColor(for: displayState.terrain),
+                color: textColor,
                 zPosition: 6
             )
         }
@@ -102,7 +133,7 @@ final class HexNode: SKNode {
         if displayState.controller != nil || supplySourceFaction != nil {
             let owner = displayState.controller ?? supplySourceFaction
             let dot = SKShapeNode(circleOfRadius: max(3, layout.hexSize * 0.10))
-            dot.fillColor = TerrainStyle.controllerColor(for: owner)
+            dot.fillColor = TerrainStyle.controllerColor(for: owner, isTangSongScenario: isTangSongScenario)
             dot.strokeColor = SKColor(white: 1, alpha: 0.70)
             dot.lineWidth = 1
             dot.position = CGPoint(x: -layout.hexSize * 0.42, y: -layout.hexSize * 0.48)
@@ -112,13 +143,20 @@ final class HexNode: SKNode {
 
         if let supplySourceFaction {
             addLabel(
-                text: supplySourceFaction == .allies ? "SUP A" : "SUP G",
+                text: supplyLabel(for: supplySourceFaction, isTangSongScenario: isTangSongScenario),
                 y: layout.hexSize * 0.36,
                 fontSize: max(6, layout.hexSize * 0.13),
-                color: TerrainStyle.textColor(for: displayState.terrain),
+                color: textColor,
                 zPosition: 7
             )
         }
+    }
+
+    private func supplyLabel(for faction: Faction, isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            return faction == .allies ? "粮宋" : "粮割"
+        }
+        return faction == .allies ? "SUP A" : "SUP G"
     }
 
     private func addFog(for visibility: VisibilityState, path: CGPath) {

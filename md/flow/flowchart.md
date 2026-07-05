@@ -505,7 +505,8 @@ flowchart TD
     HUD["顶部 HUD<br/>HUDView + GameState.phaseDisplayName<br/>显示回合、政权、阶段、胜负、资源、队列"]:::ui
     LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报、战斗、围城、粮道等分类"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
-    BOARD["地图场景<br/>BoardScene<br/>缓存 unit display hex 后排序绘制"]:::ui
+    BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette"]:::ui
+    UNIT["军队棋子<br/>UnitNode<br/>legacy NATO；唐宋军旗 + 禁/骑/弩/械/守/军字标"]:::ui
     MARSHAL["模拟元帅 / MockAI<br/>MarshalAgent + SimulatedMarshalLLMClient"]:::ai
     ZD["战区指令<br/>ZoneDirective<br/>tactic / focus / intensity"]:::command
     WCE["执行解释<br/>WarCommandExecutor<br/>infiltration 限制默认投入"]:::command
@@ -517,6 +518,7 @@ flowchart TD
     ROOT --> LOG
     ROOT --> AIUI
     ROOT --> BOARD
+    BOARD --> UNIT
     MARSHAL --> ZD --> WCE --> RULE --> STATE
     AIUI --> PLAYTEST
     LOG --> PLAYTEST

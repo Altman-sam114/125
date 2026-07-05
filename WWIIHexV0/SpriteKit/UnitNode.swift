@@ -9,7 +9,8 @@ final class UnitNode: SKNode {
         placement: UnitDisplayPlacement,
         isSelected: Bool,
         isPlayerManaged: Bool = false,
-        fillColorOverride: SKColor? = nil
+        fillColorOverride: SKColor? = nil,
+        isTangSongScenario: Bool = false
     ) {
         self.divisionId = division.id
         super.init()
@@ -32,24 +33,37 @@ final class UnitNode: SKNode {
         }
 
         let body = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: min(5, layout.hexSize * 0.10))
-        body.fillColor = fillColorOverride ?? TerrainStyle.unitFillColor(for: division.faction)
-        body.strokeColor = isSelected ? TerrainStyle.selectedStroke : TerrainStyle.unitStrokeColor(for: division.faction)
+        body.fillColor = fillColorOverride ??
+            TerrainStyle.unitFillColor(for: division.faction, isTangSongScenario: isTangSongScenario)
+        body.strokeColor = isSelected
+            ? TerrainStyle.selectedStrokeColor(isTangSongScenario: isTangSongScenario)
+            : TerrainStyle.unitStrokeColor(for: division.faction, isTangSongScenario: isTangSongScenario)
         body.lineWidth = isSelected ? max(3, layout.hexSize * 0.08) : 1.5
         body.zPosition = 0
         addChild(body)
 
-        // v0.21: NATO APP-6 兵牌内部图形（替代纯文字 markerCode）
-        addNATOSymbol(for: division, width: width, height: height)
+        if isTangSongScenario {
+            addTangSongBanner(for: division, width: width, height: height)
+        } else {
+            // v0.21: NATO APP-6 兵牌内部图形（替代纯文字 markerCode）
+            addNATOSymbol(for: division, width: width, height: height)
+        }
 
-        // 兵力数字（移至底部，NATO symbol 占中央）
+        // 兵力数字（移至底部，中央留给兵种符号）
         addLabel(
-            text: division.markerReadinessText,
+            text: markerReadinessText(for: division, isTangSongScenario: isTangSongScenario),
             y: -height * 0.28,
             fontSize: max(7, layout.hexSize * 0.16),
-            weight: "AvenirNext-Regular"
+            weight: isTangSongScenario ? "PingFangSC-Regular" : "AvenirNext-Regular"
         )
 
-        addSupplyMarker(for: division, layout: layout, bodyWidth: width, bodyHeight: height)
+        addSupplyMarker(
+            for: division,
+            layout: layout,
+            bodyWidth: width,
+            bodyHeight: height,
+            isTangSongScenario: isTangSongScenario
+        )
         addStackMarker(placement: placement, layout: layout, bodyWidth: width, bodyHeight: height)
     }
 
@@ -112,6 +126,45 @@ final class UnitNode: SKNode {
         }
     }
 
+    private func addTangSongBanner(for division: Division, width: CGFloat, height: CGFloat) {
+        let lineColor = SKColor(red: 0.98, green: 0.90, blue: 0.72, alpha: 0.98)
+        let lineWidth = max(1.2, min(width, height) * 0.055)
+        let mastX = -width * 0.30
+        let mastTop = height * 0.26
+        let mastBottom = -height * 0.10
+
+        let mastPath = CGMutablePath()
+        mastPath.move(to: CGPoint(x: mastX, y: mastBottom))
+        mastPath.addLine(to: CGPoint(x: mastX, y: mastTop))
+        let mast = SKShapeNode(path: mastPath)
+        mast.strokeColor = lineColor
+        mast.lineWidth = lineWidth
+        mast.lineCap = .round
+        mast.zPosition = 1
+        addChild(mast)
+
+        let bannerPath = CGMutablePath()
+        bannerPath.move(to: CGPoint(x: mastX, y: mastTop))
+        bannerPath.addLine(to: CGPoint(x: width * 0.25, y: mastTop))
+        bannerPath.addLine(to: CGPoint(x: width * 0.17, y: height * 0.06))
+        bannerPath.addLine(to: CGPoint(x: mastX, y: height * 0.06))
+        bannerPath.closeSubpath()
+
+        let banner = SKShapeNode(path: bannerPath)
+        banner.fillColor = lineColor.withAlphaComponent(0.18)
+        banner.strokeColor = lineColor
+        banner.lineWidth = lineWidth
+        banner.zPosition = 1
+        addChild(banner)
+
+        addLabel(
+            text: tangSongMarkerText(for: division),
+            y: height * 0.10,
+            fontSize: max(12, min(width, height) * 0.34),
+            weight: "PingFangSC-Semibold"
+        )
+    }
+
     private func addLabel(text: String, y: CGFloat, fontSize: CGFloat, weight: String) {
         let label = SKLabelNode(text: text)
         label.fontName = weight
@@ -124,10 +177,19 @@ final class UnitNode: SKNode {
         addChild(label)
     }
 
-    private func addSupplyMarker(for division: Division, layout: HexLayout, bodyWidth: CGFloat, bodyHeight: CGFloat) {
+    private func addSupplyMarker(
+        for division: Division,
+        layout: HexLayout,
+        bodyWidth: CGFloat,
+        bodyHeight: CGFloat,
+        isTangSongScenario: Bool
+    ) {
         let radius = max(3, layout.hexSize * 0.10)
         let marker = SKShapeNode(circleOfRadius: radius)
-        marker.fillColor = TerrainStyle.supplyColor(for: division.supplyState)
+        marker.fillColor = TerrainStyle.supplyColor(
+            for: division.supplyState,
+            isTangSongScenario: isTangSongScenario
+        )
         marker.strokeColor = SKColor(white: 1, alpha: 0.85)
         marker.lineWidth = 1
         marker.position = CGPoint(x: bodyWidth / 2 - radius * 0.8, y: bodyHeight / 2 - radius * 0.8)
@@ -188,8 +250,23 @@ private extension Division {
         return "INF"
     }
 
-    var markerReadinessText: String {
-        "\(strength)/\(maxStrength) \(retreatMode.markerCode)"
+    func tangSongMarkerText() -> String {
+        if isTangSongSiegeEngine {
+            return "械"
+        }
+        if isTangSongCavalry {
+            return "骑"
+        }
+        if isTangSongCrossbowGarrison {
+            return "弩"
+        }
+        if isTangSongGarrison {
+            return "守"
+        }
+        if tangSongCombatRoles.contains(.imperialGuard) {
+            return "禁"
+        }
+        return "军"
     }
 }
 
@@ -200,6 +277,28 @@ private extension RetreatMode {
             return "R"
         case .hold:
             return "H"
+        }
+    }
+}
+
+private func tangSongMarkerText(for division: Division) -> String {
+    division.tangSongMarkerText()
+}
+
+private func markerReadinessText(for division: Division, isTangSongScenario: Bool) -> String {
+    if isTangSongScenario {
+        return "\(division.strength)/\(division.maxStrength) \(division.retreatMode.tangSongMarkerCode)"
+    }
+    return "\(division.strength)/\(division.maxStrength) \(division.retreatMode.markerCode)"
+}
+
+private extension RetreatMode {
+    var tangSongMarkerCode: String {
+        switch self {
+        case .retreatable:
+            return "退"
+        case .hold:
+            return "守"
         }
     }
 }

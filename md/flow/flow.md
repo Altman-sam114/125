@@ -803,7 +803,10 @@ v5.5 首轮术语桥只改变唐宋场景的玩家可见读法：
 - `GameState.phaseDisplayName` 在唐宋场景下按当前 `PowerProfile.shortName` 显示为“宋行动”“割据军议”等，不再在 HUD/命令状态中显示 `Player Command` / `AI Command`。
 - `CommandPanelView` 在唐宋场景下显示 `军令`、`固守`、`可退`、`整补`、`结束回合` 和对应不可下令原因；底层命令仍是 `Command`。
 - `EventLogView` 在唐宋场景下显示 `战报`，分类显示为战斗、退却、整补、合围、围城、粮道、前线、方面、州府、外交、事件；日志数据结构不变。
-- 这不是完整发布级 UI 收口，尚未做运行时截图、布局烟测、地图美术重绘或正式可访问性验收。
+- `TerrainStyle` 提供唐宋视觉 token：墨绿底、绢帛平地、青绿林地、石青河流、赭石道路、朱印宋军、铜褐割据和多色州府/方面 overlay。
+- `UnitNode` 在唐宋场景下不画 NATO APP-6 符号，改画内置军旗轮廓和禁/骑/弩/械/守/军兵种字标；legacy 阿登路径仍保留 NATO 符号。
+- `HexNode` / `RegionOverlayNode` / `MapLayerOverlayNode` / `BoardScene` 只读使用唐宋 palette，围城圈、计划箭头、前线和部署色随场景切换。
+- 这不是完整发布级 UI 收口，尚未做运行时截图、布局烟测、外部美术资产、粮道线或正式可访问性验收。
 
 当前开局不会在 `RootGameView` 自动 `.task { runAIIfNeeded() }`。AI 行动由 `advanceOrRunAI()` 或命令提交后的 `runAIIfNeeded()` 触发。
 
@@ -1686,6 +1689,8 @@ deployment
 ```
 
 `MapDisplayLayer.displayName(isTangSongScenario:)` 只提供显示桥，raw case 和存档/图层逻辑不变。唐宋主路径把 `province` 读作州府，把 `initialTheater` / `dynamicTheater` 读作初始方面 / 动态方面。
+
+唐宋场景下 overlay 颜色来自 `MapLayerOverlayNode` 的 Tang Song strategic palette，覆盖朱印、青绿、石青、铜、玉、赭等多组颜色，避免州府/方面/部署图层读成单一米色或单一暗蓝。该 palette 只影响显示，不影响 bucket 归类、前线计算或部署归属。
 
 bucket 来源：
 

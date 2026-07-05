@@ -16,8 +16,16 @@ final class MapLayerOverlayNode: SKNode {
         let calculator = MapLayerOverlayCalculator(state: state)
         if layer == .frontLine {
             addOpaqueBase(state: state, layout: layout)
-            addFrontLineChains(calculator.frontLineChains(), layout: layout)
-            addSegmentSeparators(calculator.frontLineSegments(), layout: layout)
+            addFrontLineChains(
+                calculator.frontLineChains(),
+                layout: layout,
+                isTangSongScenario: state.isTangSongScenario
+            )
+            addSegmentSeparators(
+                calculator.frontLineSegments(),
+                layout: layout,
+                isTangSongScenario: state.isTangSongScenario
+            )
             return
         }
 
@@ -40,7 +48,8 @@ final class MapLayerOverlayNode: SKNode {
                 layer: layer,
                 pressure: bucket.pressure,
                 paletteIndex: bucketPaletteIndexes[bucketId],
-                paletteCount: bucketIds.count
+                paletteCount: bucketIds.count,
+                isTangSongScenario: state.isTangSongScenario
             )
             shape.strokeColor = Self.hexDividerColor(for: layer)
             shape.lineWidth = Self.hexDividerWidth(for: layer, layout: layout)
@@ -69,7 +78,8 @@ final class MapLayerOverlayNode: SKNode {
         layer: MapDisplayLayer,
         pressure: Double,
         paletteIndex: Int?,
-        paletteCount: Int
+        paletteCount: Int,
+        isTangSongScenario: Bool
     ) -> SKColor {
         let alpha: CGFloat
         switch layer {
@@ -85,13 +95,14 @@ final class MapLayerOverlayNode: SKNode {
             alpha = 0.86
         }
         if layer == .deployment {
-            return deploymentColor(for: bucketId).withAlphaComponent(alpha)
+            return deploymentColor(for: bucketId, isTangSongScenario: isTangSongScenario).withAlphaComponent(alpha)
         }
         return paletteColor(
             layer: layer,
             paletteIndex: paletteIndex,
             paletteCount: paletteCount,
-            fallback: bucketId
+            fallback: bucketId,
+            isTangSongScenario: isTangSongScenario
         ).withAlphaComponent(alpha)
     }
 
@@ -99,14 +110,20 @@ final class MapLayerOverlayNode: SKNode {
         for tile in state.map.tiles.values {
             let shape = SKShapeNode(path: Self.hexPath(layout: layout))
             shape.position = layout.hexToPixel(tile.coord)
-            shape.fillColor = SKColor(white: 0.12, alpha: 0.96)
+            shape.fillColor = state.isTangSongScenario
+                ? SKColor(red: 0.12, green: 0.15, blue: 0.13, alpha: 0.96)
+                : SKColor(white: 0.12, alpha: 0.96)
             shape.strokeColor = .clear
             shape.zPosition = 11
             addChild(shape)
         }
     }
 
-    private func addFrontLineChains(_ chains: [FrontLineOverlaySegment], layout: HexLayout) {
+    private func addFrontLineChains(
+        _ chains: [FrontLineOverlaySegment],
+        layout: HexLayout,
+        isTangSongScenario: Bool
+    ) {
         for chain in chains {
             let points = chain.points.map { layout.hexToPixel($0) }
             guard let first = points.first else { continue }
@@ -117,7 +134,7 @@ final class MapLayerOverlayNode: SKNode {
             }
 
             let line = SKShapeNode(path: path)
-            line.strokeColor = Self.frontLineColor(for: chain)
+            line.strokeColor = Self.frontLineColor(for: chain, isTangSongScenario: isTangSongScenario)
             line.lineWidth = Self.frontLineWidth(for: chain)
             line.lineCap = .round
             line.lineJoin = .round
@@ -130,12 +147,20 @@ final class MapLayerOverlayNode: SKNode {
         }
     }
 
-    private func addSegmentSeparators(_ segments: [FrontLineOverlaySegment], layout: HexLayout) {
+    private func addSegmentSeparators(
+        _ segments: [FrontLineOverlaySegment],
+        layout: HexLayout,
+        isTangSongScenario: Bool
+    ) {
         for segment in segments {
             guard let point = segment.points.first.map({ layout.hexToPixel($0) }) else {
                 continue
             }
-            addSegmentSeparator(at: point, color: Self.frontLineColor(for: segment), layout: layout)
+            addSegmentSeparator(
+                at: point,
+                color: Self.frontLineColor(for: segment, isTangSongScenario: isTangSongScenario),
+                layout: layout
+            )
         }
     }
 
@@ -182,7 +207,18 @@ final class MapLayerOverlayNode: SKNode {
         addChild(separator)
     }
 
-    private static func frontLineColor(for segment: FrontLineOverlaySegment) -> SKColor {
+    private static func frontLineColor(
+        for segment: FrontLineOverlaySegment,
+        isTangSongScenario: Bool
+    ) -> SKColor {
+        if isTangSongScenario {
+            let palette = tangSongStrategicPalette
+            let index = stableHash(segment.theaterId.rawValue) % palette.count
+            let pressureBoost = CGFloat(min(0.18, max(0, segment.pressure) * 0.18))
+            let warningAlpha: CGFloat = segment.type == .encirclement || segment.state == .collapsing ? 1.0 : 0.88
+            return palette[index].withAlphaComponent(min(1, warningAlpha + pressureBoost))
+        }
+
         let hue = theaterHue(for: segment.theaterId)
         let pressureBoost = CGFloat(min(0.22, max(0, segment.pressure) * 0.22))
         let warningBoost: CGFloat = segment.type == .encirclement || segment.state == .collapsing ? 0.12 : 0
@@ -190,14 +226,18 @@ final class MapLayerOverlayNode: SKNode {
         return SKColor(hue: hue, saturation: 0.90, brightness: min(1, brightness), alpha: 1.0)
     }
 
-    private static func deploymentColor(for bucketId: String) -> SKColor {
+    private static func deploymentColor(for bucketId: String, isTangSongScenario: Bool) -> SKColor {
         let parts = bucketId.split(separator: "_").map(String.init)
         guard let factionRaw = parts.first,
               let faction = Faction(rawValue: factionRaw),
               let role = UnitDeploymentRole(rawValue: parts.dropFirst().joined(separator: "_")) else {
             return SKColor(white: 0.8, alpha: 1)
         }
-        return TerrainStyle.deploymentUnitColor(for: faction, role: role)
+        return TerrainStyle.deploymentUnitColor(
+            for: faction,
+            role: role,
+            isTangSongScenario: isTangSongScenario
+        )
     }
 
     private static func theaterHue(for theaterId: TheaterId) -> CGFloat {
@@ -228,10 +268,11 @@ final class MapLayerOverlayNode: SKNode {
         layer: MapDisplayLayer,
         paletteIndex: Int?,
         paletteCount: Int,
-        fallback: String
+        fallback: String,
+        isTangSongScenario: Bool
     ) -> SKColor {
         let index = paletteIndex ?? (stableHash(fallback) % max(1, paletteCount))
-        let palette = strategicPalette(for: layer)
+        let palette = strategicPalette(for: layer, isTangSongScenario: isTangSongScenario)
         if paletteCount <= palette.count {
             return palette[index % palette.count]
         }
@@ -240,7 +281,28 @@ final class MapLayerOverlayNode: SKNode {
         return SKColor(hue: hue, saturation: 0.78, brightness: 0.94, alpha: 1)
     }
 
-    private static func strategicPalette(for layer: MapDisplayLayer) -> [SKColor] {
+    private static func strategicPalette(
+        for layer: MapDisplayLayer,
+        isTangSongScenario: Bool
+    ) -> [SKColor] {
+        if isTangSongScenario {
+            switch layer {
+            case .province:
+                return tangSongStrategicPalette
+            case .initialTheater, .dynamicTheater:
+                return [
+                    SKColor(red: 0.66, green: 0.15, blue: 0.13, alpha: 1),
+                    SKColor(red: 0.16, green: 0.48, blue: 0.43, alpha: 1),
+                    SKColor(red: 0.18, green: 0.42, blue: 0.55, alpha: 1),
+                    SKColor(red: 0.69, green: 0.48, blue: 0.20, alpha: 1),
+                    SKColor(red: 0.45, green: 0.36, blue: 0.57, alpha: 1),
+                    SKColor(red: 0.55, green: 0.32, blue: 0.18, alpha: 1)
+                ]
+            default:
+                return tangSongStrategicPalette
+            }
+        }
+
         switch layer {
         case .province:
             return [
@@ -270,6 +332,19 @@ final class MapLayerOverlayNode: SKNode {
                 SKColor(red: 0.82, green: 0.66, blue: 0.18, alpha: 1)
             ]
         }
+    }
+
+    private static var tangSongStrategicPalette: [SKColor] {
+        [
+            SKColor(red: 0.66, green: 0.15, blue: 0.13, alpha: 1),
+            SKColor(red: 0.18, green: 0.48, blue: 0.43, alpha: 1),
+            SKColor(red: 0.16, green: 0.40, blue: 0.56, alpha: 1),
+            SKColor(red: 0.70, green: 0.50, blue: 0.20, alpha: 1),
+            SKColor(red: 0.48, green: 0.39, blue: 0.58, alpha: 1),
+            SKColor(red: 0.55, green: 0.32, blue: 0.18, alpha: 1),
+            SKColor(red: 0.34, green: 0.55, blue: 0.29, alpha: 1),
+            SKColor(red: 0.68, green: 0.34, blue: 0.36, alpha: 1)
+        ]
     }
 
     private static func hexDividerColor(for layer: MapDisplayLayer) -> SKColor {

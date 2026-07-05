@@ -1,7 +1,30 @@
 import SpriteKit
 
 enum TerrainStyle {
-    static func fillColor(for terrain: BaseTerrain) -> SKColor {
+    static func boardBackground(isTangSongScenario: Bool) -> SKColor {
+        isTangSongScenario
+            ? SKColor(red: 0.13, green: 0.16, blue: 0.14, alpha: 1)
+            : SKColor(red: 0.16, green: 0.20, blue: 0.18, alpha: 1.0)
+    }
+
+    static func fillColor(for terrain: BaseTerrain, isTangSongScenario: Bool = false) -> SKColor {
+        if isTangSongScenario {
+            switch terrain {
+            case .plain:
+                return SKColor(red: 0.74, green: 0.74, blue: 0.55, alpha: 1)
+            case .forest:
+                return SKColor(red: 0.23, green: 0.46, blue: 0.32, alpha: 1)
+            case .mountain:
+                return SKColor(red: 0.47, green: 0.48, blue: 0.42, alpha: 1)
+            case .hill:
+                return SKColor(red: 0.58, green: 0.61, blue: 0.38, alpha: 1)
+            case .city:
+                return SKColor(red: 0.72, green: 0.65, blue: 0.49, alpha: 1)
+            case .fortress:
+                return SKColor(red: 0.41, green: 0.38, blue: 0.32, alpha: 1)
+            }
+        }
+
         switch terrain {
         case .plain:
             return SKColor(red: 0.63, green: 0.76, blue: 0.53, alpha: 1)
@@ -18,7 +41,18 @@ enum TerrainStyle {
         }
     }
 
-    static func strokeColor(for terrain: BaseTerrain) -> SKColor {
+    static func strokeColor(for terrain: BaseTerrain, isTangSongScenario: Bool = false) -> SKColor {
+        if isTangSongScenario {
+            switch terrain {
+            case .fortress:
+                return SKColor(red: 0.18, green: 0.13, blue: 0.10, alpha: 1)
+            case .city:
+                return SKColor(red: 0.35, green: 0.25, blue: 0.18, alpha: 1)
+            default:
+                return SKColor(red: 0.22, green: 0.28, blue: 0.22, alpha: 1)
+            }
+        }
+
         switch terrain {
         case .fortress:
             return SKColor(red: 0.16, green: 0.17, blue: 0.18, alpha: 1)
@@ -29,7 +63,16 @@ enum TerrainStyle {
         }
     }
 
-    static func textColor(for terrain: BaseTerrain) -> SKColor {
+    static func textColor(for terrain: BaseTerrain, isTangSongScenario: Bool = false) -> SKColor {
+        if isTangSongScenario {
+            switch terrain {
+            case .forest, .fortress:
+                return SKColor(red: 0.95, green: 0.93, blue: 0.82, alpha: 1)
+            default:
+                return SKColor(red: 0.12, green: 0.10, blue: 0.08, alpha: 1)
+            }
+        }
+
         switch terrain {
         case .forest, .fortress:
             return SKColor(white: 0.96, alpha: 1)
@@ -38,7 +81,16 @@ enum TerrainStyle {
         }
     }
 
-    static func unitFillColor(for faction: Faction) -> SKColor {
+    static func unitFillColor(for faction: Faction, isTangSongScenario: Bool = false) -> SKColor {
+        if isTangSongScenario {
+            switch faction {
+            case .germany:
+                return SKColor(red: 0.33, green: 0.24, blue: 0.17, alpha: 1)
+            case .allies:
+                return SKColor(red: 0.62, green: 0.13, blue: 0.12, alpha: 1)
+            }
+        }
+
         switch faction {
         case .germany:
             return SKColor(red: 0.23, green: 0.24, blue: 0.25, alpha: 1)
@@ -47,7 +99,16 @@ enum TerrainStyle {
         }
     }
 
-    static func unitStrokeColor(for faction: Faction) -> SKColor {
+    static func unitStrokeColor(for faction: Faction, isTangSongScenario: Bool = false) -> SKColor {
+        if isTangSongScenario {
+            switch faction {
+            case .germany:
+                return SKColor(red: 0.16, green: 0.10, blue: 0.06, alpha: 1)
+            case .allies:
+                return SKColor(red: 0.31, green: 0.03, blue: 0.03, alpha: 1)
+            }
+        }
+
         switch faction {
         case .germany:
             return SKColor(red: 0.05, green: 0.05, blue: 0.05, alpha: 1)
@@ -56,7 +117,28 @@ enum TerrainStyle {
         }
     }
 
-    static func deploymentUnitColor(for faction: Faction, role: UnitDeploymentRole) -> SKColor {
+    static func deploymentUnitColor(
+        for faction: Faction,
+        role: UnitDeploymentRole,
+        isTangSongScenario: Bool = false
+    ) -> SKColor {
+        if isTangSongScenario {
+            switch (faction, role) {
+            case (.germany, .frontUnit):
+                return SKColor(red: 0.66, green: 0.31, blue: 0.16, alpha: 1)
+            case (.germany, .depthUnit):
+                return SKColor(red: 0.56, green: 0.48, blue: 0.23, alpha: 1)
+            case (.germany, .garrisonUnit):
+                return SKColor(red: 0.38, green: 0.36, blue: 0.32, alpha: 1)
+            case (.allies, .frontUnit):
+                return SKColor(red: 0.78, green: 0.16, blue: 0.14, alpha: 1)
+            case (.allies, .depthUnit):
+                return SKColor(red: 0.17, green: 0.47, blue: 0.42, alpha: 1)
+            case (.allies, .garrisonUnit):
+                return SKColor(red: 0.43, green: 0.34, blue: 0.56, alpha: 1)
+            }
+        }
+
         switch (faction, role) {
         case (.germany, .frontUnit):
             return SKColor(red: 0.95, green: 0.22, blue: 0.16, alpha: 1)
@@ -73,7 +155,18 @@ enum TerrainStyle {
         }
     }
 
-    static func controllerColor(for faction: Faction?) -> SKColor {
+    static func controllerColor(for faction: Faction?, isTangSongScenario: Bool = false) -> SKColor {
+        if isTangSongScenario {
+            switch faction {
+            case .germany:
+                return SKColor(red: 0.47, green: 0.25, blue: 0.14, alpha: 1)
+            case .allies:
+                return SKColor(red: 0.70, green: 0.08, blue: 0.07, alpha: 1)
+            case nil:
+                return SKColor(red: 0.69, green: 0.61, blue: 0.38, alpha: 1)
+            }
+        }
+
         switch faction {
         case .germany:
             return SKColor(red: 0.08, green: 0.08, blue: 0.08, alpha: 1)
@@ -84,7 +177,18 @@ enum TerrainStyle {
         }
     }
 
-    static func supplyColor(for supplyState: SupplyState) -> SKColor {
+    static func supplyColor(for supplyState: SupplyState, isTangSongScenario: Bool = false) -> SKColor {
+        if isTangSongScenario {
+            switch supplyState {
+            case .supplied:
+                return SKColor(red: 0.16, green: 0.56, blue: 0.40, alpha: 1)
+            case .lowSupply:
+                return SKColor(red: 0.83, green: 0.48, blue: 0.16, alpha: 1)
+            case .encircled:
+                return SKColor(red: 0.73, green: 0.08, blue: 0.07, alpha: 1)
+            }
+        }
+
         switch supplyState {
         case .supplied:
             return SKColor(red: 0.18, green: 0.72, blue: 0.35, alpha: 1)
@@ -100,4 +204,34 @@ enum TerrainStyle {
     static let attackFill = SKColor(red: 0.92, green: 0.14, blue: 0.12, alpha: 0.34)
     static let roadStroke = SKColor(red: 0.80, green: 0.73, blue: 0.56, alpha: 1)
     static let riverStroke = SKColor(red: 0.18, green: 0.60, blue: 0.95, alpha: 1)
+
+    static func selectedStrokeColor(isTangSongScenario: Bool) -> SKColor {
+        isTangSongScenario
+            ? SKColor(red: 0.95, green: 0.72, blue: 0.22, alpha: 1)
+            : selectedStroke
+    }
+
+    static func movementFillColor(isTangSongScenario: Bool) -> SKColor {
+        isTangSongScenario
+            ? SKColor(red: 0.21, green: 0.59, blue: 0.50, alpha: 0.32)
+            : movementFill
+    }
+
+    static func attackFillColor(isTangSongScenario: Bool) -> SKColor {
+        isTangSongScenario
+            ? SKColor(red: 0.74, green: 0.11, blue: 0.09, alpha: 0.34)
+            : attackFill
+    }
+
+    static func roadStrokeColor(isTangSongScenario: Bool) -> SKColor {
+        isTangSongScenario
+            ? SKColor(red: 0.57, green: 0.40, blue: 0.22, alpha: 1)
+            : roadStroke
+    }
+
+    static func riverStrokeColor(isTangSongScenario: Bool) -> SKColor {
+        isTangSongScenario
+            ? SKColor(red: 0.16, green: 0.50, blue: 0.62, alpha: 1)
+            : riverStroke
+    }
 }

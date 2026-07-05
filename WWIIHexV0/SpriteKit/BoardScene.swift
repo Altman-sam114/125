@@ -22,14 +22,14 @@ final class BoardScene: SKScene {
         // v0.21: resizeFill 让 scene 跟 SKView 同尺寸；hex 大小由 HexLayout.fixed 决定（不塞满），
         // 超出 view 的 hex 画在 scene 外，由平移（任务 0.2）暴露。
         scaleMode = .resizeFill
-        backgroundColor = SKColor(red: 0.16, green: 0.20, blue: 0.18, alpha: 1.0)
+        backgroundColor = TerrainStyle.boardBackground(isTangSongScenario: false)
         setupCamera()
     }
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         scaleMode = .resizeFill
-        backgroundColor = SKColor(red: 0.16, green: 0.20, blue: 0.18, alpha: 1.0)
+        backgroundColor = TerrainStyle.boardBackground(isTangSongScenario: false)
         setupCamera()
     }
 
@@ -213,6 +213,7 @@ final class BoardScene: SKScene {
         }
 
         let state = renderState.gameState
+        backgroundColor = TerrainStyle.boardBackground(isTangSongScenario: state.isTangSongScenario)
         // v0.21: 固定大 hexSize（~36），不再 fitted 塞满 scene。超出靠平移（任务 0.2）。
         let layout = HexLayout.fixed(mapWidth: state.map.width, mapHeight: state.map.height)
         self.layout = layout
@@ -220,8 +221,8 @@ final class BoardScene: SKScene {
         drawTiles(renderState: renderState, layout: layout)
         drawLayerOverlay(renderState: renderState, layout: layout)
         drawRegionOverlays(renderState: renderState, layout: layout)
-        drawRoads(map: state.map, layout: layout)
-        drawRivers(map: state.map, layout: layout)
+        drawRoads(map: state.map, layout: layout, isTangSongScenario: state.isTangSongScenario)
+        drawRivers(map: state.map, layout: layout, isTangSongScenario: state.isTangSongScenario)
         drawSiegeOverlays(renderState: renderState, layout: layout)
         drawPlannedOperations(renderState: renderState, layout: layout)
         drawUnits(renderState: renderState, layout: layout)
@@ -245,13 +246,14 @@ final class BoardScene: SKScene {
                 supplySourceFaction: supplyByCoord[tile.coord],
                 isSelected: renderState.selectedHex == tile.coord,
                 isMoveHighlighted: renderState.movementHighlights.contains(tile.coord),
-                isAttackHighlighted: renderState.attackHighlights.contains(tile.coord)
+                isAttackHighlighted: renderState.attackHighlights.contains(tile.coord),
+                isTangSongScenario: state.isTangSongScenario
             )
             addChild(node)
         }
     }
 
-    private func drawRoads(map: MapState, layout: HexLayout) {
+    private func drawRoads(map: MapState, layout: HexLayout, isTangSongScenario: Bool) {
         let directions: [HexDirection] = [.east, .southEast, .southWest]
 
         for tile in map.tiles.values where tile.hasRoad {
@@ -269,7 +271,7 @@ final class BoardScene: SKScene {
                 path.addLine(to: end)
 
                 let road = SKShapeNode(path: path)
-                road.strokeColor = TerrainStyle.roadStroke
+                road.strokeColor = TerrainStyle.roadStrokeColor(isTangSongScenario: isTangSongScenario)
                 road.lineWidth = max(2, layout.hexSize * 0.08)
                 road.lineCap = .round
                 road.zPosition = 15
@@ -287,7 +289,8 @@ final class BoardScene: SKScene {
             let node = RegionOverlayNode(
                 region: region,
                 layout: layout,
-                isSelected: renderState.selectedRegionId == region.id
+                isSelected: renderState.selectedRegionId == region.id,
+                isTangSongScenario: renderState.gameState.isTangSongScenario
             )
             addChild(node)
         }
@@ -302,7 +305,7 @@ final class BoardScene: SKScene {
         addChild(node)
     }
 
-    private func drawRivers(map: MapState, layout: HexLayout) {
+    private func drawRivers(map: MapState, layout: HexLayout, isTangSongScenario: Bool) {
         for tile in map.tiles.values {
             let center = layout.hexToPixel(tile.coord)
             for direction in HexDirection.ordered where tile.riverEdges.contains(direction) {
@@ -312,7 +315,7 @@ final class BoardScene: SKScene {
                 path.addLine(to: edge.1)
 
                 let river = SKShapeNode(path: path)
-                river.strokeColor = TerrainStyle.riverStroke
+                river.strokeColor = TerrainStyle.riverStrokeColor(isTangSongScenario: isTangSongScenario)
                 river.lineWidth = max(3, layout.hexSize * 0.10)
                 river.lineCap = .round
                 river.zPosition = 18
@@ -327,12 +330,23 @@ final class BoardScene: SKScene {
         }
 
         for overlay in renderState.displayAdapter.siegeOverlays(viewerFaction: renderState.viewerFaction) {
-            drawSiegeRegionOverlay(overlay, layout: layout)
+            drawSiegeRegionOverlay(
+                overlay,
+                layout: layout,
+                isTangSongScenario: renderState.gameState.isTangSongScenario
+            )
         }
     }
 
-    private func drawSiegeRegionOverlay(_ overlay: SiegeOverlayState, layout: HexLayout) {
-        let strokeColor = siegeStrokeColor(for: overlay)
+    private func drawSiegeRegionOverlay(
+        _ overlay: SiegeOverlayState,
+        layout: HexLayout,
+        isTangSongScenario: Bool
+    ) {
+        let strokeColor = siegeStrokeColor(
+            for: overlay,
+            isTangSongScenario: isTangSongScenario
+        )
         let fillColor = strokeColor.withAlphaComponent(0.07)
         let path = siegeHexPath(layout: layout)
 
@@ -384,7 +398,17 @@ final class BoardScene: SKScene {
         addChild(label)
     }
 
-    private func siegeStrokeColor(for overlay: SiegeOverlayState) -> SKColor {
+    private func siegeStrokeColor(for overlay: SiegeOverlayState, isTangSongScenario: Bool) -> SKColor {
+        if isTangSongScenario {
+            if overlay.fortification == 0 {
+                return SKColor(red: 0.75, green: 0.08, blue: 0.07, alpha: 0.94)
+            }
+            if overlay.fortificationRatio <= 0.35 {
+                return SKColor(red: 0.82, green: 0.36, blue: 0.13, alpha: 0.94)
+            }
+            return SKColor(red: 0.86, green: 0.61, blue: 0.22, alpha: 0.94)
+        }
+
         if overlay.fortification == 0 {
             return SKColor(red: 0.92, green: 0.18, blue: 0.12, alpha: 0.94)
         }
@@ -437,10 +461,14 @@ final class BoardScene: SKScene {
                 drawOperationArrow(
                     from: sourcePoint,
                     to: targetPoint,
-                    type: operation.directiveType
+                    type: operation.directiveType,
+                    isTangSongScenario: renderState.gameState.isTangSongScenario
                 )
             } else {
-                drawOperationHoldMarker(at: sourcePoint)
+                drawOperationHoldMarker(
+                    at: sourcePoint,
+                    isTangSongScenario: renderState.gameState.isTangSongScenario
+                )
             }
         }
     }
@@ -467,13 +495,18 @@ final class BoardScene: SKScene {
         return layout.hexToPixel(hex)
     }
 
-    private func drawOperationArrow(from start: CGPoint, to end: CGPoint, type: DirectiveType) {
+    private func drawOperationArrow(
+        from start: CGPoint,
+        to end: CGPoint,
+        type: DirectiveType,
+        isTangSongScenario: Bool
+    ) {
         let path = CGMutablePath()
         path.move(to: start)
         path.addLine(to: end)
 
         let line = SKShapeNode(path: path)
-        line.strokeColor = operationColor(for: type)
+        line.strokeColor = operationColor(for: type, isTangSongScenario: isTangSongScenario)
         line.lineWidth = 4
         line.lineCap = .round
         line.zPosition = 26
@@ -497,24 +530,33 @@ final class BoardScene: SKScene {
         headPath.addLine(to: right)
 
         let head = SKShapeNode(path: headPath)
-        head.strokeColor = operationColor(for: type)
+        head.strokeColor = operationColor(for: type, isTangSongScenario: isTangSongScenario)
         head.lineWidth = 4
         head.lineCap = .round
         head.zPosition = 27
         addChild(head)
     }
 
-    private func drawOperationHoldMarker(at point: CGPoint) {
+    private func drawOperationHoldMarker(at point: CGPoint, isTangSongScenario: Bool) {
         let marker = SKShapeNode(circleOfRadius: 18)
         marker.position = point
-        marker.strokeColor = operationColor(for: .defend)
-        marker.fillColor = operationColor(for: .defend).withAlphaComponent(0.16)
+        marker.strokeColor = operationColor(for: .defend, isTangSongScenario: isTangSongScenario)
+        marker.fillColor = operationColor(for: .defend, isTangSongScenario: isTangSongScenario).withAlphaComponent(0.16)
         marker.lineWidth = 4
         marker.zPosition = 26
         addChild(marker)
     }
 
-    private func operationColor(for type: DirectiveType) -> SKColor {
+    private func operationColor(for type: DirectiveType, isTangSongScenario: Bool) -> SKColor {
+        if isTangSongScenario {
+            switch type {
+            case .attack:
+                return SKColor(red: 0.78, green: 0.14, blue: 0.11, alpha: 0.86)
+            case .defend:
+                return SKColor(red: 0.17, green: 0.50, blue: 0.42, alpha: 0.86)
+            }
+        }
+
         switch type {
         case .attack:
             return SKColor(red: 0.95, green: 0.32, blue: 0.20, alpha: 0.85)
@@ -560,7 +602,8 @@ final class BoardScene: SKScene {
                     for: division,
                     renderState: renderState,
                     deploymentManager: deploymentManager
-                )
+                ),
+                isTangSongScenario: renderState.gameState.isTangSongScenario
             )
             addChild(node)
         }
@@ -579,7 +622,11 @@ final class BoardScene: SKScene {
             in: renderState.gameState.map,
             state: renderState.gameState.warDeploymentState
         )
-        return TerrainStyle.deploymentUnitColor(for: division.faction, role: role)
+        return TerrainStyle.deploymentUnitColor(
+            for: division.faction,
+            role: role,
+            isTangSongScenario: renderState.gameState.isTangSongScenario
+        )
     }
 
     private func drawEmptyState() {
