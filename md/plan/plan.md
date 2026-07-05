@@ -78,7 +78,8 @@ displayName: 建隆元年：陈桥兵变与山河一统
 - v5.4 已完成 AI 军议显示桥、simulated marshal 文案唐宋化与解释字段首轮：`DirectiveType`、`CommandCategory`、`TacticName` 提供唐宋场景感知显示名；`AgentPanelView` 在唐宋场景下显示军议、诏令朝议、方面军令、进军、骑军突进、合围、弓弩压制和死守城关等读法；`MarshalBattlefieldSummary` 携带 `scenarioId`、首都、围城、粮道优先和招抚候选 region 摘要，让 `SimulatedMarshalLLMClient` 在唐宋场景下输出宋枢密院/割据行营、州府、粮道口径的 strategicIntent、summary、rationale，以及 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 可选解释字段；`TurnManager` 会把这些字段复制到 `AgentDecisionRecord.theaterDirectiveSummary`，AI 面板只读显示诏令、朝议、招抚、转运和摘要；`GameAgent.defaultCommander` 在唐宋场景下使用宋枢密院/割据行营作为默认 AI issuer，不再把默认唐宋主路径记录成 Guderian 或 Allied Mock Commander；底层 raw case 和 `ZoneDirective -> WarCommandExecutor -> RuleEngine` 权限边界不变。
 - v5.5 已完成默认唐宋主界面术语桥、地图视觉 token 与只读粮道 overlay 首轮：`MapDisplayLayer`、`GamePhase` 和 `GameState.phaseDisplayName` 提供唐宋场景显示名；`RootGameView` 的图层、观战、面板按钮、compact tabs、棋盘 accessibility label 改为唐宋口径；`HUDView`、`CommandPanelView`、`EventLogView` 显示回合、政权、军令、战报、围城和粮道等读法；`TerrainStyle`、`HexNode`、`RegionOverlayNode`、`UnitNode`、`MapLayerOverlayNode` 和 `BoardScene` 提供唐宋墨绿底、青绿/石青/铜/朱印 palette、赭石道路、石青河流、军旗棋子和禁/骑/弩/械/守/军兵种字标；`SupplyRouteOverlayState` / `MapDisplayAdapter.supplyRouteOverlays` / `BoardScene.drawSupplyRouteOverlays` 从既有 `SupplyRules.supplyRouteSummary` 派生可见友方军队到最近可见粮源的抽象虚线。底层 raw case、命令、日志结构、补给规则和规则执行不变。
 - v5.6a 已完成外交归附与天命规则合同首轮：`DiplomaticStatus` 支持 `tributary`、`submitting`、`negotiating`；`DiplomacyState` 保存 `PacificationRecord`；`GameState` 保存向后兼容的 `MandateState`；`Command.proposeSubmission -> CommandValidator -> CommandExecutor -> RuleEngine` 可在满足国家关系、天命、首府、低 warSupport 或围城压力条件后写入关系、归附记录和天命变化。
-- v5.6b 已完成玩家招抚入口与外交面板只读展示首轮：`CommandPanelView` 新增“招抚”按钮，`AppContainer.proposeSubmissionSelected` 只提交底层 `Command.proposeSubmission`；目标优先使用选中外国首府，否则扫描当前可招抚首府；`DiplomacyPanelView` 只读展示天命分数和最近归附记录。该切片不交割地图控制权、不转换部队、不改全局战争关系、不自动执行 AI `pacificationTargets`，也不让天命影响胜利。
+- v5.6b 已完成玩家招抚入口与外交面板只读展示首轮：`CommandPanelView` 新增“招抚”按钮，`AppContainer.proposeSubmissionSelected` 只提交底层 `Command.proposeSubmission`；目标优先使用选中外国首府，否则扫描当前可招抚首府；`DiplomacyPanelView` 只读展示天命分数和最近归附记录。
+- v5.6c 已完成 AI `pacificationTargets -> Command.proposeSubmission` 安全编译桥首轮：`TurnManager` 在战争 `ZoneDirective` 执行后、`.endTurn` 前，把唐宋元帅 envelope 的首府招抚候选尝试生成辅助 `Command.proposeSubmission`，仍由 `RuleEngine -> CommandValidator -> CommandExecutor` 决定成功、拒绝或跳过，并写入 `AgentDecisionRecord.commandResults`。该切片不交割地图控制权、不转换部队、不改全局战争关系，也不让天命影响胜利。
 
 仍未完成的关键项：
 
@@ -87,7 +88,7 @@ displayName: 建隆元年：陈桥兵变与山河一统
 - 自动破城、完整外交纳土交割、完整漕运/粮队/仓储容量、唐宋专用胜利规则、治理政策和完整发布级 UI 美术/截图验收仍未落地。
 - AI 默认 issuer 与 simulated rationale 的唐宋主路径首轮已迁移，但完整皇帝/朝廷/枢密/节度使/转运使/州府守臣/外交使者 schema、真实多 Agent JSON 和真 LLM 接入仍待后续；legacy Agent D、阿登数据与测试中的 Guderian/Rundstedt/Eisenhower 仍保留作兼容参考。
 
-下一轮可继续推进 v5.6：让 AI `pacificationTargets` 安全编译为合法 `Command.proposeSubmission`、设计治理政策，或设计归附后的控制权/部队处理方案；仍必须走 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不得让 UI、事件或 Agent 直接改 `GameState`。
+下一轮可继续推进 v5.6：设计治理政策、唐宋胜利判断，或设计归附后的控制权/部队处理方案；仍必须走 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不得让 UI、事件或 Agent 直接改 `GameState`。
 
 ## 4. md 目录职责
 
@@ -142,7 +143,7 @@ md/
 | v5.3 | 古代军制、粮草、围城与经济 | 进行中 | 兵种、生产、补给、粮道、围城最小闭环，资源显示迁为丁口/钱帛/粮草 | `v5.3_rules_siege_grain_record.md` |
 | v5.4 | 唐宋 AI Agent 分层 | 进行中 | 皇帝/朝廷/枢密/节度使/转运使/州府守臣/外交使者分层，保留 directive 管线 | `v5.4_agent_schema_record.md` |
 | v5.5 | 发布级 UI 与地图视觉 | 已完成术语桥、视觉 token、只读粮道 overlay 首轮 | 第一屏地图、HUD、军令、州府、府库、外交、战报、军议可读；移除默认二战文案 | `v5.5_ui_visual_record.md` |
-| v5.6 | 外交、归附、天命与治理 | 已完成规则合同和玩家入口/只读展示首轮 | 多政权关系、归附、天命/国威、治理和事件闭环 | `v5.6a_diplomacy_mandate_contract_record.md`、`v5.6b_player_submission_diplomacy_panel_record.md`、`v5.6_diplomacy_mandate_record.md` |
+| v5.6 | 外交、归附、天命与治理 | 已完成规则合同、玩家入口/只读展示和 AI 招抚辅助桥首轮 | 多政权关系、归附、天命/国威、治理和事件闭环 | `v5.6a_diplomacy_mandate_contract_record.md`、`v5.6b_player_submission_diplomacy_panel_record.md`、`v5.6c_ai_pacification_submission_record.md`、`v5.6_diplomacy_mandate_record.md` |
 | v5.7 | 教程、剧本包装与可玩闭环 | 未开始 | 开局引导、势力选择、战报、新局/重置，让普通玩家能完成首发剧本 | `v5.7_playable_loop_record.md` |
 | v5.8 | 发布候选硬化 | 未开始 | 玩家可见残留扫描、资源授权、性能和文档口径收口 | `v5.8_release_candidate_audit.md` |
 | v5.9 | 可发布版本收口 | 未开始 | 首发剧本可完整试玩，Agent C 验收通过，README/flow/update_log 反映唐宋产品 | `v5.9_release_acceptance.md` |
@@ -219,27 +220,28 @@ v5.3 收口标准：
 
 ### 8.1 v5.6 当前状态与后续风险
 
-v5.6 外交、归附、天命与治理不能只做 UI 或 Agent 文案。当前已完成 v5.6a 规则合同首轮和 v5.6b 玩家入口/只读展示首轮：
+v5.6 外交、归附、天命与治理不能只做 UI 或 Agent 文案。当前已完成 v5.6a 规则合同首轮、v5.6b 玩家入口/只读展示首轮和 v5.6c AI 招抚辅助桥首轮：
 
 - 新增 `MandateState`，在 `GameState` 中向后兼容保存 faction 级天命/合法性分数。
 - `DiplomacyState` 扩展 `tributary`、`submitting`、`negotiating`，并保存 `PacificationRecord`。
 - 新增 `Command.proposeSubmission(negotiatorId:targetCountryId:targetRegionIds:)`，经 `CommandValidator -> CommandExecutor -> RuleEngine` 写入国家关系、归附记录、天命变化和 diplomacy 日志。
 - 唐宋默认剧本初始化宋/割据天命分数。
 - 新增玩家“招抚”按钮，只通过 `AppContainer.submit` 提交底层命令；外交面板只读展示天命和归附记录。
-- 当前不交割 hex / region controller，不转换部队，不改变 `TurnOrderState.relations`，不让 AI `pacificationTargets` 自动执行。
+- AI 元帅 `pacificationTargets` 可由 `TurnManager` 在 `.endTurn` 前尝试生成辅助 `Command.proposeSubmission`，仍由 `RuleEngine` 决定成功、拒绝或跳过。
+- 当前不交割 hex / region controller，不转换部队，不改变 `TurnOrderState.relations`，不让 `pacificationTargets` 自动纳土、停战或改变控制权。
 
 仍保留的风险：
 
 - `DiplomacyState` 与 `TurnOrderState.relations` 仍是两套关系来源；战争合法性当前主要由 `WarRelationRules` 读取 turn order 关系，不能只改外交面板。
 - `VictoryRules` 仍有 legacy 阿登胜利口径；天命/国威若要影响统一评价或胜利，必须先设计规则层状态和唐宋胜利判断。
-- v5.4 的 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 仍是解释字段；v5.6b 还没有把它们编译成 `Command.proposeSubmission`。
+- v5.4 的 `mandateIntent`、`courtPolicy` 和 `supplyPriorities` 仍是解释字段；v5.6c 只把 `pacificationTargets` 桥接为规则校验的招抚提议，且目标仍限于可从首府 region 反查的外国国家。
 - 当前唐宋政权仍桥接到 legacy `.allies/.germany`，不能宣称吴越等单国已经实现 tactical neutral 或独立战争关系。
 - 当前 UI 只能从首府 region 推断目标国家，不能从吴越其他州府推断吴越。
 
 建议下一轮并发切片：
 
 - Core/Rules 单一 owner：继续设计 `GovernancePolicy`、唐宋胜利条件和单国归附后的控制权/部队处理方案。
-- Data/AI 只读 owner：审计 `DiplomacyState` 与 `TurnOrderState.relations` 同步方案，规定 AI 解释字段如何安全编译为合法命令。
+- Data/AI 只读 owner：审计 `DiplomacyState` 与 `TurnOrderState.relations` 同步方案，规定 `mandateIntent`、`courtPolicy` 和 `supplyPriorities` 后续是否需要落到规则命令。
 - UI owner：等规则状态确定后，只读展示归附记录、天命/国威和治理政策，不写 `GameState`。
 
 ## 9. 后续阶段文档建议
@@ -257,6 +259,7 @@ md/prompt/v5.0-唐宋迁移/
 ├── v5.5_ui_visual_record.md              # 已创建：默认唐宋主界面术语桥和视觉 token 首轮
 ├── v5.6a_diplomacy_mandate_contract_record.md # 已创建：外交归附与天命规则合同首轮
 ├── v5.6b_player_submission_diplomacy_panel_record.md # 已创建：玩家招抚入口与外交面板只读首轮
+├── v5.6c_ai_pacification_submission_record.md # 已创建：AI 招抚候选到规则命令安全桥首轮
 ├── v5.6_diplomacy_mandate_record.md
 ├── v5.7_playable_loop_record.md
 ├── v5.8_release_candidate_audit.md

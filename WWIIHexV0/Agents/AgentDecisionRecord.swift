@@ -87,6 +87,53 @@ struct CommandResultSummary: Identifiable, Codable, Equatable {
             errors: result.validation.errors.map(\.rawValue)
         )
     }
+
+    static func aiAuxiliaryCommand(
+        commandIndex: Int,
+        source: String,
+        command: Command,
+        result: CommandResult,
+        isTangSongScenario: Bool = false
+    ) -> CommandResultSummary {
+        let divisionId = command.actingDivisionId
+        let sourceKey = source.replacingOccurrences(of: " ", with: "_")
+        return CommandResultSummary(
+            id: "ai_\(sourceKey)_command_\(commandIndex)_\(divisionId ?? "none")",
+            orderIndex: commandIndex,
+            divisionId: divisionId,
+            orderType: nil,
+            commandDisplayName: command.displayName(isTangSongScenario: isTangSongScenario),
+            mappingSucceeded: true,
+            validationSucceeded: result.validation.isValid,
+            executed: result.succeeded,
+            message: result.message,
+            errors: result.validation.errors.map(\.rawValue)
+        )
+    }
+
+    static func aiAuxiliarySkipped(
+        commandIndex: Int,
+        source: String,
+        targetRegionId: RegionId,
+        message: String,
+        isTangSongScenario: Bool = false
+    ) -> CommandResultSummary {
+        let sourceKey = source.replacingOccurrences(of: " ", with: "_")
+        return CommandResultSummary(
+            id: "ai_\(sourceKey)_skipped_\(commandIndex)_\(targetRegionId.rawValue)",
+            orderIndex: commandIndex,
+            divisionId: nil,
+            orderType: nil,
+            commandDisplayName: isTangSongScenario
+                ? "招抚候选(\(targetRegionId.rawValue))"
+                : "PacificationCandidate(\(targetRegionId.rawValue))",
+            mappingSucceeded: true,
+            validationSucceeded: nil,
+            executed: false,
+            message: message,
+            errors: []
+        )
+    }
 }
 
 struct TheaterDirectiveExplanationSummary: Codable, Equatable {

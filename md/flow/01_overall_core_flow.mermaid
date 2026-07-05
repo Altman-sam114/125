@@ -15,7 +15,8 @@ flowchart TD
     DIP["DiplomacyState + MandateState<br/>国家关系 / 归附记录 / 天命"]:::state
 
     PLAYER["玩家操作<br/>tap / move / attack / proposeSubmission / endTurn"]:::input
-    AI["AI / 将领<br/>TheaterCommanderPool<br/>ZoneCommanderAgent"]:::input
+    AI["AI 元帅/将领<br/>MarshalAgent / TheaterCommanderPool<br/>ZoneCommanderAgent"]:::input
+    AIPAC["AI 招抚辅助命令<br/>pacificationTargets -> Command.proposeSubmission<br/>只提议，仍由规则层决定成败"]:::command
     ZD["ZoneDirective<br/>attack / defend<br/>category / tactic / target"]:::command
     WCE["WarCommandExecutor<br/>directive -> Command"]:::command
     CMD["Command<br/>move / attack / besiege / demandSurrender / proposeSubmission / endTurn"]:::command
@@ -40,6 +41,7 @@ flowchart TD
 
     PLAYER --> CMD
     AI --> ZD --> WCE --> CMD
+    AI --> AIPAC --> CMD
     CMD --> RE --> HEX
     RE --> ECO
     RE --> DIP

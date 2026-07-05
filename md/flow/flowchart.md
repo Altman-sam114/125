@@ -51,6 +51,7 @@ flowchart TD
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
     DEC["元帅 JSON 解码<br/>TheaterDirectiveDecoder<br/>提取 fenced JSON、校验 id 与 schema"]:::command
     COMP["元帅意图编译<br/>TheaterDirectiveCompiler<br/>把 TheaterDirective 降级成 ZoneDirective"]:::command
+    AIPAC["AI 招抚辅助命令<br/>pacificationTargets -> Command.proposeSubmission<br/>只提议，仍由规则层决定成败"]:::command
     ZD["战争指令<br/>ZoneDirective<br/>方面级 attack/defend 意图"]:::command
     WCE["指令翻译器<br/>WarCommandExecutor<br/>把方面意图翻成具体单位命令"]:::command
     CMD["底层命令<br/>Command<br/>move / attack / besiege / demandSurrender / proposeSubmission / endTurn"]:::command
@@ -78,6 +79,7 @@ flowchart TD
     TURN --> AI
     PLAYER --> CMD
     AI --> DEC --> COMP --> ZD --> WCE --> CMD
+    AI --> AIPAC --> CMD
     CMD --> RE --> HEX
     RE --> ECO
     RE --> DIP
@@ -362,9 +364,9 @@ flowchart TD
 
 ## 4. AI / 元帅决策链：AI 怎么下命令
 
-这张图看 v0.5 分支默认 AI 主路径。AI 不直接控制单位，也不直接改地图；元帅先读取降维战场摘要，模拟 LLM 输出 `TheaterDirectiveEnvelope` JSON，经 decoder 校验和 compiler 降级后，形成战区级 `DirectiveEnvelope`。`WarCommandExecutor` 再把这些战术翻译成底层 `Command`，最后交给 `RuleEngine`。
+这张图看 v0.5 分支默认 AI 主路径。AI 不直接控制单位，也不直接改地图；元帅先读取降维战场摘要，模拟 LLM 输出 `TheaterDirectiveEnvelope` JSON，经 decoder 校验和 compiler 降级后，形成战区级 `DirectiveEnvelope`。`WarCommandExecutor` 再把这些战术翻译成底层 `Command`，最后交给 `RuleEngine`。v5.6c 另有一条 AI 招抚辅助桥：`pacificationTargets` 不进入 `WarCommandExecutor`，而是由 `TurnManager` 在战争指令后、`.endTurn` 前尝试生成 `Command.proposeSubmission`，仍由 `RuleEngine` 决定成败。
 
-当前 v0.5 的默认 AI 主线是 `MarshalAgent -> TheaterDirective JSON -> TheaterDirectiveDecoder -> TheaterDirectiveCompiler -> ZoneDirective -> WarCommandExecutor -> RuleEngine`。旧 v0.37 `TheaterCommanderPool -> ZoneCommanderAgent` 作为 fallback 和显式 `.zoneDirective` 路径保留。统治者层只作为后续上游预留，当前不在主链路调用。旧 Agent D 管线仍保留，但默认不走。
+当前 v0.5 的默认 AI 战争主线是 `MarshalAgent -> TheaterDirective JSON -> TheaterDirectiveDecoder -> TheaterDirectiveCompiler -> ZoneDirective -> WarCommandExecutor -> RuleEngine`。v5.6c 的 AI 招抚辅助主线是 `TheaterDirectiveEnvelope.pacificationTargets -> TurnManager.executePacificationTargets -> Command.proposeSubmission -> RuleEngine`。旧 v0.37 `TheaterCommanderPool -> ZoneCommanderAgent` 作为 fallback 和显式 `.zoneDirective` 路径保留。统治者层只作为后续上游预留，当前不在主链路调用。旧 Agent D 管线仍保留，但默认不走。
 
 ```mermaid
 flowchart TD
@@ -380,7 +382,8 @@ flowchart TD
     ENV["指令信封<br/>DirectiveEnvelope<br/>收集编译后的 ZoneDirective"]:::command
     TACTIC["高级战术路由<br/>TacticName<br/>raw case 保持 Codable；唐宋显示为进军、骑军突进、合围、弓弩压制等"]:::command
     WCE["指令执行器<br/>WarCommandExecutor.execute<br/>按战术 profile 选择单位、目标和 fallback"]:::command
-    BOTTOM["具体单位命令<br/>Command<br/>attack / move / hold / allowRetreat"]:::command
+    BOTTOM["具体单位命令<br/>Command<br/>attack / move / hold / allowRetreat / besiege / demandSurrender"]:::command
+    PAC["AI 招抚辅助桥<br/>TurnManager.executePacificationTargets<br/>pacificationTargets -> Command.proposeSubmission<br/>不经过 WarCommandExecutor"]:::command
     RE["统一规则校验执行<br/>RuleEngine<br/>AI 和玩家共用同一套规则"]:::rules
     RECORD["指令复盘记录<br/>AgentDecisionRecord + WarDirectiveRecord<br/>保存诏令朝议摘要、tactic、target、结果、拒绝原因"]:::ui
     PANEL["AI 面板<br/>AgentPanelView<br/>显示军议、诏令/朝议、招抚/转运和方面军令"]:::ui
@@ -389,7 +392,9 @@ flowchart TD
     START --> CHECK
     CHECK -->|否| STOP
     CHECK -->|是| REFRESH --> TM --> SUM --> LLM --> DEC --> COMP --> ENV
-    ENV --> TACTIC --> WCE --> BOTTOM --> RE --> RECORD --> END
+    ENV --> TACTIC --> WCE --> BOTTOM --> RE --> RECORD
+    ENV --> PAC --> RE
+    RE --> END
     RECORD --> PANEL
 
     FALLBACK["Fallback 将军池<br/>TheaterCommanderPool + ZoneCommanderAgent<br/>元帅 JSON 无效或某 zone 无指令时使用"]:::ai

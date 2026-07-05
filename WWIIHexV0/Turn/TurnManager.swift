@@ -241,6 +241,7 @@ struct TurnManager {
                 rawJSON: rawJSON,
                 parsedIntent: resolution.theaterEnvelope?.strategicIntent ?? "marshal directives",
                 theaterDirectiveSummary: resolution.theaterEnvelope.map(Self.theaterDirectiveSummary),
+                pacificationTargets: resolution.theaterEnvelope?.pacificationTargets ?? [],
                 providerSuffix: "MarshalDirective",
                 additionalDiagnostics: diagnostics + resolution.diagnostics
             )
@@ -280,6 +281,7 @@ struct TurnManager {
         rawJSON: String,
         parsedIntent: String,
         theaterDirectiveSummary: TheaterDirectiveExplanationSummary? = nil,
+        pacificationTargets: [RegionId] = [],
         providerSuffix: String,
         additionalDiagnostics: [String]
     ) -> AgentTurnOutcome {
@@ -340,6 +342,13 @@ struct TurnManager {
             directiveRecords.append(record)
         }
 
+        executePacificationTargets(
+            pacificationTargets,
+            faction: faction,
+            in: &nextState,
+            commandResults: &commandResults
+        )
+
         let endTurnResult = commandHandler.execute(.endTurn, in: nextState)
         nextState = endTurnResult.state
         commandResults.append(.endTurn(result: endTurnResult))
@@ -379,6 +388,119 @@ struct TurnManager {
             ),
             directiveRecords: directiveRecords
         )
+    }
+
+    private func executePacificationTargets(
+        _ targetRegionIds: [RegionId],
+        faction: Faction,
+        in state: inout GameState,
+        commandResults: inout [CommandResultSummary]
+    ) {
+        guard state.isTangSongScenario, !targetRegionIds.isEmpty else {
+            return
+        }
+
+        var commandIndex = 0
+        var didSucceed = false
+        for regionId in uniqueRegionIds(targetRegionIds) where !didSucceed {
+            guard let targetCountry = pacificationTargetCountry(for: regionId, faction: faction, in: state) else {
+                commandResults.append(
+                    .aiAuxiliarySkipped(
+                        commandIndex: commandIndex,
+                        source: "pacificationTargets",
+                        targetRegionId: regionId,
+                        message: "Pacification target \(regionId.rawValue) skipped: no foreign country has this capital region.",
+                        isTangSongScenario: state.isTangSongScenario
+                    )
+                )
+                commandIndex += 1
+                continue
+            }
+
+            guard let negotiator = pacificationNegotiator(for: regionId, faction: faction, in: state) else {
+                commandResults.append(
+                    .aiAuxiliarySkipped(
+                        commandIndex: commandIndex,
+                        source: "pacificationTargets",
+                        targetRegionId: regionId,
+                        message: "Pacification target \(regionId.rawValue) skipped: no active \(faction.displayName) unit can carry the proposal.",
+                        isTangSongScenario: state.isTangSongScenario
+                    )
+                )
+                commandIndex += 1
+                continue
+            }
+
+            let command = Command.proposeSubmission(
+                negotiatorId: negotiator.id,
+                targetCountryId: targetCountry.id,
+                targetRegionIds: [regionId]
+            )
+            let result = commandHandler.execute(command, in: state)
+            state = result.state
+            commandResults.append(
+                .aiAuxiliaryCommand(
+                    commandIndex: commandIndex,
+                    source: "pacificationTargets",
+                    command: command,
+                    result: result,
+                    isTangSongScenario: state.isTangSongScenario
+                )
+            )
+
+            if result.succeeded {
+                didSucceed = true
+            }
+            commandIndex += 1
+        }
+    }
+
+    private func pacificationTargetCountry(
+        for capitalRegionId: RegionId,
+        faction: Faction,
+        in state: GameState
+    ) -> CountryProfile? {
+        state.diplomacyState.countries.first {
+            $0.faction != faction && $0.capitalRegionId == capitalRegionId
+        }
+    }
+
+    private func pacificationNegotiator(
+        for targetRegionId: RegionId,
+        faction: Faction,
+        in state: GameState
+    ) -> Division? {
+        let targetHex = state.map.region(id: targetRegionId)?.representativeHex
+        return state.divisions
+            .filter {
+                $0.faction == faction &&
+                    !$0.isDestroyed &&
+                    !$0.hasActed &&
+                    !$0.isRetreating &&
+                    $0.canAct
+            }
+            .sorted {
+                guard let targetHex else {
+                    return $0.id < $1.id
+                }
+                let lhsDistance = $0.coord.distance(to: targetHex)
+                let rhsDistance = $1.coord.distance(to: targetHex)
+                if lhsDistance == rhsDistance {
+                    return $0.id < $1.id
+                }
+                return lhsDistance < rhsDistance
+            }
+            .first
+    }
+
+    private func uniqueRegionIds(_ regionIds: [RegionId]) -> [RegionId] {
+        var seen: Set<RegionId> = []
+        var result: [RegionId] = []
+        for regionId in regionIds where !seen.contains(regionId) {
+            seen.insert(regionId)
+            result.append(regionId)
+        }
+        return result
     }
 
     private func isAITurn(faction: Faction, state: GameState) -> Bool {

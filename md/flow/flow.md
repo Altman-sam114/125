@@ -367,6 +367,15 @@ v5.6b 当前已落地：
 - `AppContainer.selectedSubmissionTarget` 只从外国首府 region 推断目标国家；优先使用当前选中首府，否则自动扫描当前可通过 `CommandValidator` 的首府候选。
 - `DiplomacyPanelView` 只读展示 `MandateState` 和最近 `PacificationRecord`，唐宋场景下显示外交、天命、诸国、集团、关系和归附记录。
 
+v5.6c 当前已落地：
+
+- `TurnManager.runMarshalDirectiveTurn` 会读取元帅 envelope 的 `pacificationTargets`。
+- `TurnManager.executeDirectiveEnvelope` 在战争 `ZoneDirective` 执行后、`.endTurn` 前调用 `executePacificationTargets`。
+- `executePacificationTargets` 只在唐宋场景中运行，并把首府 region 候选反查为外国 `CountryProfile`。
+- AI 招抚候选会选择当前 faction 的未行动、未撤退、可行动军队作为谈判军队，生成辅助 `Command.proposeSubmission(negotiatorId:targetCountryId:targetRegionIds:)`。
+- 辅助命令仍通过 `commandHandler.execute -> RuleEngine -> CommandValidator -> CommandExecutor` 决定成败；成功、规则拒绝或跳过都会写入 `AgentDecisionRecord.commandResults`。
+- 每个 AI 回合最多 1 个成功招抚提议，避免单轮把多个国家关系同时推进。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -379,11 +388,24 @@ CommandPanelView
   -> DiplomacyPanelView read-only
 ```
 
-v5.6a/v5.6b 当前没有做：
+v5.6c 的 AI 招抚辅助链路：
+
+```text
+TheaterDirectiveEnvelope.pacificationTargets
+  -> TurnManager.executeDirectiveEnvelope
+  -> TurnManager.executePacificationTargets
+  -> Command.proposeSubmission
+  -> RuleEngine
+  -> CommandValidator / CommandExecutor
+  -> AgentDecisionRecord.commandResults
+  -> DiplomacyState + MandateState on success
+```
+
+v5.6a/v5.6b/v5.6c 当前没有做：
 
 - 不改变 `TurnOrderState.relations` 的 `.allies/.germany` 全局战争关系。
 - 不交割 hex / region controller，不转换或删除部队，不刷新 theater/front/deploy。
-- 不让 `TheaterDirectiveEnvelope.pacificationTargets` 自动变成归附命令。
+- 不让 `TheaterDirectiveEnvelope.pacificationTargets` 自动纳土、停战或改变控制权；v5.6c 只尝试生成经规则校验的归附提议命令。
 - 不让天命影响 `VictoryRules`。
 
 后续若加入统治者层，必须满足这些边界：
@@ -1338,11 +1360,11 @@ v5.4 起，`MarshalBattlefieldSummary` 额外携带 `scenarioId`、首都 region
 ```text
 mandateIntent        # 天命/正朔意图，只解释统一、护都、恢复州府或招抚方向
 courtPolicy          # 中书枢密方针，只解释粮道、府库、攻守节奏
-pacificationTargets  # 招抚候选州府 region id，不直接改变外交或控制权
+pacificationTargets  # 招抚候选州府 region id；v5.6c 起可尝试生成规则校验的归附提议
 supplyPriorities     # 粮道优先支应 region id，不直接改变补给状态
 ```
 
-这些字段进入 `TheaterDirectiveDecoder` 的 region 存在性校验；`TheaterDirectiveCompiler` 和 `WarCommandExecutor` 当前不读取它们。v5.4 当前还会由 `TurnManager` 把字段复制成 `AgentDecisionRecord.theaterDirectiveSummary`，供 `AgentPanelView` 在唐宋场景只读显示“诏令 / 朝议 / 招抚 / 转运 / 摘要”。v5.6a 虽然新增了底层 `Command.proposeSubmission`，但这些上游解释字段仍未自动编译为归附命令。非唐宋场景仍保持 legacy 英文元帅名和模拟 JSON 文案。该变化只影响上游 JSON 解释字段和 UI 复盘，不改变 decoder 主校验、compiler 降级或后续规则执行。
+这些字段进入 `TheaterDirectiveDecoder` 的 region 存在性校验；`TheaterDirectiveCompiler` 和 `WarCommandExecutor` 当前不读取它们。v5.4 起 `TurnManager` 会把字段复制成 `AgentDecisionRecord.theaterDirectiveSummary`，供 `AgentPanelView` 在唐宋场景只读显示“诏令 / 朝议 / 招抚 / 转运 / 摘要”。v5.6c 起，`pacificationTargets` 还会在 `TurnManager.executeDirectiveEnvelope` 中、战争 `ZoneDirective` 执行后和 `.endTurn` 前，尝试生成辅助 `Command.proposeSubmission`，再由 `RuleEngine -> CommandValidator -> CommandExecutor` 决定成功、拒绝或跳过；`mandateIntent`、`courtPolicy` 和 `supplyPriorities` 仍只作解释字段。非唐宋场景仍保持 legacy 英文元帅名和模拟 JSON 文案。该变化不改变 decoder 主校验、compiler 降级、WarCommandExecutor 战争语义或地图控制权。
 
 `TheaterDirectiveDecoder` 负责从模拟 LLM 文本中提取 fenced JSON，使用 `JSONDecoder` 解码，并校验 schemaVersion、issuerId、turn、faction、zone 存在性、zone 阵营、region id、target theater/front zone 与 tactic/category 一致性。解码或校验失败时，不执行半成品 JSON，`MarshalAgent` fallback 到 `TheaterCommanderPool`。
 
