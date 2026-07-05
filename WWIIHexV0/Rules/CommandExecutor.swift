@@ -24,6 +24,8 @@ struct CommandExecutor {
             executeRepairFortification(defenderId: defenderId, targetRegionId: targetRegionId, in: &nextState)
         case .relieveSiege(let relieverId, let targetRegionId):
             executeRelieveSiege(relieverId: relieverId, targetRegionId: targetRegionId, in: &nextState)
+        case .demandSurrender(let negotiatorId, let targetRegionId):
+            executeDemandSurrender(negotiatorId: negotiatorId, targetRegionId: targetRegionId, in: &nextState)
         case .hold(let divisionId):
             executeHold(divisionId: divisionId, in: &nextState)
         case .allowRetreat(let divisionId):
@@ -240,6 +242,78 @@ struct CommandExecutor {
         }
     }
 
+    private func executeDemandSurrender(negotiatorId: String, targetRegionId: RegionId, in state: inout GameState) {
+        guard let negotiator = state.division(id: negotiatorId),
+              let region = state.map.region(id: targetRegionId),
+              let record = state.siegeState.record(for: targetRegionId),
+              record.attackerFaction == negotiator.faction,
+              record.defenderFaction == region.controller,
+              record.pressure >= siegeSupplyPressureThreshold,
+              record.fortification == 0,
+              defendersAreReadyToSurrender(record: record, in: region, state: state) else {
+            return
+        }
+
+        let capturedHexes = surrenderCandidateHexes(
+            in: region,
+            defenderFaction: record.defenderFaction,
+            map: state.map
+        )
+        guard !capturedHexes.isEmpty else {
+            return
+        }
+
+        let sourceZoneId = state.warDeploymentState.zoneId(for: negotiator.coord, map: state.map)
+        let surrenderedDefenders = state.divisions
+            .filter {
+                $0.faction == record.defenderFaction &&
+                    $0.location(in: state.map) == region.id &&
+                    !$0.isDestroyed
+            }
+            .sorted { $0.id < $1.id }
+
+        for defender in surrenderedDefenders {
+            eliminateDivision(defender, in: &state)
+        }
+
+        for hex in capturedHexes {
+            guard var tile = state.map.tile(at: hex) else { continue }
+            tile.controller = negotiator.faction
+            state.map.setTile(tile)
+            if let sourceZoneId {
+                applyStrategicAdvance(
+                    regionId: targetRegionId,
+                    hex: hex,
+                    sourceZoneId: sourceZoneId,
+                    faction: negotiator.faction,
+                    state: &state
+                )
+            }
+        }
+
+        if let negotiatorIndex = state.divisionIndex(id: negotiatorId) {
+            if let targetHex = closestHex(in: region, to: state.divisions[negotiatorIndex].coord),
+               let direction = state.divisions[negotiatorIndex].coord.direction(to: targetHex) {
+                state.divisions[negotiatorIndex].facing = direction
+            }
+            state.divisions[negotiatorIndex].hasActed = true
+        }
+
+        state.siegeState.removeRecord(for: targetRegionId)
+        _ = strategicSynchronizer.synchronizeAfterOccupationChange(
+            in: &state,
+            affectedRegionIds: [targetRegionId],
+            turn: state.turn
+        )
+
+        state.appendEvent(
+            state.isTangSongScenario
+                ? "\(negotiator.name)招降\(siegeTargetName(region))：守军纳降 \(surrenderedDefenders.count) 支，交割 \(capturedHexes.count) 个地块。"
+                : "\(negotiator.name) demanded surrender of \(siegeTargetName(region)): \(surrenderedDefenders.count) defender(s) capitulated, \(capturedHexes.count) hex(es) transferred.",
+            category: .siege
+        )
+    }
+
     private func executeHold(divisionId: String, in state: inout GameState) {
         guard let index = state.divisionIndex(id: divisionId) else {
             return
@@ -451,6 +525,12 @@ struct CommandExecutor {
             return destinationFaction != faction
         }
 
+        if let destinationTheaterId = state.theaterState.dynamicTheaterId(for: hex, map: state.map),
+           destinationTheaterId != TheaterId(sourceZoneId.rawValue),
+           let destinationFaction = state.theaterState.theaters[destinationTheaterId]?.controllingFaction {
+            return destinationFaction != faction
+        }
+
         if let controller = state.map.tile(at: hex)?.controller {
             return controller != faction
         }
@@ -651,6 +731,35 @@ struct CommandExecutor {
         }
 
         return max(1, relief)
+    }
+
+    private func defendersAreReadyToSurrender(
+        record: SiegeRecord,
+        in region: RegionNode,
+        state: GameState
+    ) -> Bool {
+        let defenders = state.divisions.filter {
+            $0.faction == record.defenderFaction &&
+                $0.location(in: state.map) == region.id &&
+                !$0.isDestroyed
+        }
+
+        return defenders.allSatisfy { $0.supplyState != .supplied }
+    }
+
+    private func surrenderCandidateHexes(
+        in region: RegionNode,
+        defenderFaction: Faction,
+        map: MapState
+    ) -> [HexCoord] {
+        let candidates = region.displayHexes.isEmpty ? [region.representativeHex] : region.displayHexes
+        return candidates.filter { coord in
+            guard let tile = map.tile(at: coord),
+                  tile.isCapturable else {
+                return false
+            }
+            return tile.controller == defenderFaction || tile.controller == nil
+        }
     }
 
     private func maxFortification(for region: RegionNode, in state: GameState) -> Int {

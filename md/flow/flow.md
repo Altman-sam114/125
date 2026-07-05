@@ -1115,9 +1115,9 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、地图围城 overlay 和 AI 围城指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege`、`SiegeState`、只读 `SiegeOverlayState` 和 `WarCommandExecutor.siegeCommand` 落地，但自动破城、招降、完整漕运和唐宋专用胜利规则仍未实现。
+这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState` 和 `WarCommandExecutor.siegeCommand` 落地，但自动破城、完整外交归附、完整漕运和唐宋专用胜利规则仍未实现。
 
-v5.3 围城城防、修城与解围首轮：
+v5.3 围城城防、修城、解围与招降首轮：
 
 ```text
 Command.besiege(attackerId, targetRegionId)
@@ -1145,6 +1145,16 @@ Command.relieveSiege(relieverId, targetRegionId)
   -> 消耗该军队行动，按攻防、骑军/禁军、补给状态削减 SiegeRecord.pressure
   -> pressure 降为 0 时移除 SiegeRecord
 
+Command.demandSurrender(negotiatorId, targetRegionId)
+  -> CommandValidator.validateDemandSurrender
+  -> 招降军队必须属于围城方，目标州府仍由原守方控制
+  -> 招降军队必须在目标 display hex 的 range 距离内
+  -> SiegeRecord.pressure >= 10，fortification == 0
+  -> 目标州府内不能存在仍为 supplied 的守方军队
+  -> CommandExecutor.executeDemandSurrender
+  -> 移除目标州府内已断粮/被围的守方军队，交割可占 hex 给围城方
+  -> 移除 SiegeRecord，消耗招降军队行动，并调用 StrategicStateSynchronizer 刷新派生层
+
 SiegeRecord
   -> targetRegionId
   -> attackerFaction / defenderFaction
@@ -1165,7 +1175,7 @@ ZoneDirective.attack
   -> 仍由 RuleEngine / CommandValidator.validateBesiege 最终校验执行
 ```
 
-围城压力、城防损耗和解围不会直接改 `HexTile.controller`、`RegionNode.controller`、`hexToTheater` 或 `hexToFrontZone`，也不会删除敌军。若后续要破城，仍必须通过合法移动/占领规则落到 hex。`SiegeRecord` 新增城防字段时使用 `decodeIfPresent` 兼容旧存档；旧围城记录缺少城防时按默认城防和既有 pressure 推导。
+围城压力、城防损耗和解围不会直接改 `HexTile.controller`、`RegionNode.controller`、`hexToTheater` 或 `hexToFrontZone`，也不会删除敌军。招降首轮会改变目标州府内可占 hex 控制权，但它必须通过显式 `Command.demandSurrender -> CommandValidator -> CommandExecutor` 执行，并在交割后调用 `StrategicStateSynchronizer` 刷新 Region / Theater / FrontLine / WarDeployment；它不是结束回合自动破城，也不是外交归附系统。`SiegeRecord` 新增城防字段时使用 `decodeIfPresent` 兼容旧存档；旧围城记录缺少城防时按默认城防和既有 pressure 推导。
 
 结束回合：
 

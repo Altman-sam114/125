@@ -286,13 +286,13 @@ flowchart TD
     classDef warn fill:#ffedd5,stroke:#f97316,color:#431407
 ```
 
-## 3.7 v5.3 唐宋围城城防、修城与解围首轮
+## 3.7 v5.3 唐宋围城城防、修城、解围与招降首轮
 
-这张图看 v5.3 的围城最小闭环。围城、修城和解围都是底层 `Command`，仍经 `RuleEngine` 校验执行；围城记录压力与城防，城防归零后才在回合结算压低守军补给，解围只削减 pressure 或移除 SiegeRecord，不直接占领 hex 或改 region controller。地图围城 overlay 只从 `SiegeState` 派生显示，不参与规则写入；AI 围城首轮只让 `ZoneDirective.attack` 经 `WarCommandExecutor` 生成底层 `Command.besiege`。
+这张图看 v5.3 的围城最小闭环。围城、修城、解围和招降都是底层 `Command`，仍经 `RuleEngine` 校验执行；围城记录压力与城防，城防归零后才在回合结算压低守军补给，解围只削减 pressure 或移除 SiegeRecord。招降是显式命令，只有 pressure 达标、城防归零且守军不再 supplied 后才交割目标州府可占 hex，并调用战略同步器刷新派生层。地图围城 overlay 只从 `SiegeState` 派生显示，不参与规则写入；AI 围城首轮只让 `ZoneDirective.attack` 经 `WarCommandExecutor` 生成底层 `Command.besiege`。
 
 ```mermaid
 flowchart TD
-    UI["玩家命令面板<br/>CommandPanelView<br/>选择可行动军队后发起围城、修城或解围"]:::ui
+    UI["玩家命令面板<br/>CommandPanelView<br/>选择可行动军队后发起围城、修城、解围或招降"]:::ui
     AI["AI / 方面攻击指令<br/>ZoneDirective.attack<br/>目标州府可围且无可攻击单位时"]:::command
     WCE["指令翻译<br/>WarCommandExecutor.siegeCommand<br/>生成底层 besiege，不写 SiegeState"]:::command
     CMD["围城命令<br/>Command.besiege<br/>attackerId + targetRegionId"]:::command
@@ -301,11 +301,15 @@ flowchart TD
     RVALID["修城校验<br/>CommandValidator.validateRepairFortification<br/>己控、被围、军队在州府内、城防未满"]:::rules
     RELIEVE["解围命令<br/>Command.relieveSiege<br/>友军 + 被围目标州府"]:::command
     LVALID["解围校验<br/>CommandValidator.validateRelieveSiege<br/>己控、被围、军队在州府内或距离内"]:::rules
+    SURRENDER["招降命令<br/>Command.demandSurrender<br/>围城方军队 + 被围目标州府"]:::command
+    SVALID["招降校验<br/>CommandValidator.validateDemandSurrender<br/>pressure 达标、城防归零、守军不再 supplied"]:::rules
     PASS{"校验通过?"}:::decision
     REJECT["拒绝命令<br/>CommandResult rejected<br/>GameState 不变"]:::stop
     EXEC["执行围城<br/>CommandExecutor.executeBesiege<br/>标记军队 hasActed，累积 pressure，损耗 fortification"]:::rules
     REXEC["执行修城<br/>CommandExecutor.executeRepairFortification<br/>标记军队 hasActed，恢复 fortification"]:::rules
     LEXEC["执行解围<br/>CommandExecutor.executeRelieveSiege<br/>标记军队 hasActed，削减 pressure；归零则解除记录"]:::rules
+    SEXEC["执行招降<br/>CommandExecutor.executeDemandSurrender<br/>移除纳降守军，交割可占 hex，移除 SiegeRecord"]:::rules
+    SYNC["战略同步<br/>StrategicStateSynchronizer<br/>刷新 Region / Theater / FrontLine / WarDeployment"]:::rules
     STATE["围城记录<br/>GameState.siegeState / SiegeRecord<br/>目标州府、攻守方、压力、城防、围城军队"]:::state
     DISPLAY["地图围城 overlay<br/>MapDisplayAdapter.siegeOverlays + BoardScene<br/>围城圈、压力、城防标签"]:::ui
     LOG["围城日志<br/>GameLogCategory.siege<br/>EventLog / RegionInspector 可见"]:::ui
@@ -316,16 +320,18 @@ flowchart TD
     WALL{"城防归零?<br/>fortification == 0"}:::decision
     BLOCK["城防尚存<br/>断粮压力暂未突破"]:::state
     LOW["断粮压力<br/>目标州府内 supplied 守军降为 lowSupply"]:::state
-    HEX["边界<br/>不改 HexTile.controller<br/>不改 RegionNode.controller<br/>不推进 hexToTheater / hexToFrontZone"]:::authority
+    HEX["边界<br/>围城/修城/解围/overlay 不写占领<br/>招降只通过显式 Command 交割 hex 并同步派生层"]:::authority
 
     UI --> CMD --> VALID --> PASS
     AI --> WCE --> CMD
     UI --> REPAIR --> RVALID --> PASS
     UI --> RELIEVE --> LVALID --> PASS
+    UI --> SURRENDER --> SVALID --> PASS
     PASS -->|否| REJECT
     PASS -->|围城| EXEC --> STATE --> LOG
     PASS -->|修城| REXEC --> STATE
     PASS -->|解围| LEXEC --> STATE
+    PASS -->|招降| SEXEC --> SYNC --> STATE
     STATE --> DISPLAY
     STATE --> END --> HOLD
     HOLD -->|否| LIFT

@@ -240,6 +240,20 @@ final class AppContainer: ObservableObject {
         submit(.relieveSiege(relieverId: division.id, targetRegionId: target.id))
     }
 
+    func demandSurrenderSelected() {
+        guard let division = selectedActionDivision else {
+            appendInteractionEvent("Demand surrender rejected: no active allied unit selected.")
+            return
+        }
+
+        guard let target = selectedDemandSurrenderTarget else {
+            appendInteractionEvent("Demand surrender rejected: no broken enemy siege target in range.")
+            return
+        }
+
+        submit(.demandSurrender(negotiatorId: division.id, targetRegionId: target.id))
+    }
+
     func orderSelectedGeneralHoldLine() {
         guard let zone = selectedGeneralCommandZone else {
             appendInteractionEvent("General order rejected: no allied front zone selected.")
@@ -439,6 +453,10 @@ final class AppContainer: ObservableObject {
         selectedRelieveSiegeTarget.map(siegeTargetName)
     }
 
+    var selectedDemandSurrenderTargetName: String? {
+        selectedDemandSurrenderTarget.map(siegeTargetName)
+    }
+
     private var selectedActionDivision: Division? {
         guard !observerModeEnabled else {
             return nil
@@ -522,6 +540,31 @@ final class AppContainer: ObservableObject {
             .first
     }
 
+    private var selectedDemandSurrenderTarget: RegionNode? {
+        guard let division = selectedActionDivision else {
+            return nil
+        }
+
+        if let selectedRegionId,
+           let selectedRegion = gameState.map.region(id: selectedRegionId),
+           canDemandSurrender(division: division, targetRegion: selectedRegion) {
+            return selectedRegion
+        }
+
+        return gameState.siegeState.records
+            .compactMap { gameState.map.region(id: $0.targetRegionId) }
+            .filter { canDemandSurrender(division: division, targetRegion: $0) }
+            .sorted { lhs, rhs in
+                let lhsDistance = siegeDistance(from: division, to: lhs)
+                let rhsDistance = siegeDistance(from: division, to: rhs)
+                if lhsDistance != rhsDistance {
+                    return lhsDistance < rhsDistance
+                }
+                return lhs.id.rawValue < rhs.id.rawValue
+            }
+            .first
+    }
+
     private var canIssuePlayerDirective: Bool {
         !observerModeEnabled &&
             gameState.effectiveTurnOrderState.allowsCommands(activeFaction: playerFaction, phase: gameState.phase)
@@ -574,6 +617,22 @@ final class AppContainer: ObservableObject {
         return siegeDistance(from: division, to: region) <= max(1, division.range)
     }
 
+    private func canDemandSurrender(division: Division, targetRegion region: RegionNode) -> Bool {
+        guard let record = gameState.siegeState.record(for: region.id),
+              record.attackerFaction == division.faction,
+              region.controller == record.defenderFaction,
+              record.pressure >= 10,
+              record.fortification == 0,
+              WarRelationRules().canTarget(attacker: division.faction, target: record.defenderFaction, in: gameState),
+              siegeDistance(from: division, to: region) <= max(1, division.range),
+              hasCapitulatingHexes(region, defenderFaction: record.defenderFaction),
+              defendersAreReadyToSurrender(record: record, in: region) else {
+            return false
+        }
+
+        return true
+    }
+
     private func isSiegeTarget(_ region: RegionNode) -> Bool {
         if region.city != nil || region.terrain == .fortress || region.supplyValue >= 4 {
             return true
@@ -594,6 +653,27 @@ final class AppContainer: ObservableObject {
         region.displayHexes
             .map { division.coord.distance(to: $0) }
             .min() ?? Int.max
+    }
+
+    private func hasCapitulatingHexes(_ region: RegionNode, defenderFaction: Faction) -> Bool {
+        let candidates = region.displayHexes.isEmpty ? [region.representativeHex] : region.displayHexes
+        return candidates.contains { coord in
+            guard let tile = gameState.map.tile(at: coord),
+                  tile.isCapturable else {
+                return false
+            }
+            return tile.controller == defenderFaction || tile.controller == nil
+        }
+    }
+
+    private func defendersAreReadyToSurrender(record: SiegeRecord, in region: RegionNode) -> Bool {
+        gameState.divisions
+            .filter {
+                $0.faction == record.defenderFaction &&
+                    $0.location(in: gameState.map) == region.id &&
+                    !$0.isDestroyed
+            }
+            .allSatisfy { $0.supplyState != .supplied }
     }
 
     private func siegeTargetName(_ region: RegionNode) -> String {

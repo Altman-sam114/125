@@ -13,12 +13,14 @@ struct CommandPanelView: View {
     let besiegeTargetName: String?
     let repairFortificationTargetName: String?
     let relieveSiegeTargetName: String?
+    let demandSurrenderTargetName: String?
     let onHold: () -> Void
     let onAllowRetreat: () -> Void
     let onResupply: () -> Void
     let onBesiege: () -> Void
     let onRepairFortification: () -> Void
     let onRelieveSiege: () -> Void
+    let onDemandSurrender: () -> Void
     let onEndTurn: () -> Void
 
     var body: some View {
@@ -69,6 +71,13 @@ struct CommandPanelView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!canRelieveSiege)
+
+            Button(action: onDemandSurrender) {
+                Label(demandSurrenderButtonTitle, systemImage: "checkmark.seal")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .disabled(!canDemandSurrender)
 
             Button(action: onEndTurn) {
                 Label("End Turn", systemImage: "forward.end")
@@ -122,6 +131,10 @@ struct CommandPanelView: View {
         canCommandSelectedUnit && relieveSiegeTargetName != nil
     }
 
+    private var canDemandSurrender: Bool {
+        canCommandSelectedUnit && demandSurrenderTargetName != nil
+    }
+
     private var besiegeButtonTitle: String {
         guard let besiegeTargetName else {
             return isTangSongScenario ? "围城" : "Besiege"
@@ -145,6 +158,15 @@ struct CommandPanelView: View {
         return isTangSongScenario
             ? "解围 \(relieveSiegeTargetName)"
             : "Relieve \(relieveSiegeTargetName)"
+    }
+
+    private var demandSurrenderButtonTitle: String {
+        guard let demandSurrenderTargetName else {
+            return isTangSongScenario ? "招降" : "Demand Surrender"
+        }
+        return isTangSongScenario
+            ? "招降 \(demandSurrenderTargetName)"
+            : "Demand \(demandSurrenderTargetName)"
     }
 
     private var statusText: String {

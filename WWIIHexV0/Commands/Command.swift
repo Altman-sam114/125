@@ -6,6 +6,7 @@ enum Command: Codable, Equatable {
     case besiege(attackerId: String, targetRegionId: RegionId)
     case repairFortification(defenderId: String, targetRegionId: RegionId)
     case relieveSiege(relieverId: String, targetRegionId: RegionId)
+    case demandSurrender(negotiatorId: String, targetRegionId: RegionId)
     case hold(divisionId: String)
     case allowRetreat(divisionId: String)
     case resupply(divisionId: String)
@@ -37,6 +38,8 @@ enum Command: Codable, Equatable {
                 return "修城(\(defenderId) -> \(targetRegionId.rawValue))"
             case .relieveSiege(let relieverId, let targetRegionId):
                 return "解围(\(relieverId) -> \(targetRegionId.rawValue))"
+            case .demandSurrender(let negotiatorId, let targetRegionId):
+                return "招降(\(negotiatorId) -> \(targetRegionId.rawValue))"
             case .hold(let divisionId):
                 return "固守(\(divisionId))"
             case .allowRetreat(let divisionId):
@@ -61,6 +64,8 @@ enum Command: Codable, Equatable {
             return "RepairFortification(\(defenderId) -> \(targetRegionId.rawValue))"
         case .relieveSiege(let relieverId, let targetRegionId):
             return "RelieveSiege(\(relieverId) -> \(targetRegionId.rawValue))"
+        case .demandSurrender(let negotiatorId, let targetRegionId):
+            return "DemandSurrender(\(negotiatorId) -> \(targetRegionId.rawValue))"
         case .hold(let divisionId):
             return "Hold(\(divisionId))"
         case .allowRetreat(let divisionId):
@@ -80,6 +85,7 @@ enum Command: Codable, Equatable {
              .besiege(let divisionId, _),
              .repairFortification(let divisionId, _),
              .relieveSiege(let divisionId, _),
+             .demandSurrender(let divisionId, _),
              .hold(let divisionId),
              .allowRetreat(let divisionId),
              .resupply(let divisionId):
@@ -102,6 +108,7 @@ enum Command: Codable, Equatable {
              .besiege,
              .repairFortification,
              .relieveSiege,
+             .demandSurrender,
              .hold,
              .allowRetreat,
              .queueProduction,

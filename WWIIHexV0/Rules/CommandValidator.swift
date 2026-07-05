@@ -3,6 +3,7 @@ import Foundation
 struct CommandValidator {
     private let movementRules = MovementRules()
     private let warRelationRules = WarRelationRules()
+    private let siegeCapitulationPressureThreshold = 10
 
     func validate(_ command: Command, in state: GameState) -> CommandValidation {
         switch command {
@@ -16,6 +17,8 @@ struct CommandValidator {
             return validateRepairFortification(defenderId: defenderId, targetRegionId: targetRegionId, in: state)
         case .relieveSiege(let relieverId, let targetRegionId):
             return validateRelieveSiege(relieverId: relieverId, targetRegionId: targetRegionId, in: state)
+        case .demandSurrender(let negotiatorId, let targetRegionId):
+            return validateDemandSurrender(negotiatorId: negotiatorId, targetRegionId: targetRegionId, in: state)
         case .hold(let divisionId):
             return validateUnitCommand(divisionId: divisionId, in: state)
         case .allowRetreat(let divisionId):
@@ -86,6 +89,45 @@ struct CommandValidator {
 
         guard canRelieve(reliever, targetRegion: region, in: state) else {
             return .invalid(.targetOutOfRange)
+        }
+
+        return .valid
+    }
+
+    private func validateDemandSurrender(
+        negotiatorId: String,
+        targetRegionId: RegionId,
+        in state: GameState
+    ) -> CommandValidation {
+        let unitValidation = validateUnitCommand(divisionId: negotiatorId, in: state)
+        guard unitValidation.isValid,
+              let negotiator = state.division(id: negotiatorId) else {
+            return unitValidation
+        }
+
+        guard let region = state.map.region(id: targetRegionId) else {
+            return .invalid(.regionNotFound)
+        }
+
+        guard let record = state.siegeState.record(for: targetRegionId) else {
+            return .invalid(.noActiveSiege)
+        }
+
+        guard record.attackerFaction == negotiator.faction,
+              region.controller == record.defenderFaction,
+              warRelationRules.canTarget(attacker: negotiator.faction, target: record.defenderFaction, in: state) else {
+            return .invalid(.invalidTargetFaction)
+        }
+
+        guard canInvest(negotiator, targetRegion: region) else {
+            return .invalid(.targetOutOfRange)
+        }
+
+        guard record.pressure >= siegeCapitulationPressureThreshold,
+              record.fortification == 0,
+              hasCapitulatingHexes(region, defenderFaction: record.defenderFaction, in: state),
+              defendersAreReadyToSurrender(record: record, in: region, state: state) else {
+            return .invalid(.capitulationNotReady)
         }
 
         return .valid
@@ -278,6 +320,44 @@ struct CommandValidator {
         let maxDistance = max(1, reliever.range)
         return region.displayHexes.contains { targetHex in
             reliever.coord.distance(to: targetHex) <= maxDistance
+        }
+    }
+
+    private func hasCapitulatingHexes(
+        _ region: RegionNode,
+        defenderFaction: Faction,
+        in state: GameState
+    ) -> Bool {
+        surrenderCandidateHexes(in: region, defenderFaction: defenderFaction, map: state.map)
+            .isEmpty == false
+    }
+
+    private func defendersAreReadyToSurrender(
+        record: SiegeRecord,
+        in region: RegionNode,
+        state: GameState
+    ) -> Bool {
+        let defenders = state.divisions.filter {
+            $0.faction == record.defenderFaction &&
+                $0.location(in: state.map) == region.id &&
+                !$0.isDestroyed
+        }
+
+        return defenders.allSatisfy { $0.supplyState != .supplied }
+    }
+
+    private func surrenderCandidateHexes(
+        in region: RegionNode,
+        defenderFaction: Faction,
+        map: MapState
+    ) -> [HexCoord] {
+        let candidates = region.displayHexes.isEmpty ? [region.representativeHex] : region.displayHexes
+        return candidates.filter { coord in
+            guard let tile = map.tile(at: coord),
+                  tile.isCapturable else {
+                return false
+            }
+            return tile.controller == defenderFaction || tile.controller == nil
         }
     }
 }

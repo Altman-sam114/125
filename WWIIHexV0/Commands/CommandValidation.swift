@@ -17,6 +17,7 @@ enum CommandValidationError: String, Codable, Equatable {
     case invalidSiegeTarget
     case noActiveSiege
     case fortificationAlreadyFull
+    case capitulationNotReady
     case insufficientResources
 }
 

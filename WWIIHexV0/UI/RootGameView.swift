@@ -161,12 +161,14 @@ struct RootGameView: View {
                         besiegeTargetName: container.selectedBesiegeTargetName,
                         repairFortificationTargetName: container.selectedRepairFortificationTargetName,
                         relieveSiegeTargetName: container.selectedRelieveSiegeTargetName,
+                        demandSurrenderTargetName: container.selectedDemandSurrenderTargetName,
                         onHold: container.holdSelected,
                         onAllowRetreat: container.allowRetreatSelected,
                         onResupply: container.resupplySelected,
                         onBesiege: container.besiegeSelected,
                         onRepairFortification: container.repairFortificationSelected,
                         onRelieveSiege: container.relieveSiegeSelected,
+                        onDemandSurrender: container.demandSurrenderSelected,
                         onEndTurn: container.advanceOrRunAI
                     )
                     GeneralCommandPanelView(
