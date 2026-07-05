@@ -60,13 +60,13 @@ final class AppContainer: ObservableObject {
         let gameState = dataLoader.loadInitialGameState()
         let commandHandler = RuleEngine()
         let generalRegistry = (try? dataLoader.loadGeneralRegistry()) ?? .empty
-        let guderian = GameAgent.guderian(from: dataLoader, state: gameState)
         let bootstrappedState = Self.refreshGeneralAssignments(
             in: StrategicStateBootstrapper().bootstrapIfNeeded(gameState),
             registry: generalRegistry
         )
+        let aiAgent = GameAgent.defaultCommander(for: .germany, from: dataLoader, state: bootstrappedState)
         let turnManager = TurnManager(
-            agent: guderian,
+            agent: aiAgent,
             provider: MockAIClient(),
             providerName: "MockAI",
             commandHandler: commandHandler,
@@ -978,22 +978,7 @@ final class AppContainer: ObservableObject {
             return turnManager
         }
 
-        let agent: GameAgent
-        switch faction {
-        case .germany:
-            agent = GameAgent.guderian(from: dataLoader, state: state)
-        case .allies:
-            let assignedIds = state.divisions
-                .filter { $0.faction == .allies && !$0.isDestroyed }
-                .map(\.id)
-            agent = GameAgent.sample(
-                id: "allied_mock_commander",
-                name: "Allied Mock Commander",
-                faction: .allies,
-                role: .armyCommander,
-                assignedDivisionIds: assignedIds
-            )
-        }
+        let agent = GameAgent.defaultCommander(for: faction, from: dataLoader, state: state)
 
         return TurnManager(
             agent: agent,

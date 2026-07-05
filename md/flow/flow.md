@@ -466,7 +466,7 @@ strength < maxStrength
 AppContainer.bootstrap()
   -> DataLoader().loadInitialGameState()
   -> RuleEngine()
-  -> GameAgent.guderian(...)
+  -> GameAgent.defaultCommander(...)
   -> StrategicStateBootstrapper().bootstrapIfNeeded(...)
   -> TurnManager(... commanderPool: buildCommanderPool(state: bootstrappedState))
   -> AppContainer(...)
@@ -1282,7 +1282,7 @@ TheaterDirective
   rationale
 ```
 
-v5.4 起，`MarshalBattlefieldSummary` 额外携带 `scenarioId`、首都 region、被威胁首都、围城 region、粮道优先 region 和招抚候选 region。`MarshalAgentConfig.automatic` 在唐宋默认剧本下把 legacy `.allies` / `.germany` 桥显示为“宋枢密院”与“割据行营”，`SimulatedMarshalLLMClient` 会把 `strategicIntent`、envelope `summary` 和每条 `TheaterDirective.rationale` 写成军议、州府、粮道口径，并填充可选解释字段：
+v5.4 起，`MarshalBattlefieldSummary` 额外携带 `scenarioId`、首都 region、被威胁首都、围城 region、粮道优先 region 和招抚候选 region。`GameAgent.defaultCommander` 在唐宋默认剧本下把 legacy `.allies` / `.germany` 桥接的默认 AI issuer 改为“宋枢密院”与“割据行营”，legacy 阿登才继续使用 Guderian / Allied Mock Commander；`MarshalAgentConfig.automatic` 也在唐宋默认剧本下把元帅配置显示为“宋枢密院”与“割据行营”。`SimulatedMarshalLLMClient` 会把 `strategicIntent`、envelope `summary` 和每条 `TheaterDirective.rationale` 写成军议、州府、粮道口径，并填充可选解释字段：
 
 ```text
 mandateIntent        # 天命/正朔意图，只解释统一、护都、恢复州府或招抚方向

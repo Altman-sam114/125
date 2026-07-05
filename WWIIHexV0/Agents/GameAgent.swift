@@ -1,7 +1,7 @@
 import Foundation
 
 // v0 runtime agent. Lightweight: no cabinet, no directive board, no authority ranks.
-// Only Guderian army commander used in v0 German AI turn. v0.5+ can extend.
+// v5.4 keeps the legacy Guderian agent for Ardennes, while Tang Song uses scenario-aware marshal issuers.
 
 enum AgentRole: String, Codable, Equatable, CaseIterable {
     case ruler
