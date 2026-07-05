@@ -1585,7 +1585,7 @@ commanderAgentId
 commandTarget
 ```
 
-直接调用 `WarCommandExecutor.execute` 不会自动写 `WarDirectiveRecord`；记录职责在 `TurnManager.runDirectiveTurn` 外层。
+直接调用 `WarCommandExecutor.execute` 不会自动写 `WarDirectiveRecord`；记录职责在 `TurnManager.runDirectiveTurn` 外层。v5.4 起，唐宋场景的 `DirectiveType`、`CommandCategory` 和 `TacticName` 通过 `displayName(isTangSongScenario:)` 显示为军议口径，例如进军、固守、骑军突进、合围、弓弩压制和死守城关；底层 raw case、Codable schema 和执行权限不变。
 
 ---
 
@@ -1917,7 +1917,7 @@ Marshal / ZoneDirective
 
 算法变化：
 
-- AI 面板从只展示 `AgentDecisionRecord` 扩展为同时展示 `WarDirectiveRecord`，每条 directive 可看到 zone、attack/defend、tactic、命令成功/拒绝数量和目标 region。
+- AI 面板从只展示 `AgentDecisionRecord` 扩展为同时展示 `WarDirectiveRecord`，每条 directive 可看到 zone、attack/defend、tactic、命令成功/拒绝数量和目标 region。v5.4 起，唐宋场景下该面板显示为“军议 / 方面军令”，并使用唐宋战术显示名；这只是 UI 读法桥，不改变 `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
 - 日志面板用 `LogDisplayEntry` 保存 entry + category，避免 body 内对同一条日志重复分类。
 - 单位绘制先缓存 `unitDisplayHex` 再排序，避免 comparator 重复计算。
 - `AttackIntensity.infiltration` 在无显式 `maxCommittedUnits` 时默认只投入约半数前线/纵深候选单位，避免渗透/袭扰全线压上。

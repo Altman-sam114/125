@@ -3,11 +3,29 @@ import Foundation
 enum DirectiveType: String, Codable, Equatable, CaseIterable {
     case defend
     case attack
+
+    func displayName(isTangSongScenario: Bool) -> String {
+        switch self {
+        case .defend:
+            return isTangSongScenario ? "固守" : rawValue
+        case .attack:
+            return isTangSongScenario ? "进军" : rawValue
+        }
+    }
 }
 
 enum CommandCategory: String, Codable, Equatable, CaseIterable {
     case offense
     case defense
+
+    func displayName(isTangSongScenario: Bool) -> String {
+        switch self {
+        case .offense:
+            return isTangSongScenario ? "攻势" : rawValue
+        case .defense:
+            return isTangSongScenario ? "防务" : rawValue
+        }
+    }
 }
 
 enum TacticName: String, Codable, Equatable, CaseIterable {
@@ -40,6 +58,39 @@ enum TacticName: String, Codable, Equatable, CaseIterable {
              .defenseInDepth,
              .lastStand:
             return .defense
+        }
+    }
+
+    func displayName(isTangSongScenario: Bool) -> String {
+        guard isTangSongScenario else {
+            return rawValue
+        }
+
+        switch self {
+        case .standardAttack:
+            return "进军"
+        case .blitzkrieg:
+            return "骑军突进"
+        case .spearhead:
+            return "定点突击"
+        case .breakthrough:
+            return "破阵"
+        case .pincerMovement:
+            return "合围"
+        case .fireCoverage:
+            return "弓弩压制"
+        case .feint:
+            return "佯动"
+        case .guerrillaWarfare:
+            return "轻骑袭扰"
+        case .holdPosition:
+            return "固守"
+        case .elasticDefense:
+            return "退守"
+        case .defenseInDepth:
+            return "纵深设防"
+        case .lastStand:
+            return "死守城关"
         }
     }
 }

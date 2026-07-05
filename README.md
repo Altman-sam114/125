@@ -1,6 +1,6 @@
 # WWIIHexV0 — 唐宋迁移中的 iOS / macOS AI 战略战棋
 
-> **当前状态：v5.3 唐宋生产/府库显示桥、古代兵种战斗修正、粮道供给/读法、围城城防、修城、解围、招降、地图围城 overlay 与 AI 围城/招降指令首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源；生产、府库和经济规则日志在唐宋路径下显示为军备、丁口、钱帛、粮草、禁军/厢军/骑军/攻城器械营；唐宋场景下骑军、弓弩守军、攻城器械营和守军已有最小战斗差异；受控高补给州府/粮仓、道路、山林和跨河成本已影响补给判定，单位详情可显示粮道通断、路径成本/上限、最近粮源和安全退路；玩家可通过统一 `Command.besiege -> RuleEngine` 对敌方城池/关隘/粮仓州府登记围城压力并损耗城防，守方可通过 `Command.repairFortification -> RuleEngine` 消耗军队行动修城，也可通过 `Command.relieveSiege -> RuleEngine` 让州府内或近旁友军削减围城压力直至解围；围城压力达标、城防归零且守军不再 supplied 后，围城方可通过 `Command.demandSurrender -> RuleEngine` 招降目标州府，规则层会移除纳降守军、交割目标州府可占 hex，并刷新 region/theater/front/deploy；`ZoneDirective.attack -> WarCommandExecutor` 会在目标州府满足纳降条件时优先生成底层 `Command.demandSurrender`，否则在目标州府可围且无可攻击单位时生成底层 `Command.besiege`；地图从 `SiegeState` 只读绘制围城圈、压力和城防标签。阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
+> **当前状态：v5.3 唐宋生产/府库显示桥、古代兵种战斗修正、粮道供给/读法、围城城防、修城、解围、招降、地图围城 overlay 与 AI 围城/招降指令首轮，v5.4 AI 军议显示桥首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源；生产、府库和经济规则日志在唐宋路径下显示为军备、丁口、钱帛、粮草、禁军/厢军/骑军/攻城器械营；唐宋场景下骑军、弓弩守军、攻城器械营和守军已有最小战斗差异；受控高补给州府/粮仓、道路、山林和跨河成本已影响补给判定，单位详情可显示粮道通断、路径成本/上限、最近粮源和安全退路；玩家可通过统一 `Command.besiege -> RuleEngine` 对敌方城池/关隘/粮仓州府登记围城压力并损耗城防，守方可通过 `Command.repairFortification -> RuleEngine` 消耗军队行动修城，也可通过 `Command.relieveSiege -> RuleEngine` 让州府内或近旁友军削减围城压力直至解围；围城压力达标、城防归零且守军不再 supplied 后，围城方可通过 `Command.demandSurrender -> RuleEngine` 招降目标州府，规则层会移除纳降守军、交割目标州府可占 hex，并刷新 region/theater/front/deploy；`ZoneDirective.attack -> WarCommandExecutor` 会在目标州府满足纳降条件时优先生成底层 `Command.demandSurrender`，否则在目标州府可围且无可攻击单位时生成底层 `Command.besiege`；地图从 `SiegeState` 只读绘制围城圈、压力和城防标签；唐宋场景下 AI 面板显示为“军议/方面军令”，战术名显示为进军、骑军突进、合围、弓弩压制、死守城关等，底层 `TacticName` raw case 和 JSON schema 保持兼容。阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
 
 ---
 
@@ -119,14 +119,14 @@ WWIIHexV0/
 | `Agents/AgentPromptBuilder.swift` | prompt 构造 | system + user prompt，强制 JSON 输出 |
 | `Turn/TurnManager.swift` | 德军 AI 回合编排 | `runGermanAITurn(state:) async -> AgentTurnOutcome`（含 endTurn 推进） |
 | `App/AppContainer.swift` | AI 接线 | `runAIIfNeeded()`（guard germany+germanAI → Task → 写 state/record），`lastAgentDecisionRecord` |
-| `UI/AgentPanelView.swift` | 决策展示 | 读 `record`（agent/provider/intent/context/command results/errors/raw JSON） |
+| `UI/AgentPanelView.swift` | 决策展示 | 读 `record` 与 `WarDirectiveRecord`；唐宋场景显示为军议、方面军令和唐宋战术名 |
 | `UI/RootGameView.swift` | 启动触发 | `.task { container.runAIIfNeeded() }` |
 
 **MockAI 行为（guderian，装甲突破风格）：**
 跳过已行动单位 → 低补给/包围优先 resupply → 射程内低 hp 敌军优先 attack（炮兵优先打城市/要塞）→ 装甲沿道路向 Bastogne move → 否则 hold
 
 **v0.7 ZoneDirective 战术行为：**
-`ZoneCommanderAgent` 读取所属 `FrontZone` 的前线/部署摘要，`BinaryTacticClassifier` 会结合兵力比、机动兵力、炮兵支援、纵深预备队、压力和补给警告，在 `standardAttack`、`blitzkrieg`、`spearhead`、`breakthrough`、`pincerMovement`、`fireCoverage`、`feint`、`guerrillaWarfare`、`holdPosition`、`elasticDefense`、`defenseInDepth`、`lastStand` 之间分类；`WarCommandExecutor` 将这些战术降级为 `move / attack / hold / allowRetreat`，仍统一交给 `RuleEngine` 校验执行。`WarDirectiveRecord` 记录 `category` / `tactic` / `commanderAgentId` / `commandTarget`，便于后续接真 LLM 回放与审计。
+`ZoneCommanderAgent` 读取所属 `FrontZone` 的前线/部署摘要，`BinaryTacticClassifier` 会结合兵力比、机动兵力、炮兵支援、纵深预备队、压力和补给警告，在 `standardAttack`、`blitzkrieg`、`spearhead`、`breakthrough`、`pincerMovement`、`fireCoverage`、`feint`、`guerrillaWarfare`、`holdPosition`、`elasticDefense`、`defenseInDepth`、`lastStand` 之间分类；`WarCommandExecutor` 将这些战术降级为 `move / attack / hold / allowRetreat`，仍统一交给 `RuleEngine` 校验执行。`WarDirectiveRecord` 记录 `category` / `tactic` / `commanderAgentId` / `commandTarget`，便于后续接真 LLM 回放与审计。v5.4 首轮只新增 `displayName(isTangSongScenario:)` 显示桥和 `AgentPanelView` 唐宋军议读法，底层 raw case / Codable schema 不变。
 
 **v0.5 MarshalDirective 行为：**
 `MarshalBattlefieldSummarizer` 把 `GameState` 降维为元帅摘要，只包含 front zone、strength ratio、补给警告、目标和事件，不把全量 hex 网格喂给模型。`SimulatedMarshalLLMClient` 生成 fenced JSON 形式的 `TheaterDirectiveEnvelope`；`TheaterDirectiveDecoder` 提取并校验 JSON；`TheaterDirectiveCompiler` 把元帅意图编译成现有 `ZoneDirective`。v0.7 后 `TheaterDirective` 可携带 `convergenceRegionId` / `coordinatedZoneIds` 支持钳形会师意图；解码或编译失败时 fallback 到 `TheaterCommanderPool`，不执行半成品 LLM 输出。

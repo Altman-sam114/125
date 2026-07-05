@@ -4,37 +4,40 @@ struct AgentPanelView: View {
     let record: AgentDecisionRecord?
     let rulerRecord: RulerDecisionRecord?
     let directiveRecords: [WarDirectiveRecord]
+    let isTangSongScenario: Bool
 
     init(
         record: AgentDecisionRecord?,
         rulerRecord: RulerDecisionRecord? = nil,
-        directiveRecords: [WarDirectiveRecord] = []
+        directiveRecords: [WarDirectiveRecord] = [],
+        isTangSongScenario: Bool = false
     ) {
         self.record = record
         self.rulerRecord = rulerRecord
         self.directiveRecords = directiveRecords
+        self.isTangSongScenario = isTangSongScenario
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("AI Decision")
+            Text(isTangSongScenario ? "军议" : "AI Decision")
                 .font(.headline)
 
-            LabeledContent("Agent") {
-                Text(record?.agentId ?? "guderian")
+            LabeledContent(isTangSongScenario ? "主事" : "Agent") {
+                Text(record?.agentId ?? (isTangSongScenario ? "privy_council" : "guderian"))
             }
 
-            LabeledContent("Provider") {
-                Text(record?.provider ?? "MockAI")
+            LabeledContent(isTangSongScenario ? "来源" : "Provider") {
+                Text(record?.provider ?? (isTangSongScenario ? "确定性军议" : "MockAI"))
             }
 
-            LabeledContent("Intent") {
-                Text(record?.parsedIntent ?? "No decision submitted")
+            LabeledContent(isTangSongScenario ? "意图" : "Intent") {
+                Text(record?.parsedIntent ?? (isTangSongScenario ? "暂无军议" : "No decision submitted"))
                     .multilineTextAlignment(.trailing)
             }
 
             if let contextSummary = record?.contextSummary {
-                LabeledContent("Context") {
+                LabeledContent(isTangSongScenario ? "战况" : "Context") {
                     Text(contextSummary)
                         .multilineTextAlignment(.trailing)
                 }
@@ -42,21 +45,21 @@ struct AgentPanelView: View {
 
             if let rulerRecord {
                 Divider()
-                LabeledContent("Ruler") {
+                LabeledContent(isTangSongScenario ? "君主" : "Ruler") {
                     Text(rulerRecord.rulerAgentId)
                 }
-                LabeledContent("Posture") {
+                LabeledContent(isTangSongScenario ? "国策" : "Posture") {
                     Text(rulerRecord.posture.displayName)
                 }
                 if let zoneId = rulerRecord.preferredFrontZoneId {
-                    LabeledContent("Focus") {
+                    LabeledContent(isTangSongScenario ? "重点" : "Focus") {
                         Text(zoneId.rawValue)
                     }
                 }
             }
 
             if let record, !record.commandResults.isEmpty {
-                Text("Command Results")
+                Text(isTangSongScenario ? "军令结果" : "Command Results")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -76,7 +79,7 @@ struct AgentPanelView: View {
             }
 
             if !directiveRecords.isEmpty {
-                Text("Zone Directives")
+                Text(isTangSongScenario ? "方面军令" : "Zone Directives")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -98,6 +101,12 @@ struct AgentPanelView: View {
                                     .minimumScaleFactor(0.75)
                             }
 
+                            if let commanderAgentId = directive.commanderAgentId {
+                                Text((isTangSongScenario ? "将令：" : "Commander: ") + commanderAgentId)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+
                             if !directive.diagnostics.isEmpty {
                                 Text(directive.diagnostics.joined(separator: " / "))
                                     .font(.caption)
@@ -113,7 +122,7 @@ struct AgentPanelView: View {
             }
 
             if let record, !record.errors.isEmpty {
-                Text("Errors")
+                Text(isTangSongScenario ? "异常" : "Errors")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
@@ -126,7 +135,7 @@ struct AgentPanelView: View {
                 }
             }
 
-            Text("Raw JSON")
+            Text(isTangSongScenario ? "原始 JSON" : "Raw JSON")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -145,18 +154,25 @@ struct AgentPanelView: View {
     }
 
     private func directiveSummary(_ directive: WarDirectiveRecord) -> String {
-        let type = directive.directiveType?.rawValue ?? "diagnostic"
-        let tactic = directive.tactic?.rawValue ?? directive.category?.rawValue ?? "none"
+        let type = directive.directiveType?.displayName(isTangSongScenario: isTangSongScenario)
+            ?? (isTangSongScenario ? "诊断" : "diagnostic")
+        let tactic = directive.tactic?.displayName(isTangSongScenario: isTangSongScenario)
+            ?? directive.category?.displayName(isTangSongScenario: isTangSongScenario)
+            ?? (isTangSongScenario ? "无战术" : "none")
         let executed = directive.commandResults.filter(\.executed).count
         let rejected = directive.commandResults.count - executed
         let targets = directive.targetRegionIds.map(\.rawValue).joined(separator: ", ")
-        let targetText = targets.isEmpty ? "no target" : targets
+        let targetText = targets.isEmpty ? (isTangSongScenario ? "无目标" : "no target") : targets
+        if isTangSongScenario {
+            return "\(type) / \(tactic) / 成 \(executed)，拒 \(rejected) / \(targetText)"
+        }
         return "\(type) / \(tactic) / \(executed) ok, \(rejected) rejected / \(targetText)"
     }
 
     private func resultLine(_ result: CommandResultSummary) -> String {
         if !result.mappingSucceeded {
-            return "Mapping failed: \(result.errors.joined(separator: ", "))"
+            let prefix = isTangSongScenario ? "映射失败" : "Mapping failed"
+            return "\(prefix): \(result.errors.joined(separator: ", "))"
         }
 
         if result.executed {
@@ -164,7 +180,8 @@ struct AgentPanelView: View {
         }
 
         if !result.errors.isEmpty {
-            return "Rejected: \(result.errors.joined(separator: ", "))"
+            let prefix = isTangSongScenario ? "规则拒绝" : "Rejected"
+            return "\(prefix): \(result.errors.joined(separator: ", "))"
         }
 
         return result.message
@@ -173,7 +190,7 @@ struct AgentPanelView: View {
     private var rawJSONPlaceholder: String {
         """
         {
-          "agentId": "guderian",
+          "agentId": "\(isTangSongScenario ? "privy_council" : "guderian")",
           "status": "placeholder",
           "orders": []
         }

@@ -372,7 +372,7 @@ flowchart TD
     DEC["元帅 JSON 解码器<br/>TheaterDirectiveDecoder<br/>提取 JSON、解码、校验 schema/zone/region/tactic"]:::command
     COMP["元帅意图编译器<br/>TheaterDirectiveCompiler<br/>TheaterDirective -> ZoneDirective<br/>传递 focus/convergence/coordinated 参数"]:::command
     ENV["指令信封<br/>DirectiveEnvelope<br/>收集编译后的 ZoneDirective"]:::command
-    TACTIC["高级战术路由<br/>TacticName<br/>blitzkrieg / spearhead / breakthrough / pincer / fire / feint / guerrilla / elastic / depth / lastStand"]:::command
+    TACTIC["高级战术路由<br/>TacticName<br/>raw case 保持 Codable；唐宋显示为进军、骑军突进、合围、弓弩压制等"]:::command
     WCE["指令执行器<br/>WarCommandExecutor.execute<br/>按战术 profile 选择单位、目标和 fallback"]:::command
     BOTTOM["具体单位命令<br/>Command<br/>attack / move / hold / allowRetreat"]:::command
     RE["统一规则校验执行<br/>RuleEngine<br/>AI 和玩家共用同一套规则"]:::rules
@@ -501,7 +501,7 @@ flowchart TD
     STATE["运行时状态<br/>GameState + EventLog + WarDirectiveRecord"]:::state
     ROOT["主界面<br/>RootGameView<br/>HUD + Info tabs"]:::ui
     LOG["日志面板<br/>EventLogView<br/>最近 60 条 LogDisplayEntry"]:::ui
-    AIUI["AI 面板<br/>AgentPanelView<br/>raw JSON + command results + zone directives"]:::ui
+    AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、方面军令、唐宋战术名"]:::ui
     BOARD["地图场景<br/>BoardScene<br/>缓存 unit display hex 后排序绘制"]:::ui
     MARSHAL["模拟元帅 / MockAI<br/>MarshalAgent + SimulatedMarshalLLMClient"]:::ai
     ZD["战区指令<br/>ZoneDirective<br/>tactic / focus / intensity"]:::command

@@ -307,7 +307,8 @@ struct TurnManager {
                     commandIndex: commandIndex,
                     directive: directive,
                     command: pair.0,
-                    result: pair.1
+                    result: pair.1,
+                    isTangSongScenario: nextState.isTangSongScenario
                 )
                 commandResults.append(summary)
                 perDirectiveResults.append(summary)

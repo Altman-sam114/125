@@ -71,14 +71,15 @@ struct CommandResultSummary: Identifiable, Codable, Equatable {
         commandIndex: Int,
         directive: ZoneDirective,
         command: Command,
-        result: CommandResult
+        result: CommandResult,
+        isTangSongScenario: Bool = false
     ) -> CommandResultSummary {
         CommandResultSummary(
             id: "directive_\(directiveIndex)_command_\(commandIndex)_\(directive.type.rawValue)",
             orderIndex: commandIndex,
             divisionId: command.actingDivisionId,
             orderType: nil,
-            commandDisplayName: command.displayName,
+            commandDisplayName: command.displayName(isTangSongScenario: isTangSongScenario),
             mappingSucceeded: true,
             validationSucceeded: result.validation.isValid,
             executed: result.succeeded,

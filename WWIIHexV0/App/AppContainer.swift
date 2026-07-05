@@ -844,7 +844,8 @@ final class AppContainer: ObservableObject {
                 commandIndex: index,
                 directive: directive,
                 command: execution.generatedCommands[index],
-                result: result
+                result: result,
+                isTangSongScenario: startState.isTangSongScenario
             )
         }
         var diagnostics: [String] = []
