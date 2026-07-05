@@ -251,7 +251,7 @@ flowchart TD
 
 ## 3.6 v5.3 唐宋粮道供给首轮
 
-这张图看 v5.3 的粮道供给切片。它不新增补给状态，也不实现完整漕运；只是让唐宋场景的高补给州府/粮仓和道路、山林、跨河成本影响既有 `supplied / lowSupply / encircled` 判定，并在单位面板显示粮道通断、路径成本和最近粮源。
+这张图看 v5.3/v5.5 的粮道供给与地图读法切片。它不新增补给状态，也不实现完整漕运；只是让唐宋场景的高补给州府/粮仓和道路、山林、跨河成本影响既有 `supplied / lowSupply / encircled` 判定，并在单位面板和地图只读 overlay 显示粮道通断、路径成本和最近粮源。
 
 ```mermaid
 flowchart TD
@@ -264,7 +264,8 @@ flowchart TD
     OK["supplied<br/>可补员，保持正常战力"]:::state
     LOW["lowSupply<br/>攻击/防御/移动下降"]:::state
     ENC["encircled<br/>包围 attrition"]:::state
-    READ["粮道读法<br/>SupplyRouteSummary -> UnitInspectorView<br/>通断、成本/上限、最近粮源、退路数"]:::ui
+    READ["粮道面板读法<br/>SupplyRouteSummary -> UnitInspectorView<br/>通断、成本/上限、最近粮源、退路数"]:::ui
+    MAP["地图粮道 overlay<br/>MapDisplayAdapter.supplyRouteOverlays + BoardScene<br/>可见友方军队到最近可见粮源的抽象虚线"]:::ui
     ECON["府库粮草<br/>EconomyRules.resolveFactionTurn<br/>战略库存短缺仍可压低补给"]:::economy
 
     START --> DIV --> SOURCE --> PATH --> REL --> STATE
@@ -272,9 +273,10 @@ flowchart TD
     STATE -->|不可达但有退路| LOW
     STATE -->|退路不足| ENC
     STATE --> READ
+    READ --> MAP
     ECON --> LOW
 
-    WARN["边界<br/>没有新增漕运 UI、粮队、仓储容量或自动破城<br/>仍复用 SupplyState 三态"]:::warn
+    WARN["边界<br/>overlay 只读，不是真实逐 hex 路径<br/>没有新增粮队、仓储容量或自动破城"]:::warn
     SOURCE -.守住.-> WARN
 
     classDef rules fill:#ccfbf1,stroke:#0f766e,color:#042f2e
@@ -505,7 +507,7 @@ flowchart TD
     HUD["顶部 HUD<br/>HUDView + GameState.phaseDisplayName<br/>显示回合、政权、阶段、胜负、资源、队列"]:::ui
     LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报、战斗、围城、粮道等分类"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
-    BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette"]:::ui
+    BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette，绘制粮道虚线"]:::ui
     UNIT["军队棋子<br/>UnitNode<br/>legacy NATO；唐宋军旗 + 禁/骑/弩/械/守/军字标"]:::ui
     MARSHAL["模拟元帅 / MockAI<br/>MarshalAgent + SimulatedMarshalLLMClient"]:::ai
     ZD["战区指令<br/>ZoneDirective<br/>tactic / focus / intensity"]:::command

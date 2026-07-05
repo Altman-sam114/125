@@ -223,6 +223,7 @@ final class BoardScene: SKScene {
         drawRegionOverlays(renderState: renderState, layout: layout)
         drawRoads(map: state.map, layout: layout, isTangSongScenario: state.isTangSongScenario)
         drawRivers(map: state.map, layout: layout, isTangSongScenario: state.isTangSongScenario)
+        drawSupplyRouteOverlays(renderState: renderState, layout: layout)
         drawSiegeOverlays(renderState: renderState, layout: layout)
         drawPlannedOperations(renderState: renderState, layout: layout)
         drawUnits(renderState: renderState, layout: layout)
@@ -322,6 +323,153 @@ final class BoardScene: SKScene {
                 addChild(river)
             }
         }
+    }
+
+    private func drawSupplyRouteOverlays(renderState: BoardRenderState, layout: HexLayout) {
+        guard renderState.gameState.isTangSongScenario,
+              renderState.mapDisplayLayer != .frontLine else {
+            return
+        }
+
+        for overlay in renderState.displayAdapter.supplyRouteOverlays(viewerFaction: renderState.viewerFaction) {
+            drawSupplyRouteOverlay(overlay, layout: layout)
+        }
+    }
+
+    private func drawSupplyRouteOverlay(_ overlay: SupplyRouteOverlayState, layout: HexLayout) {
+        let start = layout.hexToPixel(overlay.displayHex)
+        let end = layout.hexToPixel(overlay.sourceCoord)
+        let color = TerrainStyle.supplyColor(for: overlay.supplyState, isTangSongScenario: true)
+        let width = max(2, layout.hexSize * 0.055)
+
+        drawDashedLine(
+            from: start,
+            to: end,
+            color: SKColor.black.withAlphaComponent(0.34),
+            lineWidth: width + 2,
+            dashLength: max(9, layout.hexSize * 0.24),
+            gapLength: max(6, layout.hexSize * 0.15),
+            zPosition: 20.4
+        )
+        drawDashedLine(
+            from: start,
+            to: end,
+            color: color.withAlphaComponent(0.86),
+            lineWidth: width,
+            dashLength: max(9, layout.hexSize * 0.24),
+            gapLength: max(6, layout.hexSize * 0.15),
+            zPosition: 20.6
+        )
+        drawSupplySourceMarker(at: end, color: color, layout: layout)
+        drawSupplyRouteLabel(overlay.labelText, from: start, to: end, color: color, layout: layout)
+    }
+
+    private func drawDashedLine(
+        from start: CGPoint,
+        to end: CGPoint,
+        color: SKColor,
+        lineWidth: CGFloat,
+        dashLength: CGFloat,
+        gapLength: CGFloat,
+        zPosition: CGFloat
+    ) {
+        let dx = end.x - start.x
+        let dy = end.y - start.y
+        let distance = hypot(dx, dy)
+        guard distance > 1 else {
+            return
+        }
+
+        let ux = dx / distance
+        let uy = dy / distance
+        var cursor: CGFloat = 0
+
+        while cursor < distance {
+            let segmentEnd = min(cursor + dashLength, distance)
+            let segmentStartPoint = CGPoint(
+                x: start.x + ux * cursor,
+                y: start.y + uy * cursor
+            )
+            let segmentEndPoint = CGPoint(
+                x: start.x + ux * segmentEnd,
+                y: start.y + uy * segmentEnd
+            )
+            let path = CGMutablePath()
+            path.move(to: segmentStartPoint)
+            path.addLine(to: segmentEndPoint)
+
+            let segment = SKShapeNode(path: path)
+            segment.strokeColor = color
+            segment.lineWidth = lineWidth
+            segment.lineCap = .round
+            segment.zPosition = zPosition
+            addChild(segment)
+
+            cursor += dashLength + gapLength
+        }
+    }
+
+    private func drawSupplySourceMarker(at point: CGPoint, color: SKColor, layout: HexLayout) {
+        let radius = max(6, layout.hexSize * 0.16)
+        let marker = SKShapeNode(circleOfRadius: radius)
+        marker.position = point
+        marker.fillColor = SKColor.black.withAlphaComponent(0.40)
+        marker.strokeColor = color.withAlphaComponent(0.95)
+        marker.lineWidth = max(1.5, layout.hexSize * 0.045)
+        marker.zPosition = 21
+        addChild(marker)
+
+        let label = SKLabelNode(text: "粮")
+        label.fontName = "AvenirNext-DemiBold"
+        label.fontSize = max(9, layout.hexSize * 0.25)
+        label.fontColor = .white
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.position = point
+        label.zPosition = 22
+        addChild(label)
+    }
+
+    private func drawSupplyRouteLabel(
+        _ text: String,
+        from start: CGPoint,
+        to end: CGPoint,
+        color: SKColor,
+        layout: HexLayout
+    ) {
+        let dx = end.x - start.x
+        let dy = end.y - start.y
+        let distance = hypot(dx, dy)
+        let offset = distance > 1
+            ? CGPoint(x: -dy / distance * 8, y: dx / distance * 8)
+            : CGPoint(x: 0, y: layout.hexSize * 0.30)
+        let center = CGPoint(
+            x: (start.x + end.x) / 2 + offset.x,
+            y: (start.y + end.y) / 2 + offset.y
+        )
+
+        let label = SKLabelNode(text: text)
+        label.fontName = "AvenirNext-DemiBold"
+        label.fontSize = max(9, layout.hexSize * 0.24)
+        label.fontColor = .white
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.zPosition = 22
+
+        let labelSize = CGSize(
+            width: max(38, CGFloat(text.count) * label.fontSize * 0.68),
+            height: max(18, label.fontSize + 8)
+        )
+        let background = SKShapeNode(rectOf: labelSize, cornerRadius: 4)
+        background.fillColor = SKColor.black.withAlphaComponent(0.62)
+        background.strokeColor = color.withAlphaComponent(0.86)
+        background.lineWidth = 1
+        background.position = center
+        background.zPosition = 21.8
+        addChild(background)
+
+        label.position = center
+        addChild(label)
     }
 
     private func drawSiegeOverlays(renderState: BoardRenderState, layout: HexLayout) {

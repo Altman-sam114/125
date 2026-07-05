@@ -806,7 +806,8 @@ v5.5 首轮术语桥只改变唐宋场景的玩家可见读法：
 - `TerrainStyle` 提供唐宋视觉 token：墨绿底、绢帛平地、青绿林地、石青河流、赭石道路、朱印宋军、铜褐割据和多色州府/方面 overlay。
 - `UnitNode` 在唐宋场景下不画 NATO APP-6 符号，改画内置军旗轮廓和禁/骑/弩/械/守/军兵种字标；legacy 阿登路径仍保留 NATO 符号。
 - `HexNode` / `RegionOverlayNode` / `MapLayerOverlayNode` / `BoardScene` 只读使用唐宋 palette，围城圈、计划箭头、前线和部署色随场景切换。
-- 这不是完整发布级 UI 收口，尚未做运行时截图、布局烟测、外部美术资产、粮道线或正式可访问性验收。
+- `SupplyRouteOverlayState` / `MapDisplayAdapter.supplyRouteOverlays` / `BoardScene.drawSupplyRouteOverlays` 只读绘制友方可见军队到最近可见粮源的唐宋粮道虚线；它复用 `SupplyRules.supplyRouteSummary`，不重新实现补给规则，也不表示真实逐 hex 路径。
+- 这不是完整发布级 UI 收口，尚未做运行时截图、布局烟测、外部美术资产或正式可访问性验收。
 
 当前开局不会在 `RootGameView` 自动 `.task { runAIIfNeeded() }`。AI 行动由 `advanceOrRunAI()` 或命令提交后的 `runAIIfNeeded()` 触发。
 
@@ -1229,13 +1230,15 @@ SupplyRules.supplyRouteSummary
   -> 只读计算当前军队补给状态、补给源数量、最近粮源、可达路径成本/上限和安全退路数
   -> MapDisplayAdapter.unitInspectorState
   -> UnitInspectorView 显示“粮道 通/断、成本/上限、最近粮源、退路数”
+  -> MapDisplayAdapter.supplyRouteOverlays(viewerFaction)
+  -> BoardScene.drawSupplyRouteOverlays 绘制可见友方军队到最近可见粮源的抽象虚线
 
 canSupplyPass / RegionSupplyRules
   -> 敌控判断改用 WarRelationRules.canTarget
   -> 不再依赖二元 Faction.opponent
 ```
 
-这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。单位面板已有粮道读法首轮；完整漕运、粮草运输队、仓储容量、自动破城和地图粮道线仍未实现。
+这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。单位面板已有粮道读法，地图已有只读抽象粮道虚线；完整漕运、粮草运输队、仓储容量、自动破城和逐 hex 粮道路径仍未实现。
 
 ---
 
@@ -1620,6 +1623,9 @@ drawLayerOverlay
 drawRegionOverlays（仅 hex layer）
 drawRoads
 drawRivers
+drawSupplyRouteOverlays（唐宋场景；非 frontLine layer；只读抽象粮道虚线）
+drawSiegeOverlays（非 frontLine layer）
+drawPlannedOperations（非 frontLine layer）
 drawUnits（frontLine layer 隐藏单位）
 ```
 
@@ -1646,6 +1652,7 @@ touchesEnded
 - hex -> region 查询。
 - 视野判断。
 - 单位显示位置/堆叠。
+- 唐宋粮道 overlay state 派生：只显示普通玩家己方可见军队，observer/revealAll 才显示全阵营；粮源坐标也必须对 viewer 可见。
 - Region inspector state。
 - Unit inspector strategic state。
 

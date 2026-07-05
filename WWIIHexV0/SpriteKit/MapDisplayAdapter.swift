@@ -47,6 +47,23 @@ struct SiegeOverlayState: Equatable {
     }
 }
 
+struct SupplyRouteOverlayState: Equatable {
+    let divisionId: String
+    let unitCoord: HexCoord
+    let displayHex: HexCoord
+    let sourceCoord: HexCoord
+    let pathCost: Int?
+    let maxPathCost: Int
+    let supplyState: SupplyState
+
+    var labelText: String {
+        if let pathCost {
+            return "粮\(pathCost)/\(maxPathCost)"
+        }
+        return "断粮"
+    }
+}
+
 extension UnitDisplayPlacement {
     static func == (lhs: UnitDisplayPlacement, rhs: UnitDisplayPlacement) -> Bool {
         lhs.divisionId == rhs.divisionId &&
@@ -230,6 +247,49 @@ struct MapDisplayAdapter {
                 defenderFaction: record.defenderFaction,
                 besiegerCount: record.besiegingDivisionIds.count
             )
+        }
+    }
+
+    func supplyRouteOverlays(viewerFaction: Faction) -> [SupplyRouteOverlayState] {
+        guard state.isTangSongScenario else {
+            return []
+        }
+
+        let placements = unitPlacements(viewerFaction: viewerFaction)
+        let supplyRules = SupplyRules()
+
+        return state.divisions.compactMap { division in
+            guard let placement = placements[division.id],
+                  revealAll || division.faction == viewerFaction else {
+                return nil
+            }
+
+            let summary = supplyRules.supplyRouteSummary(for: division, in: state)
+            guard let sourceCoord = summary.nearestSourceCoord else {
+                return nil
+            }
+            guard revealAll || visibility(for: sourceCoord, faction: viewerFaction) == .visible else {
+                return nil
+            }
+
+            return SupplyRouteOverlayState(
+                divisionId: division.id,
+                unitCoord: division.coord,
+                displayHex: placement.hex,
+                sourceCoord: sourceCoord,
+                pathCost: summary.pathCost,
+                maxPathCost: summary.maxPathCost,
+                supplyState: summary.supplyState
+            )
+        }
+        .sorted {
+            if $0.displayHex.r == $1.displayHex.r {
+                if $0.displayHex.q == $1.displayHex.q {
+                    return $0.divisionId < $1.divisionId
+                }
+                return $0.displayHex.q < $1.displayHex.q
+            }
+            return $0.displayHex.r < $1.displayHex.r
         }
     }
 
