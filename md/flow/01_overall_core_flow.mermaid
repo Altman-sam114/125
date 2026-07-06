@@ -18,6 +18,7 @@ flowchart TD
     VICT["VictoryRules<br/>唐宋读取 victoryConditions + MandateState<br/>缺失时 fallback"]:::rules
     VICTEXT["VictoryState.reason<br/>VictoryRules.objectiveProgress<br/>HUD / 战报只读胜负说明与目标进度"]:::ui
     GOAL["HUDView.objectiveGuideText<br/>统一目标锚点<br/>只读显示已据/待取关键州府"]:::ui
+    FOCUS["AppContainer.focusObjective<br/>目标聚焦<br/>只更新 selectedHex / selectedRegionId"]:::ui
     HINT["RootGameView.nextActionHint<br/>HUD 下一步提示<br/>只读派生选军/围城/招抚/解围/修城/结束回合建议"]:::ui
 
     PLAYER["玩家操作<br/>tap / move / attack / proposeSubmission / endTurn"]:::input
@@ -67,7 +68,7 @@ flowchart TD
 
     GS --> UI
     GS --> HINT --> UI
-    VICTEXT --> GOAL --> UI
+    VICTEXT --> GOAL --> FOCUS --> UI
     HEX --> UI
     REGION --> UI
     INIT --> UI

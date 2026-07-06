@@ -174,6 +174,21 @@ final class AppContainer: ObservableObject {
         }
     }
 
+    func focusObjective(id objectiveId: String) {
+        guard let objective = gameState.map.objective(id: objectiveId),
+              gameState.map.contains(objective.coord) else {
+            return
+        }
+
+        selectedHex = objective.coord
+        selectedRegionId = mapDisplayAdapter.regionId(for: objective.coord)
+        appendInteractionEvent(
+            gameState.isTangSongScenario
+                ? "已定位目标州府：\(objective.name)。"
+                : "Focused objective: \(objective.name)."
+        )
+    }
+
     func holdSelected() {
         guard let division = selectedActionDivision else {
             appendInteractionEvent("Hold rejected: no active allied unit selected.")

@@ -19,6 +19,7 @@ struct RootGameView: View {
                     HUDView(
                         gameState: container.gameState,
                         nextActionHint: nextActionHint,
+                        onFocusObjective: container.focusObjective(id:),
                         onEndTurn: container.advanceOrRunAI,
                         onNewGame: container.resetGame
                     )

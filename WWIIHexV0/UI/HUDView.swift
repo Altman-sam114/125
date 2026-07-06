@@ -3,17 +3,20 @@ import SwiftUI
 struct HUDView: View {
     let gameState: GameState
     let nextActionHint: String?
+    let onFocusObjective: ((String) -> Void)?
     let onEndTurn: () -> Void
     let onNewGame: (() -> Void)?
 
     init(
         gameState: GameState,
         nextActionHint: String? = nil,
+        onFocusObjective: ((String) -> Void)? = nil,
         onEndTurn: @escaping () -> Void,
         onNewGame: (() -> Void)? = nil
     ) {
         self.gameState = gameState
         self.nextActionHint = nextActionHint
+        self.onFocusObjective = onFocusObjective
         self.onEndTurn = onEndTurn
         self.onNewGame = onNewGame
     }
@@ -85,6 +88,25 @@ struct HUDView: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
+
+                        if !objectiveGuideItems.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 6) {
+                                    ForEach(objectiveGuideItems) { item in
+                                        Button {
+                                            onFocusObjective?(item.id)
+                                        } label: {
+                                            Text(item.label)
+                                                .font(.caption2.weight(.semibold))
+                                                .lineLimit(1)
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .controlSize(.mini)
+                                        .disabled(onFocusObjective == nil)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -178,12 +200,8 @@ struct HUDView: View {
             return nil
         }
 
-        let controlledNames = progress.objectiveNames.filter {
-            gameState.map.controllerOfObjective(named: $0) == progress.faction
-        }
-        let pendingNames = progress.objectiveNames.filter {
-            gameState.map.controllerOfObjective(named: $0) != progress.faction
-        }
+        let controlledNames = objectiveGuideItems.filter { $0.isControlled }.map(\.name)
+        let pendingNames = objectiveGuideItems.filter { !$0.isControlled }.map(\.name)
 
         if pendingNames.isEmpty {
             return "关键州府已全部达成；保持天命并查看战报确认胜负。"
@@ -198,6 +216,26 @@ struct HUDView: View {
 
         let pendingPart = "待取 \(limitedList(pendingNames, limit: 4))"
         return "\(controlledPart)\(pendingPart)，凑足 \(progress.requiredCount) 处并保持天命。"
+    }
+
+    private var objectiveGuideItems: [ObjectiveGuideItem] {
+        guard gameState.isTangSongScenario,
+              let progress = primaryObjectiveProgress,
+              progress.status == "majorVictory" else {
+            return []
+        }
+
+        return progress.objectiveNames.compactMap { name in
+            guard let objective = gameState.map.objective(named: name) else {
+                return nil
+            }
+            let isControlled = gameState.map.controllerOfObjective(id: objective.id) == progress.faction
+            return ObjectiveGuideItem(
+                id: objective.id,
+                name: objective.name,
+                isControlled: isControlled
+            )
+        }
     }
 
     private func limitedList(_ names: [String], limit: Int) -> String {
@@ -260,5 +298,15 @@ struct HUDView: View {
 
     private var queueLabel: String {
         gameState.isTangSongScenario ? "队列" : "Queue"
+    }
+}
+
+private struct ObjectiveGuideItem: Identifiable {
+    let id: String
+    let name: String
+    let isControlled: Bool
+
+    var label: String {
+        "\(isControlled ? "已据" : "待取") \(name)"
     }
 }

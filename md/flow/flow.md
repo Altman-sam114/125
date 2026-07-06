@@ -438,6 +438,13 @@ v5.7b 当前已落地：
 - HUD 在首屏显示“目标”提示，例如开封、洛阳已据，太原、金陵、成都、杭州待取，帮助玩家理解 `统一进度 2/4` 对应哪些地图目标。
 - 该提示不新增 objective，不改变 `VictoryRules`，不提交 `Command`，不写 `eventLog`，不修改 hex / region / theater / front / diplomacy。
 
+v5.7c 当前已落地：
+
+- `HUDView.objectiveGuideItems` 把主要统一目标渲染为“已据 / 待取”小按钮，按钮使用 objective id 作为稳定标识。
+- `RootGameView` 将按钮点击传给 `AppContainer.focusObjective(id:)`。
+- `AppContainer.focusObjective(id:)` 只读取 `MapState.objective(id:)`，把 `selectedHex` 和 `selectedRegionId` 设为目标所在 hex / region，并写一条交互日志；它不改 `GameState`、不提交 `Command`、不调用 `RuleEngine`。
+- 地图已有 selected hex / selected region 高亮和 Region inspector 链路会自然显示该目标州府，形成轻量开局导览。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1384,6 +1391,11 @@ HUDView.objectiveGuideText
   -> 复用 VictoryRules.objectiveProgress + MapState.controllerOfObjective
   -> HUD 显示已据/待取关键州府
   -> 不改变 VictoryRules，不写 GameState 或 eventLog
+HUDView.objectiveGuideItems
+  -> 目标锚点按钮
+  -> AppContainer.focusObjective(id:)
+  -> 只更新 selectedHex / selectedRegionId
+  -> 地图和 Region inspector 只读聚焦目标州府
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId
