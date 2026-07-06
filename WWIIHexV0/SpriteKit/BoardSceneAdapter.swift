@@ -6,6 +6,7 @@ struct BoardRenderState: Equatable {
     let selectedUnitId: String?
     let selectedHex: HexCoord?
     let selectedRegionId: RegionId?
+    let focusedObjectiveId: String?
     let movementHighlights: Set<HexCoord>
     let attackHighlights: Set<HexCoord>
     let mapDisplayLayer: MapDisplayLayer
@@ -24,6 +25,7 @@ enum BoardSceneAdapter {
             selectedUnitId: container.selectedUnitId,
             selectedHex: container.selectedHex,
             selectedRegionId: container.selectedRegionId,
+            focusedObjectiveId: container.focusedObjectiveId,
             movementHighlights: container.movementHighlights,
             attackHighlights: container.attackHighlights,
             mapDisplayLayer: container.mapDisplayLayer,

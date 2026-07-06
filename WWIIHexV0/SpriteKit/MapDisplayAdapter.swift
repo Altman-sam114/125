@@ -64,6 +64,19 @@ struct SupplyRouteOverlayState: Equatable {
     }
 }
 
+struct ObjectiveOverlayState: Equatable, Identifiable {
+    let id: String
+    let name: String
+    let coord: HexCoord
+    let regionId: RegionId?
+    let requiredFaction: Faction
+    let isControlled: Bool
+
+    var labelText: String {
+        "\(isControlled ? "已据" : "待取") \(name)"
+    }
+}
+
 extension UnitDisplayPlacement {
     static func == (lhs: UnitDisplayPlacement, rhs: UnitDisplayPlacement) -> Bool {
         lhs.divisionId == rhs.divisionId &&
@@ -290,6 +303,29 @@ struct MapDisplayAdapter {
                 return $0.displayHex.q < $1.displayHex.q
             }
             return $0.displayHex.r < $1.displayHex.r
+        }
+    }
+
+    func objectiveOverlays() -> [ObjectiveOverlayState] {
+        guard state.isTangSongScenario,
+              let progress = VictoryRules().objectiveProgress(in: state).first(where: { $0.status == "majorVictory" }) else {
+            return []
+        }
+
+        return progress.objectiveNames.compactMap { name in
+            guard let objective = state.map.objective(named: name),
+                  state.map.contains(objective.coord) else {
+                return nil
+            }
+
+            return ObjectiveOverlayState(
+                id: objective.id,
+                name: objective.name,
+                coord: objective.coord,
+                regionId: regionId(for: objective.coord),
+                requiredFaction: progress.faction,
+                isControlled: state.map.controllerOfObjective(id: objective.id) == progress.faction
+            )
         }
     }
 

@@ -6,6 +6,7 @@ final class AppContainer: ObservableObject {
     @Published private(set) var selectedUnitId: String?
     @Published private(set) var selectedHex: HexCoord?
     @Published private(set) var selectedRegionId: RegionId?
+    @Published private(set) var focusedObjectiveId: String?
     @Published private(set) var movementHighlights: Set<HexCoord>
     @Published private(set) var attackHighlights: Set<HexCoord>
     @Published private(set) var interactionLog: [GameLogEntry]
@@ -46,6 +47,7 @@ final class AppContainer: ObservableObject {
         self.selectedUnitId = nil
         self.selectedHex = nil
         self.selectedRegionId = nil
+        self.focusedObjectiveId = nil
         self.movementHighlights = []
         self.attackHighlights = []
         self.interactionLog = []
@@ -182,6 +184,7 @@ final class AppContainer: ObservableObject {
 
         selectedHex = objective.coord
         selectedRegionId = mapDisplayAdapter.regionId(for: objective.coord)
+        focusedObjectiveId = objective.id
         appendInteractionEvent(
             gameState.isTangSongScenario
                 ? "已定位目标州府：\(objective.name)。"
@@ -381,6 +384,7 @@ final class AppContainer: ObservableObject {
         selectedUnitId = nil
         selectedHex = nil
         selectedRegionId = nil
+        focusedObjectiveId = nil
         movementHighlights = []
         attackHighlights = []
         interactionLog = []

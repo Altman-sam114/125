@@ -445,6 +445,13 @@ v5.7c 当前已落地：
 - `AppContainer.focusObjective(id:)` 只读取 `MapState.objective(id:)`，把 `selectedHex` 和 `selectedRegionId` 设为目标所在 hex / region，并写一条交互日志；它不改 `GameState`、不提交 `Command`、不调用 `RuleEngine`。
 - 地图已有 selected hex / selected region 高亮和 Region inspector 链路会自然显示该目标州府，形成轻量开局导览。
 
+v5.7d 当前已落地：
+
+- `MapDisplayAdapter.objectiveOverlays()` 在唐宋场景下复用 `VictoryRules.objectiveProgress(in:)` 的主要 `majorVictory` 条件，把 objective id / name / coord / 控制状态派生为 `ObjectiveOverlayState`。
+- `BoardScene.drawObjectiveOverlays` 在非 frontLine 图层只读绘制目标州府 spotlight，用“已据 / 待取”短标签和 hex outline 标出主要统一目标；若 HUD 点击过某个目标，`focusedObjectiveId` 只作为渲染态让该目标多一圈强调。
+- 该 spotlight 不新增 objective，不改变 `VictoryRules`，不提交 `Command`，不写 `GameState` 或 `eventLog`，不参与移动/攻击/围城/外交合法性判断。
+- HUD 目标按钮仍只负责选中聚焦；地图 spotlight 只是帮助玩家在地图上识别统一目标州府，不做自动镜头移动、路线指引或持续追踪系统。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1396,6 +1403,12 @@ HUDView.objectiveGuideItems
   -> AppContainer.focusObjective(id:)
   -> 只更新 selectedHex / selectedRegionId
   -> 地图和 Region inspector 只读聚焦目标州府
+MapDisplayAdapter.objectiveOverlays
+  -> 复用 VictoryRules.objectiveProgress + MapState.objective
+  -> BoardRenderState.focusedObjectiveId 可选强调当前 HUD 聚焦目标
+  -> BoardScene.drawObjectiveOverlays
+  -> 地图只读绘制已据/待取目标州府 spotlight
+  -> 不提交 Command，不写 GameState 或 eventLog
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId

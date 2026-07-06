@@ -225,6 +225,7 @@ final class BoardScene: SKScene {
         drawRivers(map: state.map, layout: layout, isTangSongScenario: state.isTangSongScenario)
         drawSupplyRouteOverlays(renderState: renderState, layout: layout)
         drawSiegeOverlays(renderState: renderState, layout: layout)
+        drawObjectiveOverlays(renderState: renderState, layout: layout)
         drawPlannedOperations(renderState: renderState, layout: layout)
         drawUnits(renderState: renderState, layout: layout)
     }
@@ -575,6 +576,104 @@ final class BoardScene: SKScene {
         }
         path.closeSubpath()
         return path
+    }
+
+    private func drawObjectiveOverlays(renderState: BoardRenderState, layout: HexLayout) {
+        guard renderState.gameState.isTangSongScenario,
+              renderState.mapDisplayLayer != .frontLine else {
+            return
+        }
+
+        for overlay in renderState.displayAdapter.objectiveOverlays() {
+            drawObjectiveOverlay(
+                overlay,
+                layout: layout,
+                isFocused: renderState.focusedObjectiveId == overlay.id
+            )
+        }
+    }
+
+    private func drawObjectiveOverlay(_ overlay: ObjectiveOverlayState, layout: HexLayout, isFocused: Bool) {
+        let center = layout.hexToPixel(overlay.coord)
+        let color = objectiveOverlayColor(isControlled: overlay.isControlled)
+        let path = siegeHexPath(layout: layout)
+
+        let outline = SKShapeNode(path: path)
+        outline.position = center
+        outline.fillColor = color.withAlphaComponent(overlay.isControlled ? 0.07 : 0.12)
+        outline.strokeColor = color.withAlphaComponent(0.95)
+        outline.lineWidth = max(2, layout.hexSize * 0.065)
+        outline.lineJoin = .round
+        outline.zPosition = 22.7
+        addChild(outline)
+
+        if isFocused {
+            let focusRing = SKShapeNode(circleOfRadius: max(17, layout.hexSize * 0.58))
+            focusRing.position = center
+            focusRing.fillColor = color.withAlphaComponent(0.08)
+            focusRing.strokeColor = color.withAlphaComponent(0.98)
+            focusRing.lineWidth = max(3, layout.hexSize * 0.09)
+            focusRing.zPosition = 23.1
+            addChild(focusRing)
+        }
+
+        let marker = SKShapeNode(circleOfRadius: max(7, layout.hexSize * 0.20))
+        marker.position = CGPoint(x: center.x, y: center.y - layout.hexSize * 0.50)
+        marker.fillColor = SKColor.black.withAlphaComponent(0.55)
+        marker.strokeColor = color.withAlphaComponent(0.95)
+        marker.lineWidth = max(1.4, layout.hexSize * 0.04)
+        marker.zPosition = 23.3
+        addChild(marker)
+
+        let glyph = SKLabelNode(text: overlay.isControlled ? "据" : "取")
+        glyph.fontName = "AvenirNext-DemiBold"
+        glyph.fontSize = max(9, layout.hexSize * 0.25)
+        glyph.fontColor = .white
+        glyph.horizontalAlignmentMode = .center
+        glyph.verticalAlignmentMode = .center
+        glyph.position = marker.position
+        glyph.zPosition = 23.8
+        addChild(glyph)
+
+        drawObjectiveLabel(overlay.labelText, at: center, color: color, layout: layout, isFocused: isFocused)
+    }
+
+    private func drawObjectiveLabel(
+        _ text: String,
+        at center: CGPoint,
+        color: SKColor,
+        layout: HexLayout,
+        isFocused: Bool
+    ) {
+        let label = SKLabelNode(text: text)
+        label.fontName = "AvenirNext-DemiBold"
+        label.fontSize = max(9, layout.hexSize * 0.24)
+        label.fontColor = .white
+        label.horizontalAlignmentMode = .center
+        label.verticalAlignmentMode = .center
+        label.zPosition = 24.4
+
+        let labelSize = CGSize(
+            width: max(62, CGFloat(text.count) * label.fontSize * 0.62),
+            height: max(20, label.fontSize + 9)
+        )
+        let background = SKShapeNode(rectOf: labelSize, cornerRadius: 5)
+        background.fillColor = SKColor.black.withAlphaComponent(isFocused ? 0.76 : 0.64)
+        background.strokeColor = color.withAlphaComponent(0.92)
+        background.lineWidth = isFocused ? 1.8 : 1.2
+        background.position = CGPoint(x: center.x, y: center.y + layout.hexSize * 0.62)
+        background.zPosition = 24
+        addChild(background)
+
+        label.position = background.position
+        addChild(label)
+    }
+
+    private func objectiveOverlayColor(isControlled: Bool) -> SKColor {
+        if isControlled {
+            return SKColor(red: 0.20, green: 0.62, blue: 0.48, alpha: 0.92)
+        }
+        return SKColor(red: 0.92, green: 0.52, blue: 0.16, alpha: 0.94)
     }
 
     private func drawPlannedOperations(renderState: BoardRenderState, layout: HexLayout) {
