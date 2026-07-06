@@ -31,6 +31,7 @@
   -> v5.7k 起军队/州府检查面板补齐唐宋读法
   -> v5.7l 起将领指挥/档案面板补齐唐宋读法
   -> v5.7m 起常驻军队 tooltip 补齐唐宋读法
+  -> v5.8a 起 AI 面板默认主路径残留硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -71,6 +72,7 @@ flowchart TD
     INSPECT["检查面板读法<br/>UnitInspectorView + RegionInspectorView<br/>唐宋场景显示军队、州府、政权、粮道、编成、产出与围城摘要"]:::ui
     GENPANELS["将领面板读法<br/>GeneralCommandPanelView + GeneralProfileView<br/>唐宋场景显示将领军令、档案、用兵、所属政权和辖下军队"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示兵种、兵力、补给、退却和本回合"]:::ui
+    AIPANEL["AI 面板读法硬化<br/>AgentPanelView + AgentDecisionRecord + WarDirectiveRecord<br/>唐宋默认路径显示主事、来源、方面、州府和军令读法"]:::ui
     GOAL["统一目标锚点<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
@@ -136,6 +138,7 @@ flowchart TD
     VICTEXT --> GOAL --> FOCUS --> UI
     VICTEXT --> SPOTLIGHT --> UI
     LOG --> TURNREPORT --> UI
+    LOG --> AIPANEL --> UI
     HEX --> UI
     REGION --> UI
     INIT --> UI

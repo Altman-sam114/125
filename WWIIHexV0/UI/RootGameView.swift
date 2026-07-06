@@ -378,7 +378,13 @@ struct RootGameView: View {
                         record: container.lastAgentDecisionRecord,
                         rulerRecord: container.gameState.diplomacyState.latestRulerRecord,
                         directiveRecords: container.lastWarDirectiveRecords,
-                        isTangSongScenario: container.gameState.isTangSongScenario
+                        isTangSongScenario: container.gameState.isTangSongScenario,
+                        regionDisplayName: { regionId in
+                            container.gameState.map.regions[regionId]?.name ?? regionId.rawValue
+                        },
+                        zoneDisplayName: { zoneId in
+                            container.gameState.warDeploymentState.frontZones[zoneId]?.name ?? zoneId.rawValue
+                        }
                     )
                 }
             }
