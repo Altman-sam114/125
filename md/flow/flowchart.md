@@ -38,6 +38,7 @@
   -> v5.8e 起 MapEditor 默认资源和可见读法硬化
   -> v5.8g 起主游戏默认启动不再静默回退阿登
   -> v5.8h 起唐宋将领注册表默认读取 tangsong_characters
+  -> v5.8i 起命令反馈与战报元数据隐藏 raw validation / record id
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -94,7 +95,7 @@ flowchart TD
     ZD["战争指令<br/>ZoneDirective<br/>方面级 attack/defend 意图"]:::command
     WCE["指令翻译器<br/>WarCommandExecutor<br/>把方面意图翻成具体单位命令"]:::command
     CMD["底层命令<br/>Command<br/>move / attack / besiege / demandSurrender / proposeSubmission / endTurn"]:::command
-    RE["规则引擎<br/>RuleEngine<br/>先校验，再真正修改 GameState"]:::rules
+    RE["规则引擎<br/>RuleEngine<br/>先校验，再真正修改 GameState<br/>唐宋拒绝原因显示中文 validation 名称"]:::rules
     SYNC["战略同步器<br/>StrategicStateSynchronizer<br/>占领后刷新州府、方面、前线、部署"]:::rules
 
     UI["地图和面板显示<br/>SpriteKit / SwiftUI Overlay<br/>显示 hex、州府、初始方面、动态战区、前线、部署"]:::ui
@@ -582,7 +583,7 @@ flowchart TD
     GENPANELS["将领面板<br/>GeneralCommandPanelView / GeneralProfileView<br/>唐宋场景显示将领军令、将领档案、用兵和辖下军队"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示选中军队摘要读法"]:::ui
     SESSIONHUD["亲征势力 / 观战 / 重开剧本<br/>RootGameView + HUDView + NewGameButton<br/>切换 legacy 亲征阵营，显示亲征/观战，确认后重置剧本"]:::ui
-    LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类、每回合摘要和胜负后评分估算"]:::ui
+    LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类、每回合摘要和胜负后评分估算<br/>metadata 不展示内部 relatedRecordId"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
     BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette，绘制粮道虚线"]:::ui
     UNIT["军队棋子<br/>UnitNode<br/>legacy NATO；唐宋军旗 + 禁/骑/弩/械/守/军字标"]:::ui

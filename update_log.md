@@ -111,7 +111,45 @@
 遗留事项：
 
 - `tangsong_characters.json` 当前是轻量人物表，只映射为兼容 `GeneralData`；后续可扩展更完整的唐宋将领 catalog，但不应恢复唐宋默认读取 legacy `generals.json`。
-- 命令面板 `lastCommandMessage`、EventLog `relatedRecordId`、Unit/Region inspector raw id 和部分 accessibility 文案仍有玩家可见残留，建议作为后续 v5.8i 小切片。
+- 命令面板 `lastCommandMessage` 与 EventLog `relatedRecordId` 已由 v5.8i 首轮收口；Unit/Region inspector raw id、MapDisplayAdapter objectiveStatus 和部分 accessibility 文案仍有玩家可见残留，建议作为后续 v5.8/v5.9 小切片。
+
+## v5.8i - 命令反馈与战报元数据硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- `CommandValidationError` 新增 `displayName(isTangSongScenario:)`，唐宋场景下把 `wrongPhase`、`wrongFaction`、`regionNotFound`、`submissionNotReady` 等 raw validation key 显示为中文拒绝原因。
+- `RuleEngine` 唐宋拒绝消息使用中文 validation 名称；底层 raw enum case 与 Codable schema 保持不变。
+- `AppContainer` 的 AI 回合反馈从 `AI turn completed...` 改为“军议回合已完成”，方面军令反馈从 `General order executed...` 改为“方面军令已执行”，方面军令提交日志使用防区显示名，不再写 directive type / zone raw id。
+- `AppContainer.selectionMessage` 唐宋路径写入“已选州府 / 已选地块”，不再把 region raw id 写进交互日志。
+- `CommandPanelView` 对 `lastCommandMessage` 增加唐宋显示兜底，减少旧英文 AI/General order 文案和常见 raw validation key 外露。
+- `EventLogView` 唐宋 metadata 隐藏 `relatedRecordId`，避免在默认战报路径显示内部记录 id。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8i 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/Commands/CommandValidation.swift`
+- `WWIIHexV0/Rules/RuleEngine.swift`
+- `WWIIHexV0/App/AppContainer.swift`
+- `WWIIHexV0/UI/CommandPanelView.swift`
+- `WWIIHexV0/UI/EventLogView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8i_command_feedback_event_metadata_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- Unit/Region inspector 仍有 region/theater/frontZone raw id 与英文 objectiveStatus 残留，已由并发子 Agent 定位，建议下一轮 v5.8j 小切片处理。
+- 部分交互日志写入端仍可能传入英文 fallback；本轮只处理命令反馈、AI/方面军令和选中州府高频路径。
 
 ## v0 - 六角格测试板
 

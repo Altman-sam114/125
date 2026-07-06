@@ -8,7 +8,9 @@ struct RuleEngine {
         let preparedState = EconomyRules().bootstrapIfNeeded(state)
         let validation = validator.validate(command, in: preparedState)
         guard validation.isValid else {
-            let errorMessage = validation.errors.map(\.rawValue).joined(separator: ", ")
+            let errorMessage = validation.errors
+                .map { $0.displayName(isTangSongScenario: preparedState.isTangSongScenario) }
+                .joined(separator: preparedState.isTangSongScenario ? "、" : ", ")
             return CommandResult(
                 command: command,
                 validation: validation,

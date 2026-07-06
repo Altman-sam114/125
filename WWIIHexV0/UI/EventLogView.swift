@@ -296,6 +296,9 @@ struct EventLogView: View {
         let phase = entry.phase?.displayName(isTangSongScenario: isTangSongScenario) ??
             (isTangSongScenario ? "开局" : "Setup")
         let turnLabel = isTangSongScenario ? "回合" : "Turn"
+        if isTangSongScenario {
+            return "\(turnLabel) \(entry.turn) - \(faction) - \(phase)"
+        }
         if let relatedRecordId = entry.relatedRecordId {
             return "\(turnLabel) \(entry.turn) - \(faction) - \(phase) - \(relatedRecordId)"
         }

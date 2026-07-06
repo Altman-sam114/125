@@ -60,7 +60,7 @@
 
 > **v5.6d 前序小切片：** `VictoryRules.updateVictoryState` 在唐宋场景先走唐宋专用判定，不再套用 Bastogne / St. Vith legacy 条件；宋统一胜利同时要求关键州府控制与天命阈值，割据生存胜利同时要求核心都城保有与割据天命阈值。该切片不新增治理政策、不改变 `MandateState` 调整来源、不改 UI 胜利面板结构，也不做归附后的控制权或部队交割。
 
-> **v5.8h 最新小切片：** 唐宋默认主路径的将领注册表改为读取 `tangsong_characters.json` 并映射为兼容 `GeneralRegistry`，`AppContainer.bootstrap()` 和 `DataLoader.assignGenerals` 不再用 legacy `generals.json` 给唐宋方面分配蒙哥马利、古德里安等二战将领；将领军令与档案面板在唐宋场景下对 rank、bio、skill 和头像 accessibility 增加中文兜底显示桥。该切片只改人物数据读取与显示桥，不改变 `GeneralData`、`GeneralAssignment`、AI 决策、命令管线、规则系统或 legacy 阿登 `generals.json` 路径。
+> **v5.8i 最新小切片：** 唐宋默认主路径的命令反馈与战报元数据继续硬化：`CommandValidationError` 增加唐宋中文显示名，`RuleEngine` 唐宋拒绝原因不再拼 raw validation key；AI 回合、将领方面军令、选中州府日志和命令面板反馈改为唐宋文案；`EventLogView` 唐宋 metadata 不再展示内部 `relatedRecordId`。该切片只改玩家可见反馈/日志显示桥，不改变 `CommandValidationError` raw case、`CommandResult` schema、AI 决策、命令执行或规则判定。
 
 ---
 
@@ -212,7 +212,7 @@ WWIIHexV0/
 | v5.5 | 已完成首轮 | HUD、图层、面板、战报、地图视觉 token、军旗棋子和只读粮道 overlay 已改为唐宋场景读法。 |
 | v5.6 | 已完成多轮首轮闭环 | 外交归附、天命、玩家招抚、AI 招抚辅助桥、关系投影、战术候选关系感知、数据驱动胜利条件、胜负原因和目标进度只读显示已接入。 |
 | v5.7 | 已完成多轮可玩性首轮 | 下一步提示、统一目标锚点/定位/spotlight、每回合战报摘要、新局确认、亲征/观战入口、结算预览、合法性提示、检查面板、将领面板和 tooltip 唐宋读法已接入。 |
-| v5.8a-v5.8h | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback 和唐宋将领注册表默认路径已做默认主路径硬化首轮。完整 RC 审计仍未完成。 |
+| v5.8a-v5.8i | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径和命令反馈/战报元数据已做默认主路径硬化首轮。完整 RC 审计仍未完成。 |
 | v5.9 | 未开始 | 可发布验收、完整 artifact 审计、README/flow/update_log 统一发布口径仍待后续。 |
 
 ### 当前仍未完成

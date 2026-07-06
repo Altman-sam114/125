@@ -139,10 +139,8 @@ final class AppContainer: ObservableObject {
                 self.gameState = self.refreshedRuntimeState(outcome.state)
                 self.lastAgentDecisionRecord = outcome.record
                 self.lastWarDirectiveRecords = outcome.directiveRecords
-                self.lastCommandMessage = outcome.record.errors.isEmpty
-                    ? "AI turn completed."
-                    : "AI turn completed with \(outcome.record.errors.count) issue(s)."
-                self.appendInteractionEvent("AI \(outcome.record.provider) resolved \(outcome.record.commandResults.count) command result(s).")
+                self.lastCommandMessage = self.aiTurnMessage(for: outcome.record)
+                self.appendInteractionEvent(self.aiTurnEventMessage(for: outcome.record))
                 self.isRunningAI = false
                 self.refreshSelectionAfterStateChange()
             }
@@ -1045,7 +1043,7 @@ final class AppContainer: ObservableObject {
         gameState = nextState
         lastWarDirectiveRecords = Array((lastWarDirectiveRecords + [record]).suffix(12))
         lastCommandMessage = playerDirectiveMessage(for: execution, diagnostics: diagnostics)
-        appendInteractionEvent("General order submitted: \(directive.type.rawValue) \(directive.zoneId.rawValue).")
+        appendInteractionEvent(playerDirectiveEventMessage(for: directive))
         refreshSelectionAfterStateChange()
     }
 
@@ -1055,13 +1053,47 @@ final class AppContainer: ObservableObject {
     ) -> String {
         let acceptedCount = execution.commandResults.filter(\.succeeded).count
         let totalCount = execution.generatedCommands.count
+        let isTangSong = gameState.isTangSongScenario
         if totalCount == 0 {
-            return diagnostics.first ?? "General order produced no commands."
+            return isTangSong
+                ? "方面军令未生成可执行命令。"
+                : (diagnostics.first ?? "General order produced no commands.")
         }
         if acceptedCount == totalCount {
-            return "General order executed \(acceptedCount) command(s)."
+            return isTangSong
+                ? "方面军令已执行 \(acceptedCount) 道命令。"
+                : "General order executed \(acceptedCount) command(s)."
         }
-        return "General order executed \(acceptedCount)/\(totalCount) command(s)."
+        return isTangSong
+            ? "方面军令已执行 \(acceptedCount)/\(totalCount) 道命令。"
+            : "General order executed \(acceptedCount)/\(totalCount) command(s)."
+    }
+
+    private func playerDirectiveEventMessage(for directive: ZoneDirective) -> String {
+        guard gameState.isTangSongScenario else {
+            return "General order submitted: \(directive.type.rawValue) \(directive.zoneId.rawValue)."
+        }
+        let type = directive.type == .attack ? "进攻" : "固守"
+        let zoneName = gameState.warDeploymentState.frontZones[directive.zoneId]?.name ?? "未命名方面"
+        return "方面军令提交：\(type) \(zoneName)。"
+    }
+
+    private func aiTurnMessage(for record: AgentDecisionRecord) -> String {
+        guard gameState.isTangSongScenario else {
+            return record.errors.isEmpty
+                ? "AI turn completed."
+                : "AI turn completed with \(record.errors.count) issue(s)."
+        }
+        return record.errors.isEmpty
+            ? "军议回合已完成。"
+            : "军议回合已完成，尚有 \(record.errors.count) 项问题。"
+    }
+
+    private func aiTurnEventMessage(for record: AgentDecisionRecord) -> String {
+        guard gameState.isTangSongScenario else {
+            return "AI \(record.provider) resolved \(record.commandResults.count) command result(s)."
+        }
+        return "军议已处理 \(record.commandResults.count) 条命令结果。"
     }
 
     private func shouldRunAI(for faction: Faction, phase: GamePhase) -> Bool {
@@ -1232,7 +1264,12 @@ final class AppContainer: ObservableObject {
     private func selectionMessage(for coord: HexCoord) -> String {
         guard let selectedRegionId,
               let region = gameState.map.region(id: selectedRegionId) else {
-            return "Selected hex \(coord.q),\(coord.r)."
+            return gameState.isTangSongScenario
+                ? "已选地块：\(coord.q),\(coord.r)。"
+                : "Selected hex \(coord.q),\(coord.r)."
+        }
+        if gameState.isTangSongScenario {
+            return "已选州府：\(region.name)。"
         }
         return "Selected region: \(region.name) (\(selectedRegionId.rawValue))."
     }

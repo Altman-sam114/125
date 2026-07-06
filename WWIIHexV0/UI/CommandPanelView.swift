@@ -95,7 +95,7 @@ struct CommandPanelView: View {
             .buttonStyle(.borderedProminent)
 
             if let lastCommandMessage {
-                Text(lastCommandMessage)
+                Text(commandMessageText(lastCommandMessage))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -213,5 +213,33 @@ struct CommandPanelView: View {
         }
 
         return isTangSongScenario ? "可行军或进攻。" : "Move/Attack ready."
+    }
+
+    private func commandMessageText(_ message: String) -> String {
+        guard isTangSongScenario else {
+            return message
+        }
+
+        if message == "AI turn completed." {
+            return "军议回合已完成。"
+        }
+        if message.hasPrefix("AI turn completed with") {
+            return "军议回合已完成，仍有问题待查。"
+        }
+        if message.hasPrefix("General order produced no commands") {
+            return "方面军令未生成可执行命令。"
+        }
+        if message.hasPrefix("General order executed") {
+            return message
+                .replacingOccurrences(of: "General order executed", with: "方面军令已执行")
+                .replacingOccurrences(of: "command(s).", with: "道命令。")
+        }
+        if message.contains("wrongPhase") {
+            return "军令被拒：当前阶段不可下令。"
+        }
+        if message.contains("wrongFaction") {
+            return "军令被拒：不可指挥该政权军队。"
+        }
+        return message
     }
 }

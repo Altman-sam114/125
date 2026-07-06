@@ -1193,6 +1193,8 @@ RuleEngine.execute(command, in: state)
   -> valid: CommandExecutor.execute(command, in: preparedState)
 ```
 
+v5.8i 起，唐宋场景下 `CommandValidationError.displayName(isTangSongScenario:)` 会把 `wrongPhase`、`wrongFaction`、`regionNotFound`、`submissionNotReady` 等 raw validation key 显示为中文拒绝原因；`RuleEngine` 仍保留原始 enum case 和 Codable raw 值，不改变校验语义。`AppContainer` 的 AI 回合完成、玩家方面军令反馈、选中州府日志和 `CommandPanelView.lastCommandMessage` 也优先显示唐宋文案；`EventLogView` 唐宋 metadata 不再展示内部 `relatedRecordId`，legacy 阿登路径保持旧 metadata。
+
 ### 5.2 校验规则
 
 `CommandValidator` 的关键校验：
