@@ -409,6 +409,13 @@ v5.6g 当前已落地：
 - `VictoryRules.updateTangSongVictoryState` 优先读取 `state.victoryConditions`，当前支持 `controlObjectives` 与 `holdObjectives`。
 - `majorVictory` 映射为 `.tangSongUnificationByMandate`，`survival` 映射为 `.tangSongSeparatistSurvival`；当前不支持的 type/status 会在加载校验中报错。
 
+v5.6h 当前已落地：
+
+- `VictoryReason.displayName(isTangSongScenario:)` 提供唐宋/legacy 胜负原因显示桥，不改变 enum raw value 或 Codable 兼容。
+- `HUDView.victoryText` 会读取 `VictoryState.reason`，唐宋场景显示为“宋胜利：关键州府与天命达标”等短文案。
+- `EventLogView` 接收 `VictoryState` 并在战报顶部派生只读胜负摘要；该摘要不写入 `eventLog`，不作为规则权威。
+- `RootGameView` 只把当前 `gameState.victoryState` 传入战报面板，胜负仍只由 `VictoryRules.updateVictoryState` 写入。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -459,13 +466,23 @@ tangsong_jianlong_960_scenario.json victoryConditions
   -> VictoryState.winner / reason
 ```
 
-v5.6a/v5.6b/v5.6c/v5.6d/v5.6e/v5.6f/v5.6g 当前没有做：
+v5.6h 的胜负说明显示链路：
+
+```text
+VictoryRules.updateVictoryState
+  -> VictoryState.winner / reason
+  -> VictoryReason.displayName
+  -> HUDView.victoryText
+  -> EventLogView 只读胜负摘要
+```
+
+v5.6a/v5.6b/v5.6c/v5.6d/v5.6e/v5.6f/v5.6g/v5.6h 当前没有做：
 
 - 不实现吴越、南唐、后蜀、北汉等单国 tactical neutral；v5.6e 只同步 legacy `.allies/.germany` power 级保守投影。
 - 不交割 hex / region controller，不转换或删除部队，不刷新 theater/front/deploy。
 - 不让 `TheaterDirectiveEnvelope.pacificationTargets` 自动纳土、停战或改变控制权；v5.6c 只尝试生成经规则校验的归附提议命令。
 - 不实现完整治理政策、民心、治安、税粮、叛乱或归附后的纳土交割；v5.6g 只让唐宋胜利条件可从 JSON 读取，不改变天命调整来源或控制权交割来源。
-- 不实现完整评分档位、单国胜负、胜利面板重构或统一结算战报；当前只识别唐宋 JSON 已使用的 `majorVictory` 与 `survival`。
+- 不实现完整评分档位、单国胜负、胜利面板重构或统一结算战报；当前只识别唐宋 JSON 已使用的 `majorVictory` 与 `survival`，v5.6h 只显示原因摘要。
 
 后续若加入统治者层，必须满足这些边界：
 
@@ -1331,6 +1348,7 @@ VictoryRules.updateVictoryState
      -> majorVictory 映射为宋统一胜利，survival 映射为割据生存
      -> 条件缺失时 fallback 到 v5.6d 关键州府与天命阈值
   -> 非唐宋场景：沿用 Bastogne / St. Vith / 单位损失 / 装甲断补 legacy 条件
+  -> HUD 和战报面板只读显示 VictoryState.reason，不反向改胜负
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId

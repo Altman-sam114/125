@@ -2,6 +2,7 @@ import SwiftUI
 
 struct EventLogView: View {
     let entries: [GameLogEntry]
+    var victoryState: VictoryState = .ongoing
     var isTangSongScenario = false
     var factionDisplayName: ((Faction) -> String)?
 
@@ -9,6 +10,21 @@ struct EventLogView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(isTangSongScenario ? "战报" : "Event Log")
                 .font(.headline)
+
+            if let victorySummary {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(isTangSongScenario ? "胜负" : "Victory")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.blue)
+                    Text(victorySummary)
+                        .font(.subheadline.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(8)
+                .background(.blue.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
@@ -54,6 +70,20 @@ struct EventLogView: View {
             .suffix(60)
             .reversed()
             .map { LogDisplayEntry(entry: $0, category: LogDisplayCategory(entry: $0)) }
+    }
+
+    private var victorySummary: String? {
+        guard let winner = victoryState.winner else {
+            return nil
+        }
+        let winnerName = factionDisplayName?(winner) ?? winner.displayName
+        if let reason = victoryState.reason {
+            return reason.eventMessage(winnerName: winnerName, isTangSongScenario: isTangSongScenario)
+        }
+        if isTangSongScenario {
+            return "\(winnerName)胜利。"
+        }
+        return "\(winnerName) victory."
     }
 
     private func metadata(for entry: GameLogEntry) -> String {

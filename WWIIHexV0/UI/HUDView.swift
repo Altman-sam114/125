@@ -77,10 +77,16 @@ struct HUDView: View {
         guard let winner = gameState.victoryState.winner else {
             return gameState.isTangSongScenario ? "未定" : "Ongoing"
         }
-        if gameState.isTangSongScenario {
-            return "\(gameState.displayName(for: winner))胜利"
+        let winnerName = gameState.displayName(for: winner)
+        if let reason = gameState.victoryState.reason {
+            return gameState.isTangSongScenario
+                ? "\(winnerName)胜利：\(reason.displayName(isTangSongScenario: true))"
+                : "\(winnerName) Victory: \(reason.displayName(isTangSongScenario: false))"
         }
-        return "\(gameState.displayName(for: winner)) Victory"
+        if gameState.isTangSongScenario {
+            return "\(winnerName)胜利"
+        }
+        return "\(winnerName) Victory"
     }
 
     private var activeLedger: FactionEconomyLedger {

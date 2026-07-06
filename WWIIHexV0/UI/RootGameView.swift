@@ -210,6 +210,7 @@ struct RootGameView: View {
                 case .log:
                     EventLogView(
                         entries: container.displayEventLog,
+                        victoryState: container.gameState.victoryState,
                         isTangSongScenario: container.gameState.isTangSongScenario,
                         factionDisplayName: { container.gameState.displayName(for: $0) }
                     )

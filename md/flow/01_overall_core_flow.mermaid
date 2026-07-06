@@ -16,6 +16,7 @@ flowchart TD
     TURN["TurnOrderState / PowerRelation<br/>回合 / 控制权 / 关系表"]:::state
     RELCAND["WarRelationRules.canTarget<br/>UI / AI / 执行器战术候选"]:::rules
     VICT["VictoryRules<br/>唐宋读取 victoryConditions + MandateState<br/>缺失时 fallback"]:::rules
+    VICTEXT["VictoryState.reason<br/>HUD / 战报只读胜负说明"]:::ui
 
     PLAYER["玩家操作<br/>tap / move / attack / proposeSubmission / endTurn"]:::input
     AI["AI 元帅/将领<br/>MarshalAgent / TheaterCommanderPool<br/>ZoneCommanderAgent"]:::input
@@ -71,7 +72,7 @@ flowchart TD
     DEPLOY --> UI
     ECO --> UI
     DIP --> UI
-    VICT --> UI
+    VICT --> VICTEXT --> UI
     RE --> LOG
     VICT --> LOG
     WCE --> LOG
