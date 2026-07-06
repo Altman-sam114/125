@@ -535,6 +535,12 @@ v5.8c 当前已落地：
 - `RootGameView` 向外交面板传入运行态州府与方面防区名称查找，归附记录和君主重点防区优先显示州府/防区名；缺失时唐宋路径显示“未命名州府 / 未命名方面 / 未命名集团 / 未知政权”，不直接把 raw id 当作默认玩家文案。
 - 该切片只改外交面板只读展示，不改变 `DiplomacyState`、`MandateState`、`Command.proposeSubmission`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、`TurnOrderState.relations`、`WarRelationRules.canTarget`、JSON/Codable schema 或 hex/region/theater/front/deploy 控制权。
 
+v5.8d 当前已落地：
+
+- `EventLogView` 在唐宋场景下让战报正文 `GameLogEntry.message` 和本回合摘要 highlight 统一经过 `TangSongEventLogMessage` 显示桥，常见英文命令、交互、战斗、退却、补给、AI 执行和 validation rawValue 显示为唐宋读法。
+- 该显示桥覆盖 `Command accepted/rejected`、选中地块/州府/军队、`attacked/counterattacked`、`strength`、自动退却、整补、退却失败、AI command result 和常见 `CommandValidationError.rawValue`，减少默认战报主路径英文和内部枚举外露。
+- 该切片只改战报 UI 读法，不改变 `GameLogEntry.message`、`CommandResultLogEntry`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、事件写入职责、日志 Codable schema 或任何规则结果。更完整的结构化 event payload 与写入端唐宋化仍留后续。
+
 v5.6b 的 UI 到规则链路：
 
 ```text

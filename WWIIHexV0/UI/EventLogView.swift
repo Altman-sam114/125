@@ -158,7 +158,7 @@ struct EventLogView: View {
                                         .foregroundStyle(.secondary)
                                 }
 
-                                Text(item.entry.message)
+                                Text(displayMessage(for: item.entry))
                                     .font(.body)
                                     .lineLimit(nil)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -302,6 +302,13 @@ struct EventLogView: View {
         return "\(turnLabel) \(entry.turn) - \(faction) - \(phase)"
     }
 
+    private func displayMessage(for entry: GameLogEntry) -> String {
+        guard isTangSongScenario else {
+            return entry.message
+        }
+        return TangSongEventLogMessage.display(entry.message)
+    }
+
     private var turnReportSummary: TurnReportSummary? {
         guard isTangSongScenario else {
             return nil
@@ -342,7 +349,7 @@ struct EventLogView: View {
             .filter { $0.category != .event || counts.isEmpty }
             .prefix(3)
             .map {
-                TurnReportHighlight(text: "• \($0.category.displayName(isTangSongScenario: true))：\($0.entry.message)")
+                TurnReportHighlight(text: "• \($0.category.displayName(isTangSongScenario: true))：\(displayMessage(for: $0.entry))")
             }
         let aiHighlights = turnReportAIHighlights(agentRecord: turnAgentRecord, directiveRecords: turnDirectives)
         let highlights = Array((aiHighlights + logHighlights).prefix(4))
@@ -463,6 +470,293 @@ private struct TurnReportCategoryCount {
     let category: LogDisplayCategory?
     let label: String
     let count: Int
+}
+
+private enum TangSongEventLogMessage {
+    static func display(_ message: String) -> String {
+        if let exact = exactTranslations[message] {
+            return exact
+        }
+
+        if let command = commandResult(message) {
+            return command
+        }
+        if let selection = selectionMessage(message) {
+            return selection
+        }
+        if let combat = combatMessage(message) {
+            return combat
+        }
+        if let supply = supplyMessage(message) {
+            return supply
+        }
+        if let ai = aiMessage(message) {
+            return ai
+        }
+
+        return validationErrors(in: message)
+    }
+
+    private static let exactTranslations: [String: String] = [
+        "Hold rejected: no active allied unit selected.": "固守被拒：未选择可行动的亲征军队。",
+        "Allow retreat rejected: no active allied unit selected.": "准退被拒：未选择可行动的亲征军队。",
+        "Resupply rejected: no active allied unit selected.": "休整被拒：未选择可行动的亲征军队。",
+        "Besiege rejected: no active allied unit selected.": "围城被拒：未选择可行动的亲征军队。",
+        "Besiege rejected: no adjacent enemy city, pass, or granary selected.": "围城被拒：未选择相邻敌方城池、关隘或粮仓。",
+        "Repair fortification rejected: no active allied unit selected.": "修城被拒：未选择可行动的亲征军队。",
+        "Repair fortification rejected: no damaged friendly besieged city selected.": "修城被拒：未选择己方受围且城防受损的州府。",
+        "Relieve siege rejected: no active allied unit selected.": "解围被拒：未选择可行动的亲征军队。",
+        "Relieve siege rejected: no friendly besieged city in range.": "解围被拒：射程内没有己方受围州府。",
+        "Demand surrender rejected: no active allied unit selected.": "招降被拒：未选择可行动的亲征军队。",
+        "Demand surrender rejected: no broken enemy siege target in range.": "招降被拒：射程内没有城防已破的敌方围城目标。",
+        "Submission rejected: no active allied unit selected.": "招抚被拒：未选择可行动的亲征军队。",
+        "Submission rejected: no eligible foreign capital selected.": "招抚被拒：未选择可招抚的外方国都。",
+        "General order rejected: no allied front zone selected.": "将领军令被拒：未选择亲征方面防区。",
+        "General order rejected: select an enemy front region to attack.": "将领军令被拒：未选择可进攻的敌前州府。",
+        "General order rejected: no allied source front zone available.": "将领军令被拒：没有可用的亲征方面防区。",
+        "General order rejected: not in the player command phase.": "将领军令被拒：当前不是亲征军令阶段。",
+        "General order rejected: source zone is not controlled by the player.": "将领军令被拒：来源方面不归当前亲征势力。",
+        "General order rejected: source zone changed during refresh.": "将领军令被拒：方面刷新后归属已变化。",
+        "Production rejected: observer mode is read-only.": "军备被拒：观战模式只能查看。",
+        "Player directive generated no executable commands.": "将领军令未生成可执行命令。",
+        "General order produced no commands.": "将领军令没有生成底层命令。"
+    ]
+
+    private static func commandResult(_ message: String) -> String? {
+        if message.hasPrefix("军令接受:") {
+            let action = commandAction(in: message) ?? "军令"
+            return "军令接受：\(action)已执行。"
+        }
+        if message.hasPrefix("军令驳回:") {
+            let action = commandAction(in: message) ?? "军令"
+            let reason = validationReason(in: message)
+            return "军令驳回：\(action)未能执行。\(reason)"
+        }
+        if message.hasPrefix("Command accepted:") {
+            let action = commandAction(in: message) ?? "军令"
+            return "军令接受：\(action)已执行。"
+        }
+        if message.hasPrefix("Command rejected:") || message.hasPrefix("军令被拒：") {
+            let reason = validationReason(in: message)
+            return "军令驳回：未能执行。\(reason)"
+        }
+        if message.hasPrefix("General order submitted:") {
+            let action = message.contains("attack") ? "进攻" : "固守"
+            return "将领军令已提交：\(action)。"
+        }
+        return nil
+    }
+
+    private static func selectionMessage(_ message: String) -> String? {
+        if message.hasPrefix("Selected hex ") {
+            let coord = stripped(message, prefix: "Selected hex ", suffix: ".")
+            return "已选地块 \(coord)。"
+        }
+        if message.hasPrefix("Selected region: ") {
+            let region = stripped(message, prefix: "Selected region: ", suffix: ".")
+                .components(separatedBy: " (")
+                .first?
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? "未知州府"
+            return "已选州府：\(region)。"
+        }
+        if message.hasPrefix("Inspecting unit: ") {
+            return "查看军队：\(stripped(message, prefix: "Inspecting unit: ", suffix: "."))。"
+        }
+        if message.hasPrefix("Selected unit: ") {
+            return "选中军队：\(stripped(message, prefix: "Selected unit: ", suffix: "."))。"
+        }
+        if message.hasPrefix("Selected enemy unit: ") {
+            return "选中敌军：\(stripped(message, prefix: "Selected enemy unit: ", suffix: "."))。"
+        }
+        if message.hasPrefix("Selected non-hostile unit: ") {
+            return "选中非敌对军队：\(stripped(message, prefix: "Selected non-hostile unit: ", suffix: "."))。"
+        }
+        if message.hasPrefix("Player faction changed: ") {
+            return "已切换亲征势力：\(stripped(message, prefix: "Player faction changed: ", suffix: "."))。"
+        }
+        if message.hasPrefix("Focused objective: ") {
+            return "已定位目标州府：\(stripped(message, prefix: "Focused objective: ", suffix: "."))。"
+        }
+        return nil
+    }
+
+    private static func combatMessage(_ message: String) -> String? {
+        guard let prefixEnd = message.range(of: ": strength -") else {
+            return nil
+        }
+        let prefix = String(message[..<prefixEnd.lowerBound])
+        let tail = String(message[prefixEnd.upperBound...])
+        let damage = leadingNumber(in: tail) ?? "?"
+
+        let verb: String
+        let parties: [String]
+        if prefix.contains(" counterattacked ") {
+            verb = "反击"
+            parties = prefix.components(separatedBy: " counterattacked ")
+        } else if prefix.contains(" attacked ") {
+            verb = "进攻"
+            parties = prefix.components(separatedBy: " attacked ")
+        } else {
+            return nil
+        }
+
+        let subject = parties.count == 2 ? "\(parties[0])\(verb)\(parties[1])" : prefix
+        var parts = ["\(subject)：兵力 -\(damage)"]
+        if message.contains("triggered automatic retreat") {
+            parts.append("触发自动退却")
+        }
+        if let extra = number(after: "extra strength -", in: message) {
+            parts.append("额外兵力 -\(extra)")
+        }
+        if message.contains("was destroyed") {
+            parts.append("部队溃灭")
+        }
+        return parts.joined(separator: "；") + "。"
+    }
+
+    private static func supplyMessage(_ message: String) -> String? {
+        if message.contains(" moved to ") {
+            let parts = message.components(separatedBy: " moved to ")
+            if parts.count == 2 {
+                return "\(parts[0])行军至 \(trimTrailingPeriod(parts[1]))。"
+            }
+        }
+        if message.contains(" reinforced in ") {
+            let name = message.components(separatedBy: " reinforced in ").first ?? "军队"
+            let amount = number(after: "+", in: message) ?? "?"
+            return "\(name)完成整补：兵力 +\(amount)。"
+        }
+        if message.contains(" could not recover while ") {
+            let name = message.components(separatedBy: " could not recover while ").first ?? "军队"
+            return "\(name)因粮道状态不佳，未能恢复兵力。"
+        }
+        if message.contains(" retreated from ") {
+            let parts = message.components(separatedBy: " retreated from ")
+            if parts.count == 2 {
+                return "\(parts[0])退却：\(trimTrailingPeriod(parts[1]))。"
+            }
+        }
+        if message.contains(" failed to retreat and lost ") {
+            let name = message.components(separatedBy: " failed to retreat and lost ").first ?? "军队"
+            let amount = number(after: "lost ", in: message) ?? "?"
+            return "\(name)退却失败：兵力 -\(amount)。"
+        }
+        if message.hasSuffix(" completed retreat recovery.") {
+            let name = message.replacingOccurrences(of: " completed retreat recovery.", with: "")
+            return "\(name)完成退却整备。"
+        }
+        return nil
+    }
+
+    private static func aiMessage(_ message: String) -> String? {
+        if message.hasPrefix("AI "), message.contains(" resolved "), message.contains(" command result") {
+            let count = number(after: " resolved ", in: message) ?? "若干"
+            return "军议执行：完成 \(count) 条军令结果。"
+        }
+        if message.hasPrefix("Pacification target "), message.contains(" skipped:") {
+            return "招抚候选已跳过：目标或谈判军队不符合当前规则。"
+        }
+        return nil
+    }
+
+    private static func commandAction(in message: String) -> String? {
+        let pairs: [(String, String)] = [
+            ("行军(", "行军"),
+            ("Move(", "行军"),
+            ("进攻(", "进攻"),
+            ("Attack(", "进攻"),
+            ("围城(", "围城"),
+            ("Besiege(", "围城"),
+            ("修城(", "修城"),
+            ("RepairFortification(", "修城"),
+            ("解围(", "解围"),
+            ("RelieveSiege(", "解围"),
+            ("招降(", "招降"),
+            ("DemandSurrender(", "招降"),
+            ("招抚(", "招抚"),
+            ("ProposeSubmission(", "招抚"),
+            ("固守(", "固守"),
+            ("Hold(", "固守"),
+            ("准退(", "准退"),
+            ("AllowRetreat(", "准退"),
+            ("休整(", "休整"),
+            ("Resupply(", "休整"),
+            ("军备(", "军备"),
+            ("QueueProduction(", "军备"),
+            ("结束回合", "结束回合"),
+            ("End Turn", "结束回合")
+        ]
+        return pairs.first { message.contains($0.0) }?.1
+    }
+
+    private static func validationErrors(in message: String) -> String {
+        var output = message
+        for (raw, localized) in validationErrorNames {
+            output = output.replacingOccurrences(of: raw, with: localized)
+        }
+        return output
+    }
+
+    private static func validationReason(in message: String) -> String {
+        let localized = validationErrors(in: message)
+        let knownReasons = validationErrorNames.map { $0.value }.filter { localized.contains($0) }
+        guard !knownReasons.isEmpty else {
+            return ""
+        }
+        return "原因：\(Array(Set(knownReasons)).sorted().joined(separator: "、"))。"
+    }
+
+    private static let validationErrorNames: [(raw: String, value: String)] = [
+        ("wrongPhase", "阶段不允许"),
+        ("wrongFaction", "不归当前亲征势力"),
+        ("divisionNotFound", "军队不存在"),
+        ("targetNotFound", "目标不存在"),
+        ("countryNotFound", "国家不存在"),
+        ("alreadyActed", "军队已行动"),
+        ("destinationOutOfBounds", "目标越界"),
+        ("destinationOccupied", "目标地块被占"),
+        ("noPath", "无可用路径"),
+        ("insufficientMovement", "行动力不足"),
+        ("targetOutOfRange", "目标超出射程"),
+        ("invalidTargetFaction", "目标关系不合法"),
+        ("regionNotFound", "州府不存在"),
+        ("invalidRegionForHex", "地块州府不匹配"),
+        ("invalidSiegeTarget", "围城目标不合法"),
+        ("noActiveSiege", "没有有效围城"),
+        ("fortificationAlreadyFull", "城防已满"),
+        ("capitulationNotReady", "尚未满足招降条件"),
+        ("invalidDiplomaticRelation", "外交关系不合法"),
+        ("submissionNotReady", "尚未满足归附条件"),
+        ("mandateTooLow", "天命不足"),
+        ("insufficientResources", "资源不足")
+    ]
+
+    private static func stripped(_ message: String, prefix: String, suffix: String) -> String {
+        var value = message
+        if value.hasPrefix(prefix) {
+            value.removeFirst(prefix.count)
+        }
+        if value.hasSuffix(suffix) {
+            value.removeLast(suffix.count)
+        }
+        return value
+    }
+
+    private static func number(after marker: String, in message: String) -> String? {
+        guard let range = message.range(of: marker) else {
+            return nil
+        }
+        return leadingNumber(in: String(message[range.upperBound...]))
+    }
+
+    private static func trimTrailingPeriod(_ value: String) -> String {
+        value.trimmingCharacters(in: CharacterSet(charactersIn: "."))
+    }
+
+    private static func leadingNumber(in text: String) -> String? {
+        let digits = text.prefix { $0.isNumber }
+        return digits.isEmpty ? nil : String(digits)
+    }
 }
 
 private enum LogDisplayCategory: Hashable {

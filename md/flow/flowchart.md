@@ -34,6 +34,7 @@
   -> v5.8a 起 AI 面板默认主路径残留硬化
   -> v5.8b 起 AI 面板玩家态/开发态分层
   -> v5.8c 起外交面板默认主路径读法硬化
+  -> v5.8d 起战报日志默认主路径读法硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -79,7 +80,7 @@ flowchart TD
     GOAL["统一目标锚点<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
-    TURNREPORT["每回合战报摘要<br/>EventLogView.turnReportSummary<br/>只读汇总 eventLog / AI 军议 / 方面军令"]:::ui
+    TURNREPORT["战报读法与每回合摘要<br/>EventLogView + TangSongEventLogMessage<br/>只读汇总并显示 eventLog / AI 军议 / 方面军令"]:::ui
     SESSIONHUD["指挥身份 / 重开剧本<br/>HUDView + NewGameButton<br/>只读显示模式，确认后 resetGame"]:::ui
     PLAYER["玩家输入<br/>点击地图、移动、攻击、招抚、结束回合"]:::input
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
