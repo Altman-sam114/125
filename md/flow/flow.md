@@ -590,6 +590,13 @@ v5.8u 当前已落地：
 - `HUDView` 的统一目标锚点按钮补充“查看目标”可访问标签、已据/待取状态和地图聚焦提示。
 - 该切片只改 SwiftUI 控件可读语义，不改变命令执行、经济规则、胜利目标、地图聚焦逻辑、SpriteKit 地图交互、逐 hex focus、focus order、hit target、布局、JSON schema 或 Codable raw 值；完整 VoiceOver 实机、截图、横竖屏布局和发布级 UI 验收仍未完成。
 
+v5.8v 当前已落地：
+
+- `MapEditorViewModel` 的读取默认唐宋资源、覆盖默认唐宋资源和生成资源预览失败路径不再使用 `String(describing: error)` 直出 raw 错误；已知 `MapEditorExportError` / `MapEditorGameResourceBridgeError` 继续展示中文说明，其他系统/解码错误统一落到中文 fallback。
+- MapEditor 新建州府、方面和军队名称默认改为空输入，继续由既有自动命名生成“州府 N / 方面 N / 军 N”，避免把示例文字误写入真实草案。
+- `MapEditorView` 的新建州府、新建方面、新建军队、选中地块州府/方面编辑框补充上下文 accessibility label/hint；错误区显示和读屏都带“错误：”前缀。
+- 该切片只改 MapEditor 显示、输入默认值和 SwiftUI 可读语义，不改变导出 JSON schema、默认资源路径、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId`、主游戏规则、AI 决策或 Codable raw 值；完整 VoiceOver 实机、截图、横竖屏布局和发布级 UI 验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

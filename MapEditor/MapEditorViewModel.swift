@@ -34,9 +34,9 @@ final class MapEditorViewModel: ObservableObject {
     @Published var backgroundOffsetX: Double = 0
     @Published var backgroundOffsetY: Double = 0
 
-    @Published var newRegionText: String = "新州府"
-    @Published var newTheaterText: String = "新方面"
-    @Published var newUnitNameText: String = "军"
+    @Published var newRegionText: String = ""
+    @Published var newTheaterText: String = ""
+    @Published var newUnitNameText: String = ""
 
     init(document: MapEditorDocument = .new(width: 8, height: 6)) {
         self.document = document
@@ -313,7 +313,10 @@ final class MapEditorViewModel: ObservableObject {
             lastStatusMessage = "已读取唐宋默认游戏资源。"
             markChanged()
         } catch {
-            lastErrorMessage = String(describing: error)
+            lastErrorMessage = displayErrorMessage(
+                for: error,
+                fallback: "读取唐宋默认游戏资源失败，请检查资源文件是否完整。"
+            )
         }
     }
 
@@ -324,7 +327,10 @@ final class MapEditorViewModel: ObservableObject {
             lastErrorMessage = nil
             lastStatusMessage = "已覆盖唐宋默认剧本与州府数据。"
         } catch {
-            lastErrorMessage = String(describing: error)
+            lastErrorMessage = displayErrorMessage(
+                for: error,
+                fallback: "覆盖唐宋默认游戏资源失败，请检查文件权限和资源完整性。"
+            )
         }
     }
 
@@ -337,7 +343,10 @@ final class MapEditorViewModel: ObservableObject {
             lastStatusMessage = "已生成游戏资源数据。"
             return result
         } catch {
-            lastErrorMessage = String(describing: error)
+            lastErrorMessage = displayErrorMessage(
+                for: error,
+                fallback: "生成游戏资源数据失败，请检查地块、州府和方面配置。"
+            )
             return nil
         }
     }
@@ -437,10 +446,12 @@ final class MapEditorViewModel: ObservableObject {
         let nextIndex = document.initialUnits.count + 1
         let factionPrefix = selectedUnitFaction == .germany ? "anti_song" : "song"
         let id = "\(factionPrefix)_editor_\(nextIndex)"
+        let rawName = newUnitNameText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let unitName = rawName.isEmpty ? "军 \(nextIndex)" : "\(rawName) \(nextIndex)"
         document.initialUnits.append(
             MapEditorUnitDraft(
                 id: id,
-                name: "\(newUnitNameText) \(nextIndex)",
+                name: unitName,
                 faction: selectedUnitFaction,
                 templateId: selectedUnitTemplateId,
                 coord: coord,
@@ -473,6 +484,18 @@ final class MapEditorViewModel: ObservableObject {
 
     private func markChanged() {
         redrawToken += 1
+    }
+
+    private func displayErrorMessage(for error: Error, fallback: String) -> String {
+        if let exportError = error as? MapEditorExportError {
+            return exportError.description
+        }
+
+        if let bridgeError = error as? MapEditorGameResourceBridgeError {
+            return bridgeError.description
+        }
+
+        return fallback
     }
 
     private func syncBackgroundControlsFromDocument() {

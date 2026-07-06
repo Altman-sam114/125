@@ -51,6 +51,7 @@
   -> v5.8s 起 MapEditor raw 文件名、坐标、JSON 技术词与导出错误继续硬化
   -> v5.8t 起 accessibility label/value/hint 与 MapEditor 画布可读文案继续硬化
   -> v5.8u 起军令、府库、亲征观战和目标锚点控件状态提示继续硬化
+  -> v5.8v 起 MapEditor raw 错误、示例输入和编辑框读屏上下文继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI

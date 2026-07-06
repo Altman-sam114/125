@@ -431,6 +431,40 @@
 - 本轮只改 SwiftUI 可读语义和文案，不改变 SpriteKit 地图交互、逐 hex focus、focus order、hit target、布局、规则、导出 JSON schema 或 Codable raw 值。
 - 主棋盘每个地块/军队/可攻击目标的 VoiceOver 可聚焦与可操作路径仍未实现；完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
 
+## v5.8v - MapEditor 错误与输入可访问性硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 MapEditor 读取/覆盖默认资源和生成资源预览时仍可能用 `String(describing: error)` 把 raw `Error`、解码描述、系统域或路径暴露给玩家/读屏；本轮选择低风险 MapEditor 显示与输入语义小切片。
+- `MapEditorViewModel` 新增错误显示包装，已知 `MapEditorExportError` / `MapEditorGameResourceBridgeError` 继续显示中文说明，其他读取、覆盖和资源预览失败统一落到中文 fallback。
+- MapEditor 新建州府、方面和军队名称默认改为空输入，继续由既有自动命名生成“州府 N / 方面 N / 军 N”，避免把“新州府 / 新方面 / 军”等示例文字误写入真实草案。
+- `MapEditorView` 为新建州府、新建方面、新建军队、选中地块州府/方面编辑框补充上下文 accessibility label/hint。
+- MapEditor 错误区显示和读屏都补“错误：”前缀，减少状态文本与错误文本混淆。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8v 阶段记录。
+
+关键文件：
+
+- `MapEditor/MapEditorViewModel.swift`
+- `MapEditor/MapEditorView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8v_mapeditor_error_input_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 MapEditor 显示、输入默认值和 SwiftUI 可读语义，不改变导出 JSON schema、默认资源路径、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId`、主游戏规则、AI 决策或 Codable raw 值。
+- 主棋盘每个地块/军队/可攻击目标的 VoiceOver 可聚焦与可操作路径仍未实现；完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
+
 ## v5.8u - accessibility 控件状态提示硬化
 
 完成日期：2026-07-07

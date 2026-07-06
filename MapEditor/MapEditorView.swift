@@ -107,6 +107,8 @@ struct MapEditorView: View {
             Text("州府模式")
                 .font(.headline)
             TextField("州府名称", text: $viewModel.newRegionText)
+                .accessibilityLabel("新州府名称")
+                .accessibilityHint("输入名称后点击准备新州府创建草案。留空时自动生成州府名称。")
             Button("准备新州府", systemImage: "square.and.pencil", action: viewModel.prepareNewRegion)
             Picker("当前州府", selection: regionBinding) {
                 Text("未选择").tag(Optional<RegionId>.none)
@@ -126,6 +128,8 @@ struct MapEditorView: View {
             Text("方面模式")
                 .font(.headline)
             TextField("方面名称", text: $viewModel.newTheaterText)
+                .accessibilityLabel("新方面名称")
+                .accessibilityHint("输入名称后点击准备新方面创建草案。留空时自动生成方面名称。")
             Button("准备新方面", systemImage: "square.and.pencil", action: viewModel.prepareNewTheater)
             Picker("当前方面", selection: theaterBinding) {
                 Text("未选择").tag(Optional<TheaterId>.none)
@@ -162,6 +166,8 @@ struct MapEditorView: View {
                 }
             }
             TextField("军队名称", text: $viewModel.newUnitNameText)
+                .accessibilityLabel("新军队名称")
+                .accessibilityHint("输入名称后开始添加军队。留空时自动生成军队名称。")
             Toggle("橡皮擦", isOn: $viewModel.eraseUnits)
             Text("待部署：\(viewModel.pendingUnitHexes.count)，已部署：\(viewModel.document.initialUnits.count)")
                 .font(.footnote)
@@ -259,8 +265,12 @@ struct MapEditorView: View {
                 Text("道路：\(hex.hasRoad ? "有" : "无")")
                 if let regionId = hex.regionId {
                     TextField("州府名称", text: $viewModel.inspectedRegionName)
+                        .accessibilityLabel("选中地块州府名称")
+                        .accessibilityHint("修改后点击保存信息写回选中地块所属州府。")
                     if viewModel.document.regionTheaterAssignments[regionId] != nil {
                         TextField("方面名称", text: $viewModel.inspectedTheaterName)
+                            .accessibilityLabel("选中地块方面名称")
+                            .accessibilityHint("修改后点击保存信息写回选中地块所属方面。")
                     } else {
                         Text("方面：未分配")
                             .foregroundStyle(.secondary)
@@ -288,9 +298,11 @@ struct MapEditorView: View {
             }
 
             if let message = viewModel.lastErrorMessage {
-                Text(message)
+                Text("错误：\(message)")
                     .font(.footnote)
                     .foregroundStyle(.red)
+                    .accessibilityLabel("错误：\(message)")
+                    .accessibilityHint("请根据提示检查地图编辑器资源或当前地图配置。")
             }
         }
     }
