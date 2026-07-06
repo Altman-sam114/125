@@ -964,7 +964,7 @@ WWIIHexV0/Data/tangsong_jianlong_960_scenario.json
 WWIIHexV0/Data/tangsong_jianlong_960_regions.json
 ```
 
-读取默认资源时，编辑器优先读取唐宋 960 文件；如果这两个文件不存在，才回退到 legacy 阿登 `ardennes_v0_scenario.json` / `ardennes_v02_regions.json`。覆盖保存始终写回唐宋默认文件名，不覆盖 legacy 阿登数据。
+读取默认资源时，编辑器只读取唐宋 960 文件。若 `tangsong_jianlong_960_scenario.json` 或 `tangsong_jianlong_960_regions.json` 缺失，编辑器直接报错，不再静默回退到 legacy 阿登资源；阿登数据只保留为主游戏 legacy fallback 和历史回归参考。覆盖保存始终写回唐宋默认文件名，不覆盖 legacy 阿登数据。
 
 流程：
 
@@ -983,7 +983,7 @@ overwriteDefaultGameResources(document:)
   -> 写回 WWIIHexV0/Data
 ```
 
-v5.2 当前编辑器可见术语已经迁到唐宋口径：地块、州府、方面、军队、粮仓、关隘、宋、割据诸政权。底层 `Faction.allies` / `Faction.germany`、`RegionId` / `TheaterId` 与 `Division` 类型名仍保留作兼容桥。
+v5.8e 当前编辑器可见术语继续硬化到唐宋口径：地块、州府、方面、军队、粮仓、关隘、宋、割据诸政权。新建草案默认显示为“唐宋地图草案”，城市 fallback 为“州城 q,r”，导出错误、数据注记和州府数据 displayName 使用中文；州府/方面选择器和检查面板默认显示名称，不直接暴露 raw id；编辑器棋盘单位短标改为禁、骑、弩、械、守、州、军。底层 `Faction.allies` / `Faction.germany`、`RegionId` / `TheaterId` 与 `Division` 类型名仍保留作兼容桥。
 
 相关测试确认：
 

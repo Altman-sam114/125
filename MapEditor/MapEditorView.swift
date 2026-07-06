@@ -111,7 +111,7 @@ struct MapEditorView: View {
             Picker("当前州府", selection: regionBinding) {
                 Text("未选择").tag(Optional<RegionId>.none)
                 ForEach(viewModel.document.regions.values.sorted { $0.id.rawValue < $1.id.rawValue }) { region in
-                    Text("\(region.name) · \(region.id.rawValue)").tag(Optional(region.id))
+                    Text(region.name).tag(Optional(region.id))
                 }
             }
             Toggle("橡皮擦", isOn: $viewModel.eraseRegionMembership)
@@ -130,7 +130,7 @@ struct MapEditorView: View {
             Picker("当前方面", selection: theaterBinding) {
                 Text("未选择").tag(Optional<TheaterId>.none)
                 ForEach(viewModel.document.theaters.values.sorted { $0.id.rawValue < $1.id.rawValue }) { theater in
-                    Text("\(theater.name) · \(theater.id.rawValue)").tag(Optional(theater.id))
+                    Text(theater.name).tag(Optional(theater.id))
                 }
             }
             Text("待加入州府：\(viewModel.pendingTheaterRegions.count)")
@@ -203,7 +203,7 @@ struct MapEditorView: View {
             Button("导出 JSON 到内存") {
                 _ = viewModel.export()
             }
-            Text(MapEditorGameResourceBridge.gameDataDirectory.path)
+            Text("默认文件：\(MapEditorGameResourceBridge.scenarioResourceName).json / \(MapEditorGameResourceBridge.regionResourceName).json")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
                 .textSelection(.enabled)
@@ -258,10 +258,8 @@ struct MapEditorView: View {
                 Text("地形：\(hex.terrain.chineseName)")
                 Text("道路：\(hex.hasRoad ? "有" : "无")")
                 if let regionId = hex.regionId {
-                    Text("州府 ID：\(regionId.rawValue)")
                     TextField("州府名称", text: $viewModel.inspectedRegionName)
-                    if let theaterId = viewModel.document.regionTheaterAssignments[regionId] {
-                        Text("方面 ID：\(theaterId.rawValue)")
+                    if viewModel.document.regionTheaterAssignments[regionId] != nil {
                         TextField("方面名称", text: $viewModel.inspectedTheaterName)
                     } else {
                         Text("方面：未分配")

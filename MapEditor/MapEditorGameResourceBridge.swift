@@ -7,9 +7,9 @@ enum MapEditorGameResourceBridgeError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .missingTerrain(let terrain):
-            return "Unknown terrain in game data: \(terrain)."
+            return "游戏资源中存在无法识别的地形：\(terrain)。"
         case .missingResource(let url):
-            return "Missing resource: \(url.path)."
+            return "缺少唐宋默认资源：\(url.lastPathComponent)。"
         }
     }
 }
@@ -17,8 +17,6 @@ enum MapEditorGameResourceBridgeError: Error, CustomStringConvertible {
 enum MapEditorGameResourceBridge {
     static let scenarioResourceName = "tangsong_jianlong_960_scenario"
     static let regionResourceName = "tangsong_jianlong_960_regions"
-    private static let legacyScenarioResourceName = "ardennes_v0_scenario"
-    private static let legacyRegionResourceName = "ardennes_v02_regions"
 
     static var gameDataDirectory: URL {
         URL(fileURLWithPath: #filePath)
@@ -128,13 +126,6 @@ enum MapEditorGameResourceBridge {
         if FileManager.default.fileExists(atPath: primaryScenarioURL.path),
            FileManager.default.fileExists(atPath: primaryRegionURL.path) {
             return (primaryScenarioURL, primaryRegionURL)
-        }
-
-        let legacyScenarioURL = gameDataDirectory.appending(path: legacyScenarioResourceName).appendingPathExtension("json")
-        let legacyRegionURL = gameDataDirectory.appending(path: legacyRegionResourceName).appendingPathExtension("json")
-        if FileManager.default.fileExists(atPath: legacyScenarioURL.path),
-           FileManager.default.fileExists(atPath: legacyRegionURL.path) {
-            return (legacyScenarioURL, legacyRegionURL)
         }
 
         throw MapEditorGameResourceBridgeError.missingResource(primaryScenarioURL)

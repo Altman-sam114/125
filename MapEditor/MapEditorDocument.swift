@@ -235,7 +235,7 @@ struct MapEditorDocument: Codable, Equatable, Identifiable {
         self.backgroundImage = backgroundImage
     }
 
-    static func new(id: String = "mapeditor_scenario", displayName: String = "MapEditor Scenario", width: Int, height: Int) -> MapEditorDocument {
+    static func new(id: String = "tangsong_mapeditor", displayName: String = "唐宋地图草案", width: Int, height: Int) -> MapEditorDocument {
         var hexes: [HexCoord: MapEditorHex] = [:]
         for q in 0..<max(1, width) {
             for r in 0..<max(1, height) {

@@ -71,7 +71,7 @@ final class MapEditorViewModel: ObservableObject {
         }
         document.createRegion(id: id, name: name)
         selectedRegionId = id
-        lastStatusMessage = "已创建州府：\(name)（\(id.rawValue)）。"
+        lastStatusMessage = "已创建州府：\(name)。"
         markChanged()
     }
 
@@ -91,21 +91,21 @@ final class MapEditorViewModel: ObservableObject {
         }
         document.createTheater(id: id, name: name)
         selectedTheaterId = id
-        lastStatusMessage = "已创建方面：\(name)（\(id.rawValue)）。"
+        lastStatusMessage = "已创建方面：\(name)。"
         markChanged()
     }
 
     func prepareNewRegion() {
         selectedRegionId = nil
         pendingRegionHexes.removeAll()
-        lastStatusMessage = "将创建新州府，ID 会自动递增。"
+        lastStatusMessage = "将创建新州府，编号会自动递增。"
         markChanged()
     }
 
     func prepareNewTheater() {
         selectedTheaterId = nil
         pendingTheaterRegions.removeAll()
-        lastStatusMessage = "将创建新方面，ID 会自动递增。"
+        lastStatusMessage = "将创建新方面，编号会自动递增。"
         markChanged()
     }
 
@@ -348,7 +348,7 @@ final class MapEditorViewModel: ObservableObject {
         do {
             try MapEditorExporter.write(result, to: directory)
             lastErrorMessage = nil
-            lastStatusMessage = "已导出 JSON 到 \(directory.path)。"
+            lastStatusMessage = "已导出 JSON 到 \(directory.lastPathComponent)。"
             return result
         } catch {
             lastErrorMessage = error.localizedDescription
@@ -376,7 +376,7 @@ final class MapEditorViewModel: ObservableObject {
         hex.isSupplySource = paintSupply
         hex.supplyFaction = paintSupply ? supplyFaction : nil
         if selectedTerrain == .city, hex.cityName == nil {
-            hex.cityName = "City \(coord.q),\(coord.r)"
+            hex.cityName = "州城 \(coord.q),\(coord.r)"
         } else if selectedTerrain != .city {
             hex.cityName = nil
         }

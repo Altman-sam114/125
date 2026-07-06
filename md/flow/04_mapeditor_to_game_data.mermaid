@@ -1,9 +1,9 @@
 flowchart TD
     DOC["MapEditorDocument<br/>hexes / regions / theaters / assignments / units"]:::editor
     MODE1["地块模式<br/>terrain / road / controller / supply"]:::editor
-    MODE2["省份模式<br/>hex -> regionId"]:::editor
-    MODE3["战区模式<br/>regionId -> theaterId"]:::editor
-    MODE4["部队模式<br/>initialUnits"]:::editor
+    MODE2["州府模式<br/>hex -> regionId"]:::editor
+    MODE3["方面模式<br/>regionId -> theaterId"]:::editor
+    MODE4["军队模式<br/>initialUnits"]:::editor
     EXPORT["MapEditorExporter.export"]:::loader
     CHECK{"导出校验<br/>所有 hex 有 region<br/>region 非空"}:::decision
     ERR["导出失败<br/>unassignedHex / missingRegion / emptyRegion"]:::stop
@@ -11,7 +11,7 @@ flowchart TD
     REG["RegionDataSet<br/>hexToRegion / regions / edges / theaterId"]:::data
     NEI["从真实 hex 邻接推导<br/>region neighbors / RegionEdge"]:::derived
     BRIDGE["MapEditorGameResourceBridge<br/>overwriteDefaultGameResources"]:::loader
-    FILES["WWIIHexV0/Data<br/>ardennes_v0_scenario.json<br/>ardennes_v02_regions.json"]:::data
+    FILES["WWIIHexV0/Data<br/>tangsong_jianlong_960_scenario.json<br/>tangsong_jianlong_960_regions.json"]:::data
     LOAD["DataLoader.loadGameState"]:::loader
     MAP["MapState<br/>tiles + hexToRegion + RegionGraph"]:::state
     THEATER["TheaterState<br/>initialSnapshot + regionToTheater + hexToTheater seed"]:::state
