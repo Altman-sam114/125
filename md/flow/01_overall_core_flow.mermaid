@@ -25,6 +25,7 @@ flowchart TD
     HINT["RootGameView.nextActionHint + AppContainer.selectedValidatedCommandHint<br/>HUD 下一步提示<br/>只读派生选军/候选命令/移动攻击数量/有限合法性预校验"]:::ui
     INSPECT["UnitInspectorView + RegionInspectorView<br/>军队/州府检查面板<br/>唐宋读法显示政权、粮道、编成、产出和围城摘要"]:::ui
     GENPANELS["GeneralCommandPanelView + GeneralProfileView<br/>将领军令/档案面板<br/>唐宋读法显示用兵、政权、辖军和计划摘要"]:::ui
+    TOOLTIP["UnitTooltipView<br/>常驻军队提示<br/>唐宋读法显示兵种、补给、退却和本回合"]:::ui
 
     PLAYER["玩家操作<br/>tap / move / attack / proposeSubmission / endTurn"]:::input
     AI["AI 元帅/将领<br/>MarshalAgent / TheaterCommanderPool<br/>ZoneCommanderAgent"]:::input
@@ -75,6 +76,7 @@ flowchart TD
     GS --> HINT --> UI
     GS --> INSPECT --> UI
     GS --> GENPANELS --> UI
+    GS --> TOOLTIP --> UI
     GS --> SESSIONHUD --> UI
     VICTEXT --> GOAL --> FOCUS --> UI
     VICTEXT --> SPOTLIGHT --> UI

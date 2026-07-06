@@ -30,6 +30,7 @@
   -> v5.7j 起下一步提示对当前 UI 候选做有限合法性预校验
   -> v5.7k 起军队/州府检查面板补齐唐宋读法
   -> v5.7l 起将领指挥/档案面板补齐唐宋读法
+  -> v5.7m 起常驻军队 tooltip 补齐唐宋读法
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -69,6 +70,7 @@ flowchart TD
     HINT["下一步提示<br/>RootGameView.nextActionHint + AppContainer.selectedValidatedCommandHint<br/>只读派生选军、候选命令、移动/攻击数量与有限合法性预校验"]:::ui
     INSPECT["检查面板读法<br/>UnitInspectorView + RegionInspectorView<br/>唐宋场景显示军队、州府、政权、粮道、编成、产出与围城摘要"]:::ui
     GENPANELS["将领面板读法<br/>GeneralCommandPanelView + GeneralProfileView<br/>唐宋场景显示将领军令、档案、用兵、所属政权和辖下军队"]:::ui
+    TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示兵种、兵力、补给、退却和本回合"]:::ui
     GOAL["统一目标锚点<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
@@ -129,6 +131,7 @@ flowchart TD
     GS --> HINT --> UI
     GS --> INSPECT --> UI
     GS --> GENPANELS --> UI
+    GS --> TOOLTIP --> UI
     GS --> SESSIONHUD --> UI
     VICTEXT --> GOAL --> FOCUS --> UI
     VICTEXT --> SPOTLIGHT --> UI
@@ -565,6 +568,7 @@ flowchart TD
     HINT["下一步提示<br/>RootGameView.nextActionHint -> HUDView<br/>只读提示选军、围城、招抚、解围、修城、高亮数量和有限合法性预校验"]:::ui
     INSPECT["检查面板<br/>UnitInspectorView / RegionInspectorView<br/>唐宋场景显示军队详情、州府详情、编成、产出和围城摘要"]:::ui
     GENPANELS["将领面板<br/>GeneralCommandPanelView / GeneralProfileView<br/>唐宋场景显示将领军令、将领档案、用兵和辖下军队"]:::ui
+    TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示选中军队摘要读法"]:::ui
     SESSIONHUD["亲征势力 / 观战 / 重开剧本<br/>RootGameView + HUDView + NewGameButton<br/>切换 legacy 亲征阵营，显示亲征/观战，确认后重置剧本"]:::ui
     LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类、每回合摘要和胜负后评分估算"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
@@ -583,6 +587,7 @@ flowchart TD
     ROOT --> HINT
     ROOT --> INSPECT
     ROOT --> GENPANELS
+    ROOT --> TOOLTIP
     ROOT --> SESSIONHUD
     ROOT --> LOG
     ROOT --> AIUI

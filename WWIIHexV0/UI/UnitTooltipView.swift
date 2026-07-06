@@ -2,6 +2,7 @@ import SwiftUI
 
 struct UnitTooltipView: View {
     let division: Division?
+    var isTangSongScenario = false
 
     var body: some View {
         if let division {
@@ -12,24 +13,24 @@ struct UnitTooltipView: View {
 
                 Grid(alignment: .leading, horizontalSpacing: 10, verticalSpacing: 4) {
                     GridRow {
-                        label("Type")
-                        value(division.tooltipTypeCode)
+                        label(isTangSongScenario ? "兵种" : "Type")
+                        value(division.tooltipTypeCode(isTangSongScenario: isTangSongScenario))
                     }
                     GridRow {
-                        label("Strength")
+                        label(isTangSongScenario ? "兵力" : "Strength")
                         value("\(division.strength)/\(division.maxStrength)")
                     }
                     GridRow {
-                        label("Supply")
-                        value(division.supplyState.tooltipDisplayName)
+                        label(isTangSongScenario ? "补给" : "Supply")
+                        value(division.supplyState.tooltipDisplayName(isTangSongScenario: isTangSongScenario))
                     }
                     GridRow {
-                        label("Retreat")
-                        value(division.retreatMode.tooltipDisplayName)
+                        label(isTangSongScenario ? "退却" : "Retreat")
+                        value(division.retreatMode.tooltipDisplayName(isTangSongScenario: isTangSongScenario))
                     }
                     GridRow {
-                        label("Acted")
-                        value(division.hasActed ? "Yes" : "No")
+                        label(isTangSongScenario ? "本回合" : "Acted")
+                        value(actedText(for: division))
                     }
                 }
             }
@@ -42,7 +43,7 @@ struct UnitTooltipView: View {
             }
             .padding(10)
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(division.name), \(division.tooltipTypeCode), strength \(division.strength) of \(division.maxStrength)")
+            .accessibilityLabel(accessibilityLabel(for: division))
         }
     }
 
@@ -58,25 +59,47 @@ struct UnitTooltipView: View {
             .lineLimit(1)
             .minimumScaleFactor(0.75)
     }
+
+    private func actedText(for division: Division) -> String {
+        if isTangSongScenario {
+            return division.hasActed ? "已行动" : "未行动"
+        }
+        return division.hasActed ? "Yes" : "No"
+    }
+
+    private func accessibilityLabel(for division: Division) -> String {
+        if isTangSongScenario {
+            return "\(division.name)，\(division.tooltipTypeCode(isTangSongScenario: true))，兵力 \(division.strength)/\(division.maxStrength)"
+        }
+        return "\(division.name), \(division.tooltipTypeCode(isTangSongScenario: false)), strength \(division.strength) of \(division.maxStrength)"
+    }
 }
 
 private extension Division {
-    var tooltipTypeCode: String {
+    func tooltipTypeCode(isTangSongScenario: Bool) -> String {
         if isArtillery {
-            return "ART"
+            return isTangSongScenario ? "器械" : "ART"
         }
         if isArmor {
-            return "ARM"
+            return isTangSongScenario ? "禁军" : "ARM"
         }
         if components.contains(where: { $0.type == .motorizedInfantry && $0.weight >= 0.40 }) {
-            return "MOT"
+            return isTangSongScenario ? "骑军" : "MOT"
         }
-        return "INF"
+        return isTangSongScenario ? "厢军" : "INF"
     }
 }
 
 private extension RetreatMode {
-    var tooltipDisplayName: String {
+    func tooltipDisplayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .retreatable:
+                return "可退"
+            case .hold:
+                return "固守"
+            }
+        }
         switch self {
         case .retreatable:
             return "Retreatable"
@@ -87,7 +110,17 @@ private extension RetreatMode {
 }
 
 private extension SupplyState {
-    var tooltipDisplayName: String {
+    func tooltipDisplayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .supplied:
+                return "有粮"
+            case .lowSupply:
+                return "缺粮"
+            case .encircled:
+                return "被围"
+            }
+        }
         switch self {
         case .supplied:
             return "Supplied"

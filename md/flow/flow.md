@@ -507,6 +507,13 @@ v5.7l 当前已落地：
 - 计划摘要在唐宋场景下把 `DirectiveType.attack/defend` 显示为进攻/固守，将领用兵风格显示为锐进、持重或谨慎。
 - 该切片只补玩家可见显示桥，不改 `GeneralData`、`GeneralAssignment`、`FrontZone`、`PlayerPlannedOperation` schema，不改变将领分配、AI 决策、`ZoneDirective`、`WarCommandExecutor`、`RuleEngine` 或规则执行。
 
+v5.7m 当前已落地：
+
+- `RootGameView` 向右下角 `UnitTooltipView` 传入 `isTangSongScenario`，让常驻选中军队摘要跟随唐宋场景显示桥。
+- `UnitTooltipView` 在唐宋场景下把字段显示为兵种、兵力、补给、退却和本回合，并把底层 ART/ARM/MOT/INF 显示为器械、禁军、骑军、厢军，把 Supplied/Low/Encircled 显示为有粮、缺粮、被围，把 Retreatable/Hold 显示为可退、固守。
+- tooltip 的 accessibility label 同步改为唐宋读法，避免读屏时仍输出英文 type / strength 口径。
+- 该切片只补玩家可见显示桥，不改 `Division`、`ComponentType`、`SupplyState`、`RetreatMode`、命令、补给、退却或任何规则执行。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1029,7 +1036,7 @@ handleBoardTap(coord)
 - Info / 面板按钮，内含 compact panel：
   - legacy tabs：`Unit` / `Region` / `General` / `Log` / `Economy` / `Diplomacy` / `AI`
   - 唐宋 tabs：`军队` / `州府` / `将领` / `战报` / `府库` / `外交` / `军议`
-- `UnitTooltipView`。
+- `UnitTooltipView`：右下角选中军队摘要；v5.7m 起唐宋场景显示兵种、兵力、补给、退却和本回合读法。
 
 v5.5 首轮术语桥只改变唐宋场景的玩家可见读法：
 
