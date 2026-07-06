@@ -193,7 +193,7 @@ struct HUDView: View {
             return nil
         }
         return gameState.isTangSongScenario
-            ? "\(progress.controlledCount)/\(progress.requiredCount) 州府"
+            ? "州府 \(progress.controlledCount)／\(progress.requiredCount)"
             : "\(progress.controlledCount)/\(progress.requiredCount)"
     }
 
@@ -203,7 +203,9 @@ struct HUDView: View {
               let mandateThreshold = progress.mandateThreshold else {
             return nil
         }
-        return "\(mandateScore)/\(mandateThreshold)"
+        return gameState.isTangSongScenario
+            ? "\(mandateScore)／\(mandateThreshold)"
+            : "\(mandateScore)/\(mandateThreshold)"
     }
 
     private var objectiveGuideText: String? {

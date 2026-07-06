@@ -60,11 +60,17 @@ struct VictoryObjectiveProgress: Equatable, Identifiable {
     }
 
     func summary(isTangSongScenario: Bool) -> String {
-        let objectiveLabel = isTangSongScenario ? "州府 \(controlledCount)/\(requiredCount)" : "Objectives \(controlledCount)/\(requiredCount)"
+        let objectiveLabel = isTangSongScenario
+            ? "州府 \(controlledCount)／\(requiredCount)"
+            : "Objectives \(controlledCount)/\(requiredCount)"
         var parts = [objectiveLabel]
 
         if let mandateScore, let mandateThreshold {
-            parts.append(isTangSongScenario ? "天命 \(mandateScore)/\(mandateThreshold)" : "Mandate \(mandateScore)/\(mandateThreshold)")
+            parts.append(
+                isTangSongScenario
+                    ? "天命 \(mandateScore)／\(mandateThreshold)"
+                    : "Mandate \(mandateScore)/\(mandateThreshold)"
+            )
         }
 
         if let turnRequirement {

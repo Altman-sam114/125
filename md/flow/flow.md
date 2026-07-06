@@ -556,6 +556,14 @@ v5.8q 当前已落地：
 - `AppContainer` 的常见本地 guard 反馈已做唐宋分流：无可行动军队、围城/修城/解围/招降/招抚目标缺失、将领军令入口拒绝、府库观战拒绝、选中军队、敌方/非敌对军队和地块坐标均优先写入中文文案。
 - 非唐宋路径继续保留 legacy 英文 fallback，便于阿登历史回归；该切片不改变 `CommandResult`、`GameLogEntry`、`CommandValidator`、`RuleEngine`、`WarCommandExecutor`、AI 决策、事件 schema 或 Codable raw 值。
 
+v5.8r 当前已落地：
+
+- `VictoryObjectiveProgress.summary`、`HUDView` 和 `EventLogView` 在唐宋场景下把统一进度、天命进度和胜负后评分估算中的 ASCII `/` 改为“／”。
+- `EconomyResources.summary(isTangSongScenario:)` 的唐宋路径改用“、”连接丁口、钱帛、粮草；`EconomyPanelView` 继续复用该显示桥。
+- `UnitInspectorView` 粮道近源坐标与 `EventLogView` 旧英文 `Selected hex` 日志显示桥改用“第 q 列，第 r 行”。
+- `EventLogView` 本回合战报的军议摘要遇到 Latin、JSON 痕迹、schema key 或 raw id 风险时降级为“军议摘要已形成 / 已形成方面军令”，不直接把上游原文铺给玩家。
+- 该切片只改主游戏玩家可见显示桥，不改变胜利规则、经济规则、补给规则、`AgentDecisionRecord`、`WarDirectiveRecord`、事件写入职责、AI 决策或 Codable raw 值。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
@@ -1238,7 +1246,7 @@ RuleEngine.execute(command, in: state)
   -> valid: CommandExecutor.execute(command, in: preparedState)
 ```
 
-v5.8i 起，唐宋场景下 `CommandValidationError.displayName(isTangSongScenario:)` 会把 `wrongPhase`、`wrongFaction`、`regionNotFound`、`submissionNotReady` 等 raw validation key 显示为中文拒绝原因；`RuleEngine` 仍保留原始 enum case 和 Codable raw 值，不改变校验语义。`AppContainer` 的 AI 回合完成、玩家方面军令反馈、选中州府日志和 `CommandPanelView.lastCommandMessage` 也优先显示唐宋文案；`EventLogView` 唐宋 metadata 不再展示内部 `relatedRecordId`，legacy 阿登路径保持旧 metadata。v5.8q 起，`AppContainer` 的常见玩家交互反馈进一步从写入端分流为唐宋文案：命令接受/驳回、无可行动军队、围城/修城/解围/招降/招抚目标缺失、将领军令、府库观战拒绝、选中军队和地块坐标不再默认写入英文或 raw id 摘要。
+v5.8i 起，唐宋场景下 `CommandValidationError.displayName(isTangSongScenario:)` 会把 `wrongPhase`、`wrongFaction`、`regionNotFound`、`submissionNotReady` 等 raw validation key 显示为中文拒绝原因；`RuleEngine` 仍保留原始 enum case 和 Codable raw 值，不改变校验语义。`AppContainer` 的 AI 回合完成、玩家方面军令反馈、选中州府日志和 `CommandPanelView.lastCommandMessage` 也优先显示唐宋文案；`EventLogView` 唐宋 metadata 不再展示内部 `relatedRecordId`，legacy 阿登路径保持旧 metadata。v5.8q 起，`AppContainer` 的常见玩家交互反馈进一步从写入端分流为唐宋文案：命令接受/驳回、无可行动军队、围城/修城/解围/招降/招抚目标缺失、将领军令、府库观战拒绝、选中军队和地块坐标不再默认写入英文或 raw id 摘要。v5.8r 起，胜利/天命进度、评分估算、粮道近源坐标、府库资源摘要和本回合军议摘要继续在显示层收口，减少 `/`、`,`、`q,r`、Latin、JSON 痕迹和 raw key 直出。
 
 v5.8j 起，唐宋军队/州府检查面板不再默认把 `RegionId`、`TheaterId`、`FrontZoneId`、`FrontLineId`、补给源 id 或 `MapDisplayAdapter` 生成的英文 `None/controlled` 作为玩家文案。`MapDisplayAdapter` 仍保存 raw id 供逻辑和 legacy 显示使用，同时为 inspector state 补运行态州府、动态方面、防区和粮源名称；`UnitInspectorView` / `RegionInspectorView` 在唐宋路径优先显示这些名称，缺失时使用“未知州府 / 未命名方面 / 未命名防区 / 无目标”等兜底。该变化只影响 UI 派生显示，不改变任何 id schema、目标控制、补给判定或命令执行。
 

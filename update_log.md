@@ -356,6 +356,44 @@
 - 本轮只改将领面板与州府详情面板的玩家可见显示桥，不改变 `PlayerPlannedOperation`、`RegionInspectorState`、`SiegeRecord`、命令、围城规则、AI 决策、事件写入或 Codable schema。
 - 这不是完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收或 v5.9 发布验收；全局 accessibility 和其他玩家可见残留仍需后续切片继续收口。
 
+## v5.8r - 胜利、粮道与军议摘要显示硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 HUD / EventLog / UnitInspector / Economy 仍有唐宋路径下的 ASCII `/`、`,`、`q,r` 坐标和上游军议 raw 文本直出风险。
+- `VictoryObjectiveProgress.summary`、HUD 统一/天命进度和战报评分估算改用“／”，减少胜利目标与天命门槛中的 ASCII 分隔符。
+- `EconomyResources.summary(isTangSongScenario:)` 唐宋路径改用“、”连接丁口、钱帛、粮草，府库军备成本行同步受益。
+- `UnitInspectorView` 粮道近源坐标与 `EventLogView` 旧英文 `Selected hex` 日志显示桥改用“第 q 列，第 r 行”。
+- `EventLogView` 本回合军议摘要遇到 Latin、JSON 痕迹、schema key 或 raw id 风险时，降级为“军议摘要已形成 / 已形成方面军令”。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8r 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/Core/EconomyState.swift`
+- `WWIIHexV0/Rules/VictoryRules.swift`
+- `WWIIHexV0/UI/HUDView.swift`
+- `WWIIHexV0/UI/EventLogView.swift`
+- `WWIIHexV0/UI/UnitInspectorView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8r_victory_supply_summary_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改主游戏玩家可见显示桥，不改变胜利规则、经济规则、补给规则、`AgentDecisionRecord`、`WarDirectiveRecord`、事件写入职责、AI 决策或 Codable raw 值。
+- MapEditor 仍有 raw 文件名、`q,r` 坐标、`JSON` 文案和导出错误 raw id 残留，建议作为后续 v5.8s 小切片。
+- 这不是结构化 event payload、真 LLM 输出本地化、完整 VoiceOver 实机、截图、横竖屏布局或 v5.9 发布验收。
+
 ## v5.8q - AppContainer 源头反馈中文化
 
 完成日期：2026-07-06

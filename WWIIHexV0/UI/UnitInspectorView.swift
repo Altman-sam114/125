@@ -145,7 +145,9 @@ struct UnitInspectorView: View {
         let sourceName = sourceName
             ?? summary.nearestSourceId.map { isTangSongScenario ? "补给源" : $0 }
             ?? noneText
-        let sourceCoord = summary.nearestSourceCoord.map { "(\($0.q),\($0.r))" } ?? ""
+        let sourceCoord = summary.nearestSourceCoord.map {
+            isTangSongScenario ? "第 \($0.q) 列，第 \($0.r) 行" : "(\($0.q),\($0.r))"
+        } ?? ""
 
         if isTangSongScenario {
             if let pathCost = summary.pathCost {

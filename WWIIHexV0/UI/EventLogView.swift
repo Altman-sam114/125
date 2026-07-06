@@ -214,7 +214,7 @@ struct EventLogView: View {
         let objectiveText: String
         if let progress = matchingProgress {
             objectiveRatio = Double(progress.controlledCount) / Double(max(1, progress.requiredCount))
-            objectiveText = "州府 \(progress.controlledCount)/\(progress.requiredCount)"
+            objectiveText = "州府 \(progress.controlledCount)／\(progress.requiredCount)"
         } else {
             objectiveRatio = 1
             objectiveText = "州府已判定"
@@ -225,7 +225,7 @@ struct EventLogView: View {
         if let mandateScore = matchingProgress?.mandateScore,
            let mandateThreshold = matchingProgress?.mandateThreshold {
             mandateRatio = Double(mandateScore) / Double(max(1, mandateThreshold))
-            mandateText = "天命 \(mandateScore)/\(mandateThreshold)"
+            mandateText = "天命 \(mandateScore)／\(mandateThreshold)"
         } else {
             mandateRatio = 1
             mandateText = "天命无额外门槛"
@@ -430,10 +430,10 @@ struct EventLogView: View {
         var highlights: [TurnReportHighlight] = []
         if let summary = agentRecord?.theaterDirectiveSummary?.summary,
            !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            highlights.append(TurnReportHighlight(text: "• 军议：\(summary)"))
+            highlights.append(TurnReportHighlight(text: "• 军议：\(safeTangSongNarrative(summary, fallback: "军议摘要已形成"))"))
         } else if let parsedIntent = agentRecord?.parsedIntent,
                   !parsedIntent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            highlights.append(TurnReportHighlight(text: "• 军议：\(parsedIntent)"))
+            highlights.append(TurnReportHighlight(text: "• 军议：\(safeTangSongNarrative(parsedIntent, fallback: "已形成方面军令"))"))
         }
 
         for record in directiveRecords.suffix(2).reversed() {
@@ -443,6 +443,22 @@ struct EventLogView: View {
             highlights.append(TurnReportHighlight(text: "• 方面：\(detail)"))
         }
         return highlights
+    }
+
+    private func safeTangSongNarrative(_ text: String, fallback: String) -> String {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return fallback
+        }
+
+        let rawMarkers = ["{", "}", "[", "]", "\"", ":", "_", "rawJSON", "directive", "marshal", "attack(", "move("]
+        let lowercased = trimmed.lowercased()
+        if trimmed.unicodeScalars.contains(where: { scalar in
+            (65...90).contains(Int(scalar.value)) || (97...122).contains(Int(scalar.value))
+        }) || rawMarkers.contains(where: { lowercased.contains($0.lowercased()) }) {
+            return fallback
+        }
+        return trimmed
     }
 }
 
@@ -557,7 +573,11 @@ enum TangSongEventLogMessage {
     private static func selectionMessage(_ message: String) -> String? {
         if message.hasPrefix("Selected hex ") {
             let coord = stripped(message, prefix: "Selected hex ", suffix: ".")
-            return "已选地块 \(coord)。"
+            let parts = coord.split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            if parts.count == 2 {
+                return "已选地块：第 \(parts[0]) 列，第 \(parts[1]) 行。"
+            }
+            return "已选地块：\(coord)。"
         }
         if message.hasPrefix("Selected region: ") {
             let region = stripped(message, prefix: "Selected region: ", suffix: ".")

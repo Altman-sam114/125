@@ -39,7 +39,7 @@ struct EconomyResources: Codable, Equatable {
 
     func summary(isTangSongScenario: Bool) -> String {
         if isTangSongScenario {
-            return "丁口 \(manpower), 钱帛 \(industry), 粮草 \(supplies)"
+            return "丁口 \(manpower)、钱帛 \(industry)、粮草 \(supplies)"
         }
 
         return "MP \(manpower), IC \(industry), SUP \(supplies)"
