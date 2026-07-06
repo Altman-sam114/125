@@ -116,6 +116,8 @@ struct RootGameView: View {
                     zone: container.selectedGeneralCommandZone,
                     assignedDivisions: container.selectedGeneralAssignedDivisions,
                     hqUnderAttack: container.selectedGeneralHQUnderAttack,
+                    isTangSongScenario: container.gameState.isTangSongScenario,
+                    factionDisplayName: { container.gameState.displayName(for: $0) },
                     onClose: { isGeneralProfilePresented = false }
                 )
             } else {
@@ -311,6 +313,7 @@ struct RootGameView: View {
                         targetZone: container.selectedGeneralTargetZone,
                         hqUnderAttack: container.selectedGeneralHQUnderAttack,
                         plannedOperations: container.selectedGeneralPlannedOperations,
+                        isTangSongScenario: container.gameState.isTangSongScenario,
                         canHoldLine: container.canOrderSelectedGeneralHoldLine,
                         canAttackRegion: container.canOrderSelectedGeneralAttackRegion,
                         onShowProfile: { isGeneralProfilePresented = true },
@@ -333,6 +336,7 @@ struct RootGameView: View {
                         targetZone: container.selectedGeneralTargetZone,
                         hqUnderAttack: container.selectedGeneralHQUnderAttack,
                         plannedOperations: container.selectedGeneralPlannedOperations,
+                        isTangSongScenario: container.gameState.isTangSongScenario,
                         canHoldLine: container.canOrderSelectedGeneralHoldLine,
                         canAttackRegion: container.canOrderSelectedGeneralAttackRegion,
                         onShowProfile: { isGeneralProfilePresented = true },

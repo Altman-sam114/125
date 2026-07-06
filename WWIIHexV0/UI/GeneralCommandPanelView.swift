@@ -9,6 +9,7 @@ struct GeneralCommandPanelView: View {
     let targetZone: FrontZone?
     let hqUnderAttack: Bool
     let plannedOperations: [PlayerPlannedOperation]
+    let isTangSongScenario: Bool
     let canHoldLine: Bool
     let canAttackRegion: Bool
     let onShowProfile: () -> Void
@@ -17,16 +18,16 @@ struct GeneralCommandPanelView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("General Command")
+            Text(isTangSongScenario ? "将领军令" : "General Command")
                 .font(.headline)
 
             if let zone {
-                LabeledContent("Front Zone") {
+                LabeledContent(isTangSongScenario ? "方面防区" : "Front Zone") {
                     Text(zone.name)
                         .multilineTextAlignment(.trailing)
                 }
             } else {
-                Text("No allied front zone selected.")
+                Text(isTangSongScenario ? "未选择亲征方面防区。" : "No allied front zone selected.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -37,7 +38,7 @@ struct GeneralCommandPanelView: View {
                         Button(action: onShowProfile) {
                             portraitBadge(for: general)
                         }
-                            .accessibilityLabel("Open profile for \(general.localizedName)")
+                            .accessibilityLabel(profileAccessibilityLabel(for: general))
                             .buttonStyle(.plain)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(general.localizedName)
@@ -60,30 +61,30 @@ struct GeneralCommandPanelView: View {
                     }
 
                     if let assignment {
-                        metricBar(title: "Loyalty", value: assignment.loyalty)
-                        metricBar(title: "Satisfaction", value: assignment.satisfaction)
-                        LabeledContent("Interventions") {
+                        metricBar(title: isTangSongScenario ? "忠诚" : "Loyalty", value: assignment.loyalty)
+                        metricBar(title: isTangSongScenario ? "军心" : "Satisfaction", value: assignment.satisfaction)
+                        LabeledContent(isTangSongScenario ? "亲征干预" : "Interventions") {
                             Text("\(assignment.interventionCount)")
                         }
                     }
 
-                    Button("View Profile", systemImage: "person.text.rectangle", action: onShowProfile)
+                    Button(isTangSongScenario ? "查看档案" : "View Profile", systemImage: "person.text.rectangle", action: onShowProfile)
                         .buttonStyle(.bordered)
                 }
             } else if zone != nil {
-                Text("No general assigned to this zone.")
+                Text(isTangSongScenario ? "该方面尚未委任将领。" : "No general assigned to this zone.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
             if hqUnderAttack {
-                Label("HQ region contested", systemImage: "exclamationmark.triangle.fill")
+                Label(isTangSongScenario ? "本营州府受敌压迫" : "HQ region contested", systemImage: "exclamationmark.triangle.fill")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.orange)
             }
 
             if !assignedDivisions.isEmpty {
-                Text("Assigned Units")
+                Text(isTangSongScenario ? "所属军队" : "Assigned Units")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 4) {
@@ -96,21 +97,21 @@ struct GeneralCommandPanelView: View {
             }
 
             if let targetRegion, targetZone?.faction != zone?.faction {
-                LabeledContent("Target") {
+                LabeledContent(isTangSongScenario ? "目标州府" : "Target") {
                     Text(targetRegion.name)
                 }
             }
 
             HStack(spacing: 8) {
-                Button("Hold Line", systemImage: "shield.fill", action: onHoldLine)
+                Button(isTangSongScenario ? "固守防线" : "Hold Line", systemImage: "shield.fill", action: onHoldLine)
                     .disabled(!canHoldLine)
-                Button("Attack Region", systemImage: "arrow.up.right.circle", action: onAttackRegion)
+                Button(isTangSongScenario ? "进攻州府" : "Attack Region", systemImage: "arrow.up.right.circle", action: onAttackRegion)
                     .disabled(!canAttackRegion)
             }
             .buttonStyle(.bordered)
 
             if !plannedOperations.isEmpty {
-                Text("Planned Operations")
+                Text(isTangSongScenario ? "已拟军令" : "Planned Operations")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 4) {
@@ -133,7 +134,7 @@ struct GeneralCommandPanelView: View {
             .frame(width: 40, height: 40)
             .background(PlatformStyles.selectionTint)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .accessibilityLabel("\(general.localizedName) portrait placeholder")
+            .accessibilityLabel(portraitAccessibilityLabel(for: general))
     }
 
     private func metricBar(title: String, value: Int) -> some View {
@@ -156,6 +157,17 @@ struct GeneralCommandPanelView: View {
     }
 
     private func styleLabel(_ style: ZoneCommanderAgentConfig.CommandStyle) -> String {
+        if isTangSongScenario {
+            switch style {
+            case .aggressive:
+                return "锐意进取"
+            case .balanced:
+                return "攻守持衡"
+            case .cautious:
+                return "谨慎持重"
+            }
+        }
+
         switch style {
         case .aggressive:
             return "Aggressive"
@@ -182,6 +194,26 @@ struct GeneralCommandPanelView: View {
 
     private func operationSummary(_ operation: PlayerPlannedOperation) -> String {
         let target = operation.targetRegionId?.rawValue ?? operation.sourceRegionId?.rawValue ?? operation.zoneId.rawValue
+        if isTangSongScenario {
+            return "\(directiveLabel(operation.directiveType)) / \(target)"
+        }
         return "\(operation.directiveType.rawValue) / \(target)"
+    }
+
+    private func directiveLabel(_ type: DirectiveType) -> String {
+        switch type {
+        case .attack:
+            return "进攻"
+        case .defend:
+            return "固守"
+        }
+    }
+
+    private func profileAccessibilityLabel(for general: GeneralData) -> String {
+        isTangSongScenario ? "打开\(general.localizedName)档案" : "Open profile for \(general.localizedName)"
+    }
+
+    private func portraitAccessibilityLabel(for general: GeneralData) -> String {
+        isTangSongScenario ? "\(general.localizedName)头像占位" : "\(general.localizedName) portrait placeholder"
     }
 }

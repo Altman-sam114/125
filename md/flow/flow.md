@@ -500,6 +500,13 @@ v5.7k 当前已落地：
 - `RootGameView.nextActionHint` 的已行动提示继续读取当前亲征势力名称，不再硬写“宋军”；`CommandPanelView` 在唐宋场景下把非玩家所控单位显示为“非亲征军队”，减少多政权入口下的误导。
 - 该切片只补玩家可见显示桥，不改 `Division` / `RegionNode` / `ComponentType` / `EconomyResources` / `Faction` Codable schema，不改 `GameState`、命令、围城、补给、胜负或地图控制规则，也未做截图/布局验收。
 
+v5.7l 当前已落地：
+
+- `GeneralCommandPanelView` 接收 `isTangSongScenario`，唐宋场景下把将领操作面板显示为将领军令、方面防区、未选择亲征方面防区、忠诚、军心、亲征干预、查看档案、所属军队、目标州府、固守防线、进攻州府和已拟军令。
+- `GeneralProfileView` 接收 `isTangSongScenario` 与 `factionDisplayName`，唐宋场景下把档案页显示为将领档案、关闭、履历、用兵、所辖方面、朝廷关系、忠诚、军心、亲征干预、特长和辖下军队，并通过 `GameState.displayName(for:)` 显示将领所属政权，避免默认唐宋路径直接露出 `Germany` / `Allies`。
+- 计划摘要在唐宋场景下把 `DirectiveType.attack/defend` 显示为进攻/固守，将领用兵风格显示为锐进、持重或谨慎。
+- 该切片只补玩家可见显示桥，不改 `GeneralData`、`GeneralAssignment`、`FrontZone`、`PlayerPlannedOperation` schema，不改变将领分配、AI 决策、`ZoneDirective`、`WarCommandExecutor`、`RuleEngine` 或规则执行。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1491,6 +1498,10 @@ UnitInspectorView / RegionInspectorView
   -> 唐宋场景读取 isTangSongScenario 与 GameState.displayName(for:)
   -> 军队/州府检查面板显示唐宋字段、资源、兵种和围城摘要
   -> 不改底层 schema，不写 GameState，不参与命令执行
+GeneralCommandPanelView / GeneralProfileView
+  -> 唐宋场景读取 isTangSongScenario 与 GameState.displayName(for:)
+  -> 将领军令/档案面板显示唐宋字段、政权名、用兵风格和计划摘要
+  -> 不改 GeneralData / FrontZone / PlayerPlannedOperation schema，不改变 AI 或规则
 NewGameButton
   -> RootGameView confirmationDialog
   -> 用户确认后调用 AppContainer.resetGame()

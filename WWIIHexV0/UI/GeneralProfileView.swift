@@ -6,6 +6,8 @@ struct GeneralProfileView: View {
     let zone: FrontZone?
     let assignedDivisions: [Division]
     let hqUnderAttack: Bool
+    let isTangSongScenario: Bool
+    let factionDisplayName: (Faction) -> String
     let onClose: () -> Void
 
     var body: some View {
@@ -27,10 +29,10 @@ struct GeneralProfileView: View {
         .background(.ultraThinMaterial)
         .safeAreaInset(edge: .top) {
             HStack {
-                Text("General Profile")
+                Text(isTangSongScenario ? "将领档案" : "General Profile")
                     .font(.headline)
                 Spacer()
-                Button("Close", systemImage: "xmark", action: onClose)
+                Button(isTangSongScenario ? "关闭" : "Close", systemImage: "xmark", action: onClose)
                     .buttonStyle(.bordered)
             }
             .padding(12)
@@ -52,7 +54,7 @@ struct GeneralProfileView: View {
             Text(general.rank)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Text(general.faction.displayName)
+            Text(factionDisplayName(general.faction))
                 .font(.caption.weight(.semibold))
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
@@ -64,24 +66,24 @@ struct GeneralProfileView: View {
 
     private var biographyBlock: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Biography")
+            Text(isTangSongScenario ? "履历" : "Biography")
                 .font(.headline)
             Text(general.biography)
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            LabeledContent("Command Style") {
+            LabeledContent(isTangSongScenario ? "用兵" : "Command Style") {
                 Text(styleLabel(general.commandStyle))
             }
             if let zone {
-                LabeledContent("Assigned Zone") {
+                LabeledContent(isTangSongScenario ? "所辖方面" : "Assigned Zone") {
                     Text(zone.name)
                         .multilineTextAlignment(.trailing)
                 }
             }
             if hqUnderAttack {
-                Label("HQ region contested", systemImage: "exclamationmark.triangle.fill")
+                Label(isTangSongScenario ? "本营州府受敌压迫" : "HQ region contested", systemImage: "exclamationmark.triangle.fill")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.orange)
             }
@@ -90,11 +92,11 @@ struct GeneralProfileView: View {
 
     private var statusBlock: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Relationship")
+            Text(isTangSongScenario ? "朝廷关系" : "Relationship")
                 .font(.headline)
-            metricBar(title: "Loyalty", value: assignment?.loyalty ?? general.baseLoyalty)
-            metricBar(title: "Satisfaction", value: assignment?.satisfaction ?? general.baseSatisfaction)
-            LabeledContent("Player Interventions") {
+            metricBar(title: isTangSongScenario ? "忠诚" : "Loyalty", value: assignment?.loyalty ?? general.baseLoyalty)
+            metricBar(title: isTangSongScenario ? "军心" : "Satisfaction", value: assignment?.satisfaction ?? general.baseSatisfaction)
+            LabeledContent(isTangSongScenario ? "亲征干预" : "Player Interventions") {
                 Text("\(assignment?.interventionCount ?? 0)")
             }
         }
@@ -102,10 +104,10 @@ struct GeneralProfileView: View {
 
     private var skillsBlock: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Skills")
+            Text(isTangSongScenario ? "特长" : "Skills")
                 .font(.headline)
             if general.skills.isEmpty {
-                Text("No explicit skills configured.")
+                Text(isTangSongScenario ? "暂无特长配置。" : "No explicit skills configured.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -126,10 +128,10 @@ struct GeneralProfileView: View {
 
     private var assignedUnitsBlock: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Assigned Units")
+            Text(isTangSongScenario ? "辖下军队" : "Assigned Units")
                 .font(.headline)
             if assignedDivisions.isEmpty {
-                Text("No active divisions assigned.")
+                Text(isTangSongScenario ? "暂无在列军队。" : "No active divisions assigned.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -163,6 +165,17 @@ struct GeneralProfileView: View {
     }
 
     private func styleLabel(_ style: ZoneCommanderAgentConfig.CommandStyle) -> String {
+        if isTangSongScenario {
+            switch style {
+            case .aggressive:
+                return "锐进"
+            case .balanced:
+                return "持重"
+            case .cautious:
+                return "谨慎"
+            }
+        }
+
         switch style {
         case .aggressive:
             return "Aggressive"
