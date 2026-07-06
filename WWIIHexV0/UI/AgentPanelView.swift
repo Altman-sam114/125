@@ -38,11 +38,11 @@ struct AgentPanelView: View {
             }
 
             LabeledContent(isTangSongScenario ? "意图" : "Intent") {
-                Text(record?.parsedIntent ?? (isTangSongScenario ? "暂无军议" : "No decision submitted"))
+                Text(intentDisplayText)
                     .multilineTextAlignment(.trailing)
             }
 
-            if let contextSummary = record?.contextSummary {
+            if let contextSummary = contextDisplayText {
                 LabeledContent(isTangSongScenario ? "战况" : "Context") {
                     Text(contextSummary)
                         .multilineTextAlignment(.trailing)
@@ -163,9 +163,17 @@ struct AgentPanelView: View {
                             }
 
                             if !directive.diagnostics.isEmpty {
-                                Text(directive.diagnostics.joined(separator: " / "))
+                                if isTangSongScenario {
+                                    DisclosureGroup("军令诊断：\(directive.diagnostics.count)项") {
+                                        debugTextBlock(directive.diagnostics.joined(separator: " / "))
+                                    }
                                     .font(.caption)
                                     .foregroundStyle(.orange)
+                                } else {
+                                    Text(directive.diagnostics.joined(separator: " / "))
+                                        .font(.caption)
+                                        .foregroundStyle(.orange)
+                                }
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -182,30 +190,63 @@ struct AgentPanelView: View {
                     .foregroundStyle(.secondary)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(record.errors, id: \.self) { error in
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(.red)
+                    if isTangSongScenario {
+                        DisclosureGroup("军议未成：\(record.errors.count)项") {
+                            ForEach(record.errors, id: \.self) { error in
+                                debugTextBlock(error)
+                            }
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                    } else {
+                        ForEach(record.errors, id: \.self) { error in
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                        }
                     }
                 }
             }
 
-            Text(isTangSongScenario ? "原始 JSON" : "Raw JSON")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            Text(record?.rawJSON ?? rawJSONPlaceholder)
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(8)
-                .background(PlatformStyles.tertiarySystemBackground)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
+            rawJSONSection
         }
         .padding(12)
         .background(PlatformStyles.systemBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    @ViewBuilder
+    private var rawJSONSection: some View {
+        if isTangSongScenario {
+            if let rawJSON = displayText(record?.rawJSON) {
+                DisclosureGroup("军议原文") {
+                    debugTextBlock(rawJSON)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            } else {
+                Text("暂无军议原文")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } else {
+            Text("Raw JSON")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            debugTextBlock(record?.rawJSON ?? rawJSONPlaceholder)
+        }
+    }
+
+    private func debugTextBlock(_ text: String) -> some View {
+        Text(text)
+            .font(.system(.caption, design: .monospaced))
+            .foregroundStyle(.secondary)
+            .textSelection(.enabled)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(8)
+            .background(PlatformStyles.tertiarySystemBackground)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
     }
 
     private func directiveSummary(_ directive: WarDirectiveRecord) -> String {
@@ -216,7 +257,7 @@ struct AgentPanelView: View {
             ?? (isTangSongScenario ? "无战术" : "none")
         let executed = directive.commandResults.filter(\.executed).count
         let rejected = directive.commandResults.count - executed
-        let targets = directive.targetRegionIds.map(regionDisplayName).joined(separator: ", ")
+        let targets = directive.targetRegionIds.map(displayName).joined(separator: ", ")
         let targetText = targets.isEmpty ? (isTangSongScenario ? "无目标" : "no target") : targets
         if isTangSongScenario {
             return "\(type) / \(tactic) / 成 \(executed)，拒 \(rejected) / \(targetText)"
@@ -283,9 +324,24 @@ struct AgentPanelView: View {
     }
 
     private func resultLine(_ result: CommandResultSummary) -> String {
+        if isTangSongScenario {
+            if !result.mappingSucceeded {
+                return "军令未成：映射失败"
+            }
+            if result.executed {
+                return "已执行"
+            }
+            if !result.errors.isEmpty {
+                return "规则拒绝：\(result.errors.count)项"
+            }
+            if result.validationSucceeded == false {
+                return "规则拒绝"
+            }
+            return "未执行"
+        }
+
         if !result.mappingSucceeded {
-            let prefix = isTangSongScenario ? "映射失败" : "Mapping failed"
-            return "\(prefix): \(result.errors.joined(separator: ", "))"
+            return "Mapping failed: \(result.errors.joined(separator: ", "))"
         }
 
         if result.executed {
@@ -293,8 +349,7 @@ struct AgentPanelView: View {
         }
 
         if !result.errors.isEmpty {
-            let prefix = isTangSongScenario ? "规则拒绝" : "Rejected"
-            return "\(prefix): \(result.errors.joined(separator: ", "))"
+            return "Rejected: \(result.errors.joined(separator: ", "))"
         }
 
         return result.message
@@ -308,14 +363,61 @@ struct AgentPanelView: View {
     }
 
     private func regionList(_ regionIds: [RegionId]) -> String {
-        regionIds.map(regionDisplayName).joined(separator: ", ")
+        regionIds.map(displayName).joined(separator: ", ")
     }
 
     private func directiveZoneTitle(_ zoneId: FrontZoneId?) -> String {
         guard let zoneId else {
             return isTangSongScenario ? "全局军令" : "global"
         }
-        return zoneDisplayName(zoneId)
+        return displayName(for: zoneId)
+    }
+
+    private func displayName(for regionId: RegionId) -> String {
+        let name = regionDisplayName(regionId)
+        if isTangSongScenario, name == regionId.rawValue {
+            return "未命名州府"
+        }
+        return name
+    }
+
+    private func displayName(for zoneId: FrontZoneId) -> String {
+        let name = zoneDisplayName(zoneId)
+        if isTangSongScenario, name == zoneId.rawValue {
+            return "未命名方面"
+        }
+        return name
+    }
+
+    private var intentDisplayText: String {
+        if isTangSongScenario {
+            if let summary = displayText(record?.theaterDirectiveSummary?.summary) {
+                return summary
+            }
+            if let strategicIntent = displayText(record?.theaterDirectiveSummary?.strategicIntent) {
+                return strategicIntent
+            }
+            if record != nil {
+                return "已形成方面军令"
+            }
+            return "暂无军议"
+        }
+        return record?.parsedIntent ?? "No decision submitted"
+    }
+
+    private var contextDisplayText: String? {
+        guard let contextSummary = displayText(record?.contextSummary) else {
+            return nil
+        }
+        guard isTangSongScenario else {
+            return contextSummary
+        }
+
+        let normalized = contextSummary.lowercased()
+        if normalized.contains("marshal") || normalized.contains("directive") || normalized.contains("json") {
+            return "已汇总战场、粮道与方面态势"
+        }
+        return contextSummary
     }
 
     private func agentDisplayName(_ agentId: String?) -> String {
@@ -363,8 +465,8 @@ struct AgentPanelView: View {
     private var rawJSONPlaceholder: String {
         """
         {
-          "agentId": "\(isTangSongScenario ? "宋枢密院" : "guderian")",
-          "status": "\(isTangSongScenario ? "暂无军议" : "placeholder")",
+          "agentId": "guderian",
+          "status": "placeholder",
           "orders": []
         }
         """
