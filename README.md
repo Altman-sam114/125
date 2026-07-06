@@ -1,4 +1,4 @@
-# WWIIHexV0 — 唐宋迁移中的 iOS / macOS AI 战略战棋
+# 山河一统 Agent — 唐宋迁移中的 iOS / macOS AI 战略战棋
 
 > **当前状态：v5.7 可玩闭环的首屏“下一步”只读提示、统一目标锚点、目标锚点定位、地图目标高亮层、每回合战报摘要、新局/指挥身份包装、高亮数量行动提示、亲征势力/观战轻量入口、胜负后结算预览/评分估算、下一步有限合法性预校验、检查面板、将领面板和常驻军队 tooltip 唐宋读法补齐首轮已接入；v5.8a/v5.8b AI 面板默认主路径残留硬化与玩家态/开发态分层首轮已接入；v5.8c 外交面板默认主路径读法硬化首轮已接入；v5.8d 战报日志默认主路径读法硬化首轮已接入；此前 v5.6 唐宋外交、归附、天命规则/UI、战术候选关系感知、数据驱动胜利条件、胜负原因显示与胜利目标进度只读显示首轮已接入；此前 v5.3 唐宋生产/府库显示桥、古代兵种战斗修正、粮道供给/读法、围城城防、修城、解围、招降、地图围城 overlay 与 AI 围城/招降指令首轮，v5.4 AI 军议显示桥、模拟元帅 JSON 文案唐宋化和可选解释字段首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源；生产、府库和经济规则日志在唐宋路径下显示为军备、丁口、钱帛、粮草、禁军/厢军/骑军/攻城器械营；唐宋场景下骑军、弓弩守军、攻城器械营和守军已有最小战斗差异；受控高补给州府/粮仓、道路、山林和跨河成本已影响补给判定，单位详情可显示粮道通断、路径成本/上限、最近粮源和安全退路，地图可从同一摘要只读绘制友方可见军队到最近可见粮源的抽象粮道虚线；玩家可通过统一 `Command.besiege -> RuleEngine` 对敌方城池/关隘/粮仓州府登记围城压力并损耗城防，守方可通过 `Command.repairFortification -> RuleEngine` 消耗军队行动修城，也可通过 `Command.relieveSiege -> RuleEngine` 让州府内或近旁友军削减围城压力直至解围；围城压力达标、城防归零且守军不再 supplied 后，围城方可通过 `Command.demandSurrender -> RuleEngine` 招降目标州府，规则层会移除纳降守军、交割目标州府可占 hex，并刷新 region/theater/front/deploy；`ZoneDirective.attack -> WarCommandExecutor` 会在目标州府满足纳降条件时优先生成底层 `Command.demandSurrender`，否则在目标州府可围且无可攻击单位时生成底层 `Command.besiege`；地图从 `SiegeState` 只读绘制围城圈、压力和城防标签；唐宋场景下 AI 面板显示为“军议/方面军令”，战术名显示为进军、骑军突进、合围、弓弩压制、死守城关等，模拟元帅 raw JSON 的默认主事、strategicIntent、summary 和 rationale 也改用宋枢密院/割据行营与州府粮道口径；`TheaterDirectiveEnvelope` 新增可选 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 解释字段，唐宋 simulated marshal 会从首都、围城、粮道和外交候选摘要填充这些字段，`AgentDecisionRecord` 会保存只读军议解释摘要，`AgentPanelView` 在唐宋场景下结构化显示诏令、朝议、招抚、转运与摘要；v5.8a 起 `AgentPanelView` 的默认唐宋主路径会把 agent/provider/ruler/zone/region/order/posture fallback 显示为宋枢密院、割据行营、确定性军议、全局军令、州府和唐宋军令读法，`RootGameView` 传入运行态州府/防区名称查找；v5.8b 起 `AgentPanelView` 在唐宋场景下把 diagnostics、错误原文和 raw JSON 放入折叠调试区，玩家默认只看到军令执行/拒绝摘要、军议原文入口和“未命名州府/方面”兜底，不直接铺开英文诊断、内部 id 或 schema key；v5.8c 起 `DiplomacyPanelView` 在唐宋场景下把外交状态、集团、君主、国策、重点方面和归附州府 fallback 显示为唐宋读法，未知对象显示为未知政权、未命名集团、未命名州府或未命名方面；v5.8d 起 `EventLogView` 在唐宋场景下对战报正文与本回合摘要中的常见命令、选中、战斗、退却、补给、AI 执行和规则拒绝 raw 文案做只读显示桥，减少英文事件和 raw validation 暴露；`GameAgent.defaultCommander` 在唐宋场景下使用宋枢密院/割据行营作为默认 AI issuer，不再把默认唐宋主路径记录成 Guderian 或 Allied Mock Commander；`Command.proposeSubmission -> RuleEngine` 已能记录招抚、更新国家关系投影和天命分数，玩家命令面板已提供“招抚”入口，外交面板只读显示天命与归附记录；UI 攻击候选、攻击高亮、AI 敌强/敌区估算、`WarCommandExecutor` 敌军/敌控 region 和战术移动候选已改为读取 `WarRelationRules.canTarget`；唐宋 `VictoryRules` 优先读取场景 JSON 的 `victoryConditions`，按 objective id、count、turn 和 `mandateThreshold` 判定宋统一或割据生存，缺失数据时保留 v5.6d 硬编码 fallback；HUD 与战报面板会从 `VictoryState.reason` 只读显示“关键州府与天命达标”等胜负原因，并从同一胜利条件只读派生州府/天命/回合进度；HUD 会按当前回合、选中军队、围城/招抚/解围/修城候选和胜负状态只读显示“下一步”提示，并把主要统一目标拆成可点击的“已据/待取”关键州府锚点，点击后只更新 `selectedHex` / `selectedRegionId` 来聚焦目标州府；SpriteKit 地图会从同一主要统一目标只读绘制“已据/待取”州府 spotlight；战报面板会从已有 `eventLog`、最近 `AgentDecisionRecord` 和 `WarDirectiveRecord` 只读汇总本回合/最近回合摘要，并在胜负已定后从 `VictoryState` 与胜者自己的 `VictoryRules.objectiveProgress` 只读估算预览分和档位；HUD 会显示当前指挥身份和观战/亲征模式，唐宋“重开剧本”会先弹出确认再调用既有重置；下一步提示会读取既有移动/攻击高亮数量，并对当前 UI 候选的围城、招抚、解围、修城、招降、攻击和行军做有限 `CommandValidator` 预校验后提示可执行项；RootGameView 可在唐宋场景切换当前亲征 legacy 阵营和观战模式，AppContainer 同步 `playerFaction` 与 `TurnOrderState.playerControlledPowerIds`，不新增多政权 schema；军队详情、州府详情、将领军令、将领档案面板和右下角常驻军队 tooltip 在唐宋场景下补齐军队、政权、指挥、地块、州府、方面、防区、粮道、兵力、编成、产出、围城、用兵、朝廷关系、辖下军队、补给、退却和本回合行动等显示桥，并通过 `GameState.displayName(for:)` 读取当前政权名。底层 `TacticName` raw case、AI 决策记录 raw id、JSON schema 和执行权限保持兼容；除 v5.6c 的 `pacificationTargets -> TurnManager -> Command.proposeSubmission` 辅助桥外，新增解释字段不直接改规则结果。阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，AI 招抚辅助桥也只生成底层 `Command` 后交给 `RuleEngine`；Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流按用户要求不跑本地测试，推送后由 GitHub Actions 云端重验证。**
 
@@ -60,13 +60,13 @@
 
 > **v5.6d 前序小切片：** `VictoryRules.updateVictoryState` 在唐宋场景先走唐宋专用判定，不再套用 Bastogne / St. Vith legacy 条件；宋统一胜利同时要求关键州府控制与天命阈值，割据生存胜利同时要求核心都城保有与割据天命阈值。该切片不新增治理政策、不改变 `MandateState` 调整来源、不改 UI 胜利面板结构，也不做归附后的控制权或部队交割。
 
-> **v5.8d 最新小切片：** 唐宋战报日志默认主路径读法硬化首轮，减少 EventLog 正文和战报摘要中的英文命令、raw validation 和交互日志残留；这只是只读显示桥，不改变日志 schema、规则或事件写入。
+> **v5.8f 最新文档切片：** README、md 大纲和 flow 文档的接手口径已从 WWIIHexV0/v0.x 阿登原型转向山河一统 Agent / 唐宋 v5.x 当前主线；v0.x、阿登、Guderian、Bastogne 和旧分支记录保留为 legacy 工程地基和历史回归参考，不作为默认产品叙述。该切片只改文档，不改变源码、JSON、规则或 CI workflow。
 
 ---
 
 ## 项目定位
 
-一款 iOS / macOS 回合制历史策略游戏，当前正从二战阿登原型迁移为唐宋时代 AI Agent 策略游戏。目标结合战棋（六角格操作感）、大战略（州府占领、粮道、前线）与角色扮演（LLM 驱动的将领/朝廷 AI）。
+一款 iOS / macOS 回合制历史策略游戏，当前主线是 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）。仓库名和部分底层类型仍沿用 `WWIIHexV0` legacy 工程名，但默认产品目标是唐宋时代 AI Agent 历史策略游戏：六角格战棋操作、州府/粮道/方面大战略、将领与朝廷 AI 军议共同驱动。
 
 **核心参考：**
 - 《统一指挥2》：六角格战棋、补给、攻击（战术层参照）
@@ -198,134 +198,34 @@ WWIIHexV0/
 
 ## 当前完成进度
 
-### ✅ v0：六角格测试板（已完成）
+当前主线是唐宋 v5.x 迁移，不再以阿登 v0.x 原型作为默认产品叙述。v0.x 内容保留为工程地基和 legacy fallback。
 
-**场景**：阿登测试战场（Ardennes），德军 vs 盟军，11×9 六角格地图
+### 唐宋 v5.x 主线
 
-| 功能模块 | 状态 |
-|----------|------|
-| 六角格 axial 坐标系统 | ✅ |
-| 地形系统（平原/森林/山地/城市/道路/河流/要塞） | ✅ |
-| 移动系统（地形消耗、道路加成、跨河惩罚、敌方阻挡） | ✅ |
-| 战斗系统（近战/炮兵远程、地形防御修正、反击） | ✅ |
-| 侧翼/背后加成 | ✅ |
-| 占领系统（城市控制权变更） | ✅ |
-| 补给系统（supplied / lowSupply / encircled） | ✅ |
-| 包围判定与惩罚 | ✅ |
-| 回合系统（德军 AI 先手 → 盟军玩家 → 结算） | ✅ |
-| MockAI 将领 agent（guderian，装甲突破风格） | ✅ |
-| 结构化 JSON 命令解析与校验 | ✅ |
-| AI 决策日志面板（AgentPanelView 读 AgentDecisionRecord） | ✅ |
-| 胜利条件（巴斯托涅占领 / 消灭 3 单位 / 切断补给） | ✅ |
+| 版本 | 状态 | 当前事实 |
+|---|---|---|
+| v5.0 | 已建档 | 唐宋迁移总提示词、审计合同、首发 960 剧本目标、架构边界和禁止项已建立。 |
+| v5.1 | 已完成首轮 | `PowerId` / `PowerProfile` / `PowerRelation` / `TurnOrderState` / `WarRelationRules` 兼容地基已接入。 |
+| v5.2 | 已完成首轮 | 默认数据优先加载 `jianlong_960_unification`；唐宋场景、州府/方面、单位模板、人物 JSON 与 MapEditor 默认资源桥已接入。 |
+| v5.3 | 已完成多轮首轮闭环 | 唐宋生产/府库显示桥、古代兵种战斗修正、粮道供给/读法、围城城防、修城、解围、招降、地图围城 overlay 与 AI 围城/招降指令已接入。 |
+| v5.4 | 已完成首轮 | AI 军议显示桥、simulated marshal 唐宋文案、`mandateIntent` / `courtPolicy` / `pacificationTargets` / `supplyPriorities` 解释字段与默认宋枢密院/割据行营 issuer 已接入。 |
+| v5.5 | 已完成首轮 | HUD、图层、面板、战报、地图视觉 token、军旗棋子和只读粮道 overlay 已改为唐宋场景读法。 |
+| v5.6 | 已完成多轮首轮闭环 | 外交归附、天命、玩家招抚、AI 招抚辅助桥、关系投影、战术候选关系感知、数据驱动胜利条件、胜负原因和目标进度只读显示已接入。 |
+| v5.7 | 已完成多轮可玩性首轮 | 下一步提示、统一目标锚点/定位/spotlight、每回合战报摘要、新局确认、亲征/观战入口、结算预览、合法性提示、检查面板、将领面板和 tooltip 唐宋读法已接入。 |
+| v5.8a-v5.8f | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径和 README/plan/flow 文档定位已做默认主路径硬化首轮。完整 RC 审计仍未完成。 |
+| v5.9 | 未开始 | 可发布验收、完整 artifact 审计、README/flow/update_log 统一发布口径仍待后续。 |
 
----
+### 当前仍未完成
 
-### ✅ v0.1：strength、撤退与补员（已完成）
+- `Faction`、`ProductionKind`、`EconomyResources`、`Division`、`ComponentType` 等底层 Codable schema 仍保留 legacy 名称或二战兼容桥。
+- 真实多政权数据驱动、完整吴越/南唐/后蜀等势力选择、持久化配置和存档槽仍未收口。
+- 自动破城、完整外交纳土交割、完整漕运/粮队/仓储容量、治理政策、正式评分系统、完整统一结算页仍未落地。
+- 完整皇帝/朝廷/枢密/节度使/转运使/州府守臣/外交使者 schema、真实多 Agent JSON 与真 LLM 接入仍待后续。
+- 截图、iPhone/iPad 横竖屏布局、VoiceOver、资源授权和发布级 UI 验收仍未完成；当前验证以 GitHub Actions 云端 build/artifact 为准。
 
-| 功能模块 | 状态 |
-|----------|------|
-| `Division` 升级为 strength/maxStrength，保留 hp/maxHP 兼容 | ✅ |
-| 战斗改为 strength 伤害（organization 已移除） | ✅ |
-| 撤退状态：自动寻找安全相邻格撤退 | ✅ |
-| 撤退失败施加额外惩罚 | ✅ |
-| `resupply/rest` 恢复 strength | ✅ |
-| 包围每回合扣 strength | ✅ |
-| UI 显示 Strength、Retreating 状态 | ✅ |
-| 日志按 combat/retreat/reinforce/encircle/supply 分类 | ✅ |
-| 死守 / 允许撤退（RetreatMode）按钮与 HOLD 防御加成 | ✅ |
+### 历史地基
 
-**v0.1 最终模型：** 只看兵力，无 organization。`RetreatMode`（retreatable/hold）控制撤退：HOLD 防御 +20%，RETREATABLE 单次损失比例 ≥ 35% 自动撤退。
-
----
-
-### ✅ Agent D：AI/Agent 决策管线（已完成）
-
-| 功能模块 | 状态 |
-|----------|------|
-| `DecisionProvider` 协议（MockAI + LocalLLM 共用） | ✅ |
-| `AgentContext` / `AgentContextBuilder`（Codable 摘要，无 UI/SpriteKit 对象） | ✅ |
-| `AgentDecisionEnvelope` / `AgentOrder` JSON schema | ✅ |
-| `AgentDecisionParser`（校验 schema/agent/turn） | ✅ |
-| `AgentCommandMapper`（order → Command，缺字段抛 error） | ✅ |
-| `MockAIClient`（guderian 启发式，向 Bastogne 推进） | ✅ |
-| `LLMClient` / `LocalLLMDecisionProvider` / `AgentPromptBuilder`（预留，v0 默认关） | ✅ |
-| `TurnManager`（德军 AI 回合编排，含 endTurn） | ✅ |
-| `AppContainer.runAIIfNeeded()`（启动自动跑 AI 回合） | ✅ |
-| `AgentDecisionRecord` + `AgentPanelView`（UI 读决策记录） | ✅ |
-| `AgentPipelineTests`（8 测试：context/MockAI/parser/mapper/provider 失败/非法命令） | ✅ |
-
----
-
-### ✅ v0.2 Agent 1：省份图架构（已完成）
-
-省份图规则层模型。**叠加，不替换 hex。** hex 仍战术层权威坐标，province 是战略层聚合。
-
-| 文件 | 职责 |
-|------|------|
-| `Core/Region.swift` | `RegionId`（RawRepresentable<String>）、`RegionNode`、`RegionEdge`、`RegionGraph`、`CityInfo`、`ResourceAmount`、`ResourceType`、`OccupationState`、`RegionEdgeKey`（对称键）、`RegionValidationError`（9 case） |
-| `Core/MapState.swift`（改） | 加 `regions`/`hexToRegion`/`regionEdges` 字段（默认空）；加 province 查询：`region(for:)`/`region(id:)`/`neighbors(of:)`/`areAdjacent`/`edgeBetween`/`representativeHex`/`regionDistance`/`regionGraph`；加 `validateRegionGraph()` |
-| `Core/Terrain.swift`（改） | `HexTile` 加 `regionId: RegionId?`（默认 nil） |
-| `RegionGraph.validate()` | idMismatch/emptyDisplayHexes/representativeHexNotInDisplayHexes/neighborNotFound/neighborNotBidirectional/edgeEndpointNotFound/edgeNotInNeighbors |
-| `MapState.validateRegionGraph()` | 复用上图校验 + hexToRegionPointsToMissingRegion + displayHexesOverlap |
-| `Tests/RegionGraphTests.swift` | 19 测试：编解码/neighbors/areAdjacent/hexToRegion/representativeHex/validate 全错误类型+valid+empty |
-
-**设计约束（Agent 1 已守）：**
-- hex 规则全保留，province 默认空不破现有行为
-- `MapState.ardennesV0()` 不改（保持纯 hex，测试用）
-- 省份挂载在 Data 层（DataLoader），Core 不依赖 Data
-
----
-
-### ✅ v0.2 Agent 2：省份数据层（已完成）
-
-阿登 v0.2 省份图数据 + 加载。17 省覆盖全部 99 hex，零重叠，邻接双向一致。
-
-| 文件 | 职责 |
-|------|------|
-| `Data/ardennes_v02_regions.json` | 17 省/41 边/99 hex 映射/2 补给源/4 目标。schemaVersion 2 |
-| `Data/RegionDataSet.swift` | `RegionDataSet` + Codable 定义（`RegionNodeDefinition`/`CityInfoDefinition`/`ResourceAmountDefinition`/`OccupationStateDefinition`/`RegionEdgeDefinition`/`RegionSupplySourceDefinition`/`RegionObjectiveDefinition`）+ 映射 `toRegions()`/`toRegionEdges()`/`toHexToRegion()` |
-| `Data/DataLoader.swift`（改） | 加 `loadArdennesV02Regions()` + `validate(_ regionData:)`（复用 validateRegionGraph）；`loadInitialGameState()` 叠加省份数据（try? 失败 fallback 纯 hex）+ 反向填 HexTile.regionId |
-
-**省份设计：**
-- 德方控制：german_east_depot（补给源）、eifel_approach、schnee_eifel
-- 盟方控制：allied_west_depot（补给源）、bastogne（主目标 VP5）、bastogne_fortress、st_vith、western_approach
-- 中立（原 allies 领土中立化，owner/controller null 映射回退 .allies）：meuse_approach、houffalize、luxembourg_road、ardennes_forest_north/central/south、northern_ridge、southern_ridge、northern_frontier
-- 路径：german_east_depot→bastogne=2，allied_west_depot→bastogne=3
-
-| `Tests/ArdennesV02DataTests.swift` | 17 测试：解码/region 数/hexToRegion 覆盖/validate/邻接双向/repHex/路径连通/补给源/目标/关键省/控制权 |
-
----
-
-### ✅ v0.3：战区、前线、部署、战争指令（当前主线，已推进至 v0.37）
-
-| 版本 | 主题 | 关键内容 |
-|------|------|----------|
-| **v0.31** | Theater 战区层 | 四战区初始化、控制比例、70% 阈值、扩张/退役接口 |
-| **v0.32** | FrontLine 前线层 | 动态前线、segment、dirty 更新、简化包围识别 |
-| **v0.33** | WarDeployment 部署层 | FRONT / DEPTH / GARRISON 分层，FrontZone 单元池 |
-| **v0.34** | 地图编辑器 | 默认地图与项目 schema 打通 |
-| **v0.351** | 初级战争指令 | `ZoneDirective` / `WarCommandExecutor` / `MockAICommander` |
-| **v0.352** | 新管线唯一化 | `WarPipelineMode.zoneDirective` 默认，观察者模式，分层战略 UI |
-| **v0.353** | 默认地图验收 | hex controller 成为归属权威，补给归属跟随占领者 |
-| **v0.354** | 联动修复 | 占领→region→theater→frontline 同回合联动，ZOC 友军穿越修正，拒绝率治理 |
-| **v0.355** | 动态/初始战区分离 | `initialSnapshot` 与运行时动态战区分离，前线 overlay 与观察者 UI |
-| **v0.356-v0.357** | 地图/前线 UI 修正 | 编辑器与游戏视角统一、开局单位越界检查、前线按战区/segment 着色 |
-| **v0.358** | hex 动态战区语义收口 | 动态战区改跟 `hexToTheater`，region 基础战区只作初始/生成参照；AI/部署/前线测试同步更新 |
-| **v0.36** | 命令层扩展与多将领 MockAI | `CommandCategory` / `TacticName` / `DirectiveTarget` / `ZoneCommanderAgent` / `TheaterCommanderPool` |
-| **v0.37** | 命令层统一整合 | 移除 `TurnManager` 的 `MockAICommander` fallback，默认路径收口到 `TheaterCommanderPool`；补 issuer-agnostic executor 探针 |
-| **v0.5** | 元帅层与模拟 LLM JSON | `MarshalAgent` / `TheaterDirectiveEnvelope` / decoder / compiler / marshal fallback |
-| **v0.7** | 高级战术与命令扩展 | 闪电战、定点矛头、突破、钳形攻势、火力覆盖、佯攻、游击战、弹性防御、纵深防御、死守 |
-
-### ⏳ 后续方向
-
-| 版本 | 主题 | 关键内容 |
-|------|------|----------|
-| **v0.4** | 聊天命令与角色服从 | 玩家通过聊天框命令将领；将领根据性格/忠诚回应；命令可被质疑/拖延/抗命 |
-| **v0.5** | 元帅决策链与模拟 LLM JSON | `MarshalAgent`、`TheaterDirectiveEnvelope`、JSON decoder、compiler、fallback；统治者只预留为后续上游，不恢复 Cabinet/Minister |
-| **v1.0** | 大战略原型 | 经济/科技/生产；空军实体化；简化海军；天气；多国家多战区；全球地图；美术资源 |
-| **v1.x** | 多回合战术行动 | 撤退命令、突破/闪电战、装甲差异化、`AttackIntensity` 深度分流等复杂多回合行动骨架 |
-
-**v0.37 决策记录：** 撤退、突破、闪电战、装甲差异化和 `AttackIntensity` 深度分流推迟至 1.x。v1.0 只先把 `infiltration` 解释为默认低投入上限，不引入额外伤害、绕规则推进或多回合追踪行动。
+v0.x 阿登原型提供了仍在使用的工程地基：hex 坐标、移动、战斗、占领、补给、包围、`Division` 兵力/撤退模型、Region 聚合层、Theater / FrontLine / WarDeployment 派生层、Agent D legacy 管线、`ZoneDirective` / `WarCommandExecutor` / `RuleEngine` 统一命令管线、MapEditor 和模拟 LLM JSON 接口。阿登数据、Guderian / Allied Mock Commander、Bastogne 等内容只作为 legacy fallback、历史测试夹具和回归参考，不是唐宋默认产品主线。
 
 ---
 
@@ -366,7 +266,7 @@ md/
     ├── README.md
     │   Agent A/B/C 召唤、阶段 prompt 写法、main 直推和 CI artifact 要求
     ├── v5.0-唐宋迁移/
-    │   唐宋 v5.0-v5.9 总提示词、v5.0 审计合同、v5.7a 下一步提示、v5.7b 目标锚点、v5.7c 目标定位、v5.7d 地图目标高亮、v5.7e 战报摘要、v5.7f 新局身份包装、v5.7g 高亮数量提示、v5.7h 亲征/观战入口、v5.7i 结算预览/评分估算、v5.7j 合法性提示、v5.7k 检查面板读法、v5.7l 将领面板读法、v5.7m 常驻 tooltip 读法、v5.8a AI 面板默认主路径硬化、v5.8b AI 面板玩家态/开发态分层、v5.8c 外交面板读法硬化、v5.8d 战报读法硬化等阶段记录
+    │   唐宋 v5.0-v5.9 总提示词、v5.0 审计合同、v5.7a 下一步提示、v5.7b 目标锚点、v5.7c 目标定位、v5.7d 地图目标高亮、v5.7e 战报摘要、v5.7f 新局身份包装、v5.7g 高亮数量提示、v5.7h 亲征/观战入口、v5.7i 结算预览/评分估算、v5.7j 合法性提示、v5.7k 检查面板读法、v5.7l 将领面板读法、v5.7m 常驻 tooltip 读法、v5.8a AI 面板默认主路径硬化、v5.8b AI 面板玩家态/开发态分层、v5.8c 外交面板读法硬化、v5.8d 战报读法硬化、v5.8e MapEditor 默认路径硬化、v5.8f 文档定位收口等阶段记录
     ├── v2.0-三国迁移/
     ├── v3.0-拿战迁移/
     ├── v3.0-隋唐迁移/
@@ -387,20 +287,22 @@ md/
 ## 给后续 Claude Code 的提示
 
 **你接手时的代码库状态：**
-- v0.5 分支已引入元帅层与模拟 LLM JSON/decoder/ compiler；历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0。当前默认不跑重测试，只做 `md/test/test.md` 允许的轻量检查。
+- 当前主线是唐宋 v5.x 迁移，默认剧本为 `jianlong_960_unification`；v5.8e 已把 MapEditor 默认读取收口到唐宋 960 资源，v5.8f 已把 README / plan / flow 从 v0.x 阿登原型叙述切到唐宋 mainline 交接口径，等待本轮云端验证。
+- v0.5 元帅层与模拟 LLM JSON/decoder/compiler 是仍在使用的历史架构地基；历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0。当前按用户要求不在本机测试，推送后由 GitHub Actions 云端验证。
 - 战斗模型：兵力伤害为主，`RetreatMode`（retreatable/hold）控制撤退，无 organization。
 - 默认战争 AI 管线：`MarshalAgent` 读取摘要并模拟输出 `TheaterDirectiveEnvelope` JSON，经 `TheaterDirectiveDecoder` 与 `TheaterDirectiveCompiler` 降级成 `ZoneDirective`，再走 `WarCommandExecutor`。`TheaterCommanderPool` / `ZoneCommanderAgent` 仍作为 fallback 和显式 `.zoneDirective` 路径。
 - Legacy Agent D 管线保留但默认不调用。
 - 地图坐标系：hex 仍是战术权威；Region 是省份规则层；动态战区看 `hexToTheater`。
 
 **继续开发前请先阅读：**
-1. 本 README（地图架构三层决策 + Agent D 接口表）
-2. `WWIIHexV0/Core/Division.swift`（当前 Division 模型）
-3. `WWIIHexV0/Core/MapState.swift` / `Region.swift` / `Theater.swift`
-4. `WWIIHexV0/Rules/TheaterSystem.swift` / `FrontLineManager.swift` / `WarDeploymentManager.swift`
-5. `WWIIHexV0/Commands/WarDirective.swift` / `WarCommandExecutor.swift`
-6. `WWIIHexV0/Agents/ZoneCommanderAgent.swift` / `MockAICommander.swift`
-7. `md/prompt/anti生成/v0.5/anti/0.50_v0.5_marshal_implementation_record.md`
+1. `AGENTS.md`、`update_log.md`、`md/test/test.md`、`md/plan/plan.md`
+2. `md/flow/flow.md` / `md/flow/flowchart.md`
+3. `md/prompt/v5.0-唐宋迁移/codex-v5.0-唐宋aiagent历史策略迁移总提示词.md`
+4. `md/prompt/v5.0-唐宋迁移/` 下最新 v5.8 阶段记录和云端 artifact 记录
+5. `WWIIHexV0/Core/Division.swift`、`MapState.swift`、`Region.swift`、`Theater.swift`
+6. `WWIIHexV0/Rules/TheaterSystem.swift`、`FrontLineManager.swift`、`WarDeploymentManager.swift`
+7. `WWIIHexV0/Commands/WarDirective.swift`、`WarCommandExecutor.swift`
+8. `WWIIHexV0/Agents/ZoneCommanderAgent.swift`、`MockAICommander.swift`
 
 **当前必须遵守：**
 - 不删 `HexCoord`，不把运行时战区推进退回 region 粒度。
@@ -409,13 +311,14 @@ md/
 - 前线 UI 和 AI target 选择必须基于动态 hex 邻接；历史测试 fixture / 语义文档也必须构造真实相邻 hex，不能只声明 region 邻接。
 - `ZoneDirective` 新字段必须保持 Codable 向后兼容。
 - 元帅层和未来统治者层不得绕过 `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
-- 当前 v0.5 只模拟 LLM JSON 接口，不接真实模型；真实 LLM 接入必须保留 decoder 校验与 fallback。
+- 当前只模拟 LLM JSON 接口，不接真实模型；真实 LLM 接入必须保留 decoder 校验与 fallback。
+- v0.x / 阿登 / Guderian / Bastogne 文档只能作为 legacy 参考，不再作为默认产品主线叙述。
 
 ## 协作与云端验证
 
 当前协作制度固定使用 `main` 作为上传、提交、推送和云端验证分支。Agent B 本地只跑 `md/test/test.md` 允许的轻量检查，提交后直接 push 到 `origin/main` 触发 GitHub Actions；Agent C 通过 GitHub CLI 下载未加密 CI 结果包，核对 manifest、JUnit、构建日志和失败摘要后再验收。详细规则见 `AGENTS.md`、`md/test/test.md` 和 `md/prompt/README.md`。
 
-**轻量检查**（每轮先读 [`md/test/test.md`](md/test/test.md)，本机默认只做轻量检查，重验证交给 GitHub Actions）：
+**轻量检查**（每轮先读 [`md/test/test.md`](md/test/test.md)；若用户要求“不在本地测试”，则本机不跑检查，直接 push 后等云端 Actions）：
 ```bash
 rg -n "[[:blank:]]+$" AGENTS.md README.md update_log.md md/test/test.md md/flow/flow.md
 ```

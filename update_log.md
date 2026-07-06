@@ -9,6 +9,39 @@
 - 若本轮只是文档整理、目录迁移、回滚或打捞，不应伪装成新 v 版本；可写入“历史维护记录”。
 - 若 README、测试规范或源码语义发生变化，应同步更新本日志。
 
+当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
+
+## v5.8f - README / plan / flow 产品定位收口
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 将 README 接手说明从 v0.5 / 阿登原型叙述切到唐宋 v5.x / `jianlong_960_unification` 当前主线，补 v5.8e MapEditor 与 v5.8f docs-only 记录索引。
+- 更新 `md/plan/plan.md` 的当前进度快照、v5.8 路线表、v5.3 历史收口命名和 v5.8 后续风险，让 MapEditor 默认路径硬化与文档定位收口进入当前 md 大纲。
+- 更新 `md/flow/flow.md` 标题、资料依据和历史 v1.0 / v0.4 分支章节，明确旧分支只作历史兼容附录，当前默认 main-only。
+- 更新 `md/flow/flowchart.md` 的 MapEditor 默认数据文件节点，避免误读为 MapEditor 默认读取仍会静默回退阿登资源。
+- 新增 `md/prompt/v5.0-唐宋迁移/v5.8f_docs_product_positioning_record.md`，记录本轮 docs-only 范围、并发子 Agent 发现、验证口径和遗留风险。
+
+关键文件：
+
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `update_log.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8f_docs_product_positioning_record.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 仍需完整 v5.8 RC 玩家可见残留清单、全局 accessibility、截图/布局/VoiceOver 验收计划和主游戏 `DataLoader` fallback 策略评估。
+- v0.x 历史段落仍保留在文档中作为技术地基；后续只应在必要处继续压缩，不应删除影响回归理解的历史事实。
+
 ## v0 - 六角格测试板
 
 完成日期：2026-06-14 至 2026-06-15

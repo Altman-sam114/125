@@ -1,8 +1,8 @@
-# WWIIHexV0 核心流程文档（v0.5 元帅决策链分支）
+# 山河一统 Agent / 唐宋 v5.x 核心流程文档（main 当前主线）
 
 > 本文是项目当前核心逻辑的接手文档。目标不是复述历史设计，而是按当前代码真实链路说明：数据如何进入游戏，hex / region / theater / front / deploy 如何派生，主游戏和地图编辑器如何共同维护同一套地图语义，AI / 玩家命令如何落到规则系统。
 
-资料依据：`AGENT.md`、`README.md`、`update_log.md`、`md/test/test.md`、v0.355/v0.36/v0.37 阶段文档、最近 git 记录，以及当前源码中的 `Core/`、`Rules/`、`Commands/`、`Agents/`、`Turn/`、`App/`、`SpriteKit/`、`UI/`、`MapEditor/` 与关键测试。
+资料依据：`AGENTS.md`、`README.md`、`update_log.md`、`md/test/test.md`、`md/plan/plan.md`、`md/prompt/v5.0-唐宋迁移/` 阶段记录、当前 `origin/main` git / GitHub Actions artifact 口径，以及当前源码中的 `Core/`、`Rules/`、`Commands/`、`Agents/`、`Turn/`、`App/`、`SpriteKit/`、`UI/`、`MapEditor/`。v0.355/v0.36/v0.37 和 v0.5 文档只作历史架构与回归参考。
 
 ---
 
@@ -2217,8 +2217,8 @@ MapEditorGameResourceBridge.loadDefaultDocument
 - 真 LLM 尚未接入；当前只用 `SimulatedMarshalLLMClient` 模拟 fenced JSON 输出和解码流程，唐宋场景下仅做 deterministic 军议文案分支。
 - 默认 AI 上游已是 `MarshalAgent -> TheaterDirectiveEnvelope -> TheaterDirectiveDecoder -> TheaterDirectiveCompiler`，下游执行必须是 `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
 - 元帅层不能直接输出底层 `Command`，不能直接修改地图、单位、hex controller 或动态战区权威。
-- 统治者层只作为未来方向预留，当前 v0.5 不在主链路调用。
-- 当前工作树存在外交/经济/UI 等非 v0.5 方向残留，合并前需要单独审查文件归属和 public API 冲突。
+- 统治者层只作为未来方向预留，当前 main 主链路不调用 `RulerAgent`。
+- 外交、经济和 UI 已作为唐宋 v5.x 主线功能接入，但仍必须按模块边界维护，不能绕过 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
 - `AttackIntensity.infiltration` 已在 `WarCommandExecutor` 中解释为默认低投入上限；`.limitedCounter` 和 `.allOut` 仍主要依赖 tactic profile 与显式 `maxCommittedUnits`。
 - `TacticConditionChecker` 当前总是允许现有战术。
 - 战区互助接口 `requestSupport` / `getAvailableForces` / `notifyThreat` 有模型但没有主流程调用方。
@@ -2259,9 +2259,9 @@ MapEditorGameResourceBridge.loadDefaultDocument
 
 ---
 
-## 12. v1.0 UI / AI / Playtest 分支收口
+## 12. 历史兼容附录：v1.0 UI / AI / Playtest 收口记录
 
-v1.0 分支名：`v1.0-ui-ai-playtest`。
+本节是历史分支收口记录，保留为 UI / AI / playtest 架构参考。当前协作制度以 `main` 直推和云端验证为准，不按该分支流推进。
 
 该分支不改变战术权威和命令权威，只让当前主游戏更适合人工初版试玩和后续调参：
 
@@ -2299,16 +2299,16 @@ Marshal / ZoneDirective
 - 规则：玩家和 AI 行动是否仍能追溯到 `CommandResultSummary` / `WarDirectiveRecord`。
 - 性能体感：地图拖动、图层切换、日志面板滚动是否有明显卡顿。
 
-当前限制：
+历史限制：
 
 - 未跑 Xcode / XCTest / 模拟器 / 性能测试。
-- 当前工作树含多版本未提交改动，v1.0 合并前必须重新审查 `project.pbxproj`、Swift 新文件引用、AI schema 和文档版本口径。
+- 若复用该段历史方案，仍需重新审查 `project.pbxproj`、Swift 新文件引用、AI schema 和文档版本口径。
 
 ---
 
-## 13. v0.4 将军养成、将军 UI 与玩家双轨命令
+## 13. 历史兼容附录：v0.4 将军养成、将军 UI 与玩家双轨命令
 
-v0.4 分支名：`v0.4-generals-command-ui-final`。
+本节是历史分支记录，保留为将领 UI、微操锁和宏观军令设计参考。当前主线以唐宋 v5.x / `main` 为准，不再按 v0.4 分支合并流程推进。
 
 该分支把 0.41-0.48 的将军与玩家命令链路收口到当前代码，仍保持命令权威不变：
 
@@ -2356,7 +2356,7 @@ Data/generals.json
 - v0.4 不让将军或 UI 直接修改 `GameState` 战术权威；所有行动仍要走 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
 - v0.4 没有实现真正抗命、政变、完整 RPG 成长树或真实 LLM 聊天解析；当前是忠诚/满意度和干预次数的可视化与数据底座。
 - v0.4 没有做自由手绘前线。采用 region 锚点法：选择战区/目标 region 后自动画箭头，符合 0.44 文档中的移动端妥协方案。
-- 当前工作树混有 v0.5、v0.7、v0.9、v1.x 外部改动；合并前必须重新做文件/API/schema/project 冲突审查。
+- 若后续复用旧分支方案，必须重新做文件/API/schema/project 冲突审查，不能假定历史分支可直接并入当前 main。
 
 ---
 

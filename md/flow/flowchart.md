@@ -493,7 +493,7 @@ flowchart TD
     REG["州府 JSON<br/>RegionDataSet<br/>保存 hexToRegion、州府、边、初始 theaterId"]:::data
     NEI["自动推导州府邻接<br/>真实 hex 邻接 -> Region.neighbors / RegionEdge<br/>避免手写邻接出错"]:::derived
     BRIDGE["默认资源桥<br/>MapEditorGameResourceBridge<br/>读取或覆盖项目默认地图资源"]:::loader
-    FILES["项目默认数据文件<br/>WWIIHexV0/Data<br/>tangsong_jianlong_960_scenario.json + tangsong_jianlong_960_regions.json<br/>阿登数据保留为 legacy fallback"]:::data
+    FILES["MapEditor 默认数据文件<br/>WWIIHexV0/Data<br/>tangsong_jianlong_960_scenario.json + tangsong_jianlong_960_regions.json<br/>缺失时报错，不静默回退阿登"]:::data
     LOAD["游戏启动加载<br/>DataLoader.loadGameState<br/>DEBUG 下优先读源码 JSON"]:::loader
     MAP["地图状态<br/>MapState<br/>tiles + hexToRegion + RegionGraph"]:::state
     THEATER["战区状态<br/>TheaterState<br/>捕获 initialSnapshot，并 seed hexToTheater"]:::state
