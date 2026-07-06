@@ -201,7 +201,7 @@ struct CommandPanelView: View {
         }
 
         guard selectedDivision.faction == playerFaction else {
-            return isTangSongScenario ? "已选择敌军，军令停用。" : "Enemy unit selected. Commands disabled."
+            return isTangSongScenario ? "已选择非亲征军队，军令停用。" : "Enemy unit selected. Commands disabled."
         }
 
         guard activeFaction == playerFaction, commandsAllowed else {

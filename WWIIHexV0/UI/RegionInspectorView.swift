@@ -2,16 +2,18 @@ import SwiftUI
 
 struct RegionInspectorView: View {
     let inspectorState: RegionInspectorState?
+    let isTangSongScenario: Bool
+    let factionDisplayName: (Faction) -> String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Region")
+            Text(isTangSongScenario ? "州府详情" : "Region")
                 .font(.headline)
 
             if let inspectorState {
                 regionDetails(inspectorState)
             } else {
-                Text("No region selected.")
+                Text(isTangSongScenario ? "未选择州府。" : "No region selected.")
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -27,92 +29,92 @@ struct RegionInspectorView: View {
                 .font(.subheadline.weight(.semibold))
 
             if let selectedHex = state.selectedHex {
-                LabeledContent("Hex") {
+                LabeledContent(isTangSongScenario ? "地块" : "Hex") {
                     Text("\(selectedHex.q),\(selectedHex.r)")
                 }
 
-                LabeledContent("Hex Controller") {
-                    Text(state.selectedHexController?.displayName ?? "None")
+                LabeledContent(isTangSongScenario ? "地块控制" : "Hex Controller") {
+                    Text(state.selectedHexController.map(factionDisplayName) ?? noneText)
                 }
 
-                LabeledContent("Hex Dynamic Theater") {
-                    Text(state.selectedHexDynamicTheaterId?.rawValue ?? "None")
+                LabeledContent(isTangSongScenario ? "动态方面" : "Hex Dynamic Theater") {
+                    Text(state.selectedHexDynamicTheaterId?.rawValue ?? noneText)
                 }
 
-                LabeledContent("Hex FrontZone") {
-                    Text(state.selectedHexFrontZoneId?.rawValue ?? "None")
+                LabeledContent(isTangSongScenario ? "防区" : "Hex FrontZone") {
+                    Text(state.selectedHexFrontZoneId?.rawValue ?? noneText)
                 }
             }
 
-            LabeledContent("Controller") {
-                Text(state.region.controller.displayName)
+            LabeledContent(isTangSongScenario ? "控制政权" : "Controller") {
+                Text(factionDisplayName(state.region.controller))
             }
 
-            LabeledContent("Terrain") {
-                Text(state.region.terrain.displayName)
+            LabeledContent(isTangSongScenario ? "地形" : "Terrain") {
+                Text(terrainName(state.region.terrain))
             }
 
-            LabeledContent("City") {
-                Text(state.region.city?.name ?? "None")
+            LabeledContent(isTangSongScenario ? "城池" : "City") {
+                Text(state.region.city?.name ?? noneText)
             }
 
-            LabeledContent("City Level") {
-                Text(state.cityLevel.displayName)
+            LabeledContent(isTangSongScenario ? "城级" : "City Level") {
+                Text(cityLevelName(state.cityLevel))
             }
 
-            LabeledContent("Fortress") {
-                Text(state.region.terrain == .fortress ? "Yes" : "No")
+            LabeledContent(isTangSongScenario ? "关隘" : "Fortress") {
+                Text(state.region.terrain == .fortress ? yesText : noText)
             }
 
-            LabeledContent("Supply") {
+            LabeledContent(isTangSongScenario ? "粮草" : "Supply") {
                 Text("\(state.region.supplyValue)")
             }
 
-            LabeledContent("Siege") {
+            LabeledContent(isTangSongScenario ? "围城" : "Siege") {
                 Text(siegeSummary(state.siegeRecord))
                     .multilineTextAlignment(.trailing)
             }
 
-            LabeledContent("Factories") {
+            LabeledContent(isTangSongScenario ? "工坊" : "Factories") {
                 Text("\(state.region.factories)")
             }
 
-            LabeledContent("Output") {
-                Text("MP \(state.economicOutput.manpower), IC \(state.economicOutput.industry), SUP \(state.economicOutput.supplies)")
+            LabeledContent(isTangSongScenario ? "产出" : "Output") {
+                Text(economicOutputText(state.economicOutput))
                     .multilineTextAlignment(.trailing)
             }
 
-            LabeledContent("Theater") {
-                Text(state.theaterId?.rawValue ?? "None")
+            LabeledContent(isTangSongScenario ? "方面" : "Theater") {
+                Text(state.theaterId?.rawValue ?? noneText)
             }
 
-            LabeledContent("FrontZone") {
-                Text(state.frontZoneId?.rawValue ?? "None")
+            LabeledContent(isTangSongScenario ? "防区" : "FrontZone") {
+                Text(state.frontZoneId?.rawValue ?? noneText)
             }
 
-            LabeledContent("Front Pressure") {
+            LabeledContent(isTangSongScenario ? "前线压力" : "Front Pressure") {
                 Text(state.frontPressure, format: .number.precision(.fractionLength(2)))
             }
 
-            LabeledContent("Infrastructure") {
+            LabeledContent(isTangSongScenario ? "道路" : "Infrastructure") {
                 Text("\(state.region.infrastructure)")
             }
 
-            LabeledContent("Objectives") {
-                Text(state.objectiveNames.isEmpty ? "None" : state.objectiveNames.joined(separator: ", "))
+            LabeledContent(isTangSongScenario ? "目标" : "Objectives") {
+                Text(state.objectiveNames.isEmpty ? noneText : state.objectiveNames.joined(separator: ", "))
                     .multilineTextAlignment(.trailing)
             }
 
-            LabeledContent("Objective Status") {
+            LabeledContent(isTangSongScenario ? "目标状态" : "Objective Status") {
                 Text(state.objectiveStatus)
             }
 
-            LabeledContent("Friendly Units") {
+            LabeledContent(isTangSongScenario ? "己方军队" : "Friendly Units") {
                 Text(unitNames(state.friendlyDivisions))
                     .multilineTextAlignment(.trailing)
             }
 
-            LabeledContent("Visible Enemies") {
+            LabeledContent(isTangSongScenario ? "可见敌军" : "Visible Enemies") {
                 Text(unitNames(state.visibleEnemyDivisions))
                     .multilineTextAlignment(.trailing)
             }
@@ -121,16 +123,77 @@ struct RegionInspectorView: View {
 
     private func unitNames(_ divisions: [Division]) -> String {
         guard !divisions.isEmpty else {
-            return "None"
+            return noneText
         }
         return divisions.map(\.name).joined(separator: ", ")
     }
 
     private func siegeSummary(_ record: SiegeRecord?) -> String {
         guard let record else {
-            return "None"
+            return noneText
         }
 
-        return "围城压力 \(record.pressure), 城防 \(record.fortification)/\(record.maxFortification), \(record.attackerFaction.displayName) -> \(record.defenderFaction.displayName), \(record.besiegingDivisionIds.count) unit(s)"
+        if isTangSongScenario {
+            return "压力 \(record.pressure)，城防 \(record.fortification)/\(record.maxFortification)，\(factionDisplayName(record.attackerFaction))围\(factionDisplayName(record.defenderFaction))，\(record.besiegingDivisionIds.count) 支军队"
+        }
+
+        return "Pressure \(record.pressure), fortification \(record.fortification)/\(record.maxFortification), \(factionDisplayName(record.attackerFaction)) -> \(factionDisplayName(record.defenderFaction)), \(record.besiegingDivisionIds.count) unit(s)"
+    }
+
+    private func economicOutputText(_ output: EconomyResources) -> String {
+        if isTangSongScenario {
+            return "丁口 \(output.manpower)，钱帛 \(output.industry)，粮草 \(output.supplies)"
+        }
+        return "MP \(output.manpower), IC \(output.industry), SUP \(output.supplies)"
+    }
+
+    private func terrainName(_ terrain: BaseTerrain) -> String {
+        guard isTangSongScenario else {
+            return terrain.displayName
+        }
+
+        switch terrain {
+        case .plain:
+            return "平原"
+        case .forest:
+            return "山林"
+        case .mountain:
+            return "山地"
+        case .hill:
+            return "丘陵"
+        case .city:
+            return "城池"
+        case .fortress:
+            return "关隘"
+        }
+    }
+
+    private func cityLevelName(_ level: CityLevel) -> String {
+        guard isTangSongScenario else {
+            return level.displayName
+        }
+
+        switch level {
+        case .none:
+            return "无"
+        case .village:
+            return "县镇"
+        case .town:
+            return "州府"
+        case .metropolis:
+            return "都城"
+        }
+    }
+
+    private var noneText: String {
+        isTangSongScenario ? "无" : "None"
+    }
+
+    private var yesText: String {
+        isTangSongScenario ? "是" : "Yes"
+    }
+
+    private var noText: String {
+        isTangSongScenario ? "否" : "No"
     }
 }

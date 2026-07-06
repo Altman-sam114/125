@@ -180,7 +180,7 @@ struct RootGameView: View {
         }
 
         if selectedDivision.hasActed {
-            return "该军本回合已行动；继续选择其他未行动宋军，或结束回合让 AI 推进。"
+            return "该军本回合已行动；继续选择其他未行动\(playerName)军队，或结束回合让 AI 推进。"
         }
 
         if let validatedHint = container.selectedValidatedCommandHint {
@@ -265,9 +265,15 @@ struct RootGameView: View {
                     UnitInspectorView(
                         division: container.selectedDivision,
                         playerFaction: container.playerFaction,
+                        isTangSongScenario: container.gameState.isTangSongScenario,
+                        factionDisplayName: { container.gameState.displayName(for: $0) },
                         strategicState: container.selectedUnitInspectorStrategicState
                     )
-                    RegionInspectorView(inspectorState: container.selectedRegionInspectorState)
+                    RegionInspectorView(
+                        inspectorState: container.selectedRegionInspectorState,
+                        isTangSongScenario: container.gameState.isTangSongScenario,
+                        factionDisplayName: { container.gameState.displayName(for: $0) }
+                    )
                     CommandPanelView(
                         selectedDivision: container.selectedDivision,
                         activeFaction: container.gameState.activeFaction,
@@ -312,7 +318,11 @@ struct RootGameView: View {
                         onAttackRegion: container.orderSelectedGeneralAttackRegion
                     )
                 case .region:
-                    RegionInspectorView(inspectorState: container.selectedRegionInspectorState)
+                    RegionInspectorView(
+                        inspectorState: container.selectedRegionInspectorState,
+                        isTangSongScenario: container.gameState.isTangSongScenario,
+                        factionDisplayName: { container.gameState.displayName(for: $0) }
+                    )
                 case .general:
                     GeneralCommandPanelView(
                         zone: container.selectedGeneralCommandZone,

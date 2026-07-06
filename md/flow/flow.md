@@ -493,6 +493,13 @@ v5.7j 当前已落地：
 - `AppContainer` 的围城、修城、解围和招降候选过滤也收口到同一 `CommandValidator` 入口，减少 UI 层复制规则条件。
 - 该切片不提交 `Command`，不调用 `RuleEngine.execute`，不写 `GameState`、`eventLog`、hex / region / theater / front / deploy 或 diplomacy，不改变 `CommandValidator` 语义；它不是通用 dry-run 系统、完整逐命令教程或规则模拟器。
 
+v5.7k 当前已落地：
+
+- `UnitInspectorView` 接收 `isTangSongScenario` 与 `factionDisplayName`，唐宋场景下把军队详情字段显示为军队、政权、指挥、地块、州府、动态方面、防区、粮道、兵力、退却口径、补给、状态和编成，并把底层组件显示为禁军、骑军、厢军、器械。
+- `RegionInspectorView` 接收 `isTangSongScenario` 与 `factionDisplayName`，唐宋场景下把州府详情字段显示为地块控制、控制政权、地形、城池、城级、关隘、粮草、围城、工坊、产出、方面、防区、前线压力、道路、目标、己方军队和可见敌军；产出读作丁口、钱帛、粮草，围城摘要使用当前 `GameState.displayName(for:)` 的政权名。
+- `RootGameView.nextActionHint` 的已行动提示继续读取当前亲征势力名称，不再硬写“宋军”；`CommandPanelView` 在唐宋场景下把非玩家所控单位显示为“非亲征军队”，减少多政权入口下的误导。
+- 该切片只补玩家可见显示桥，不改 `Division` / `RegionNode` / `ComponentType` / `EconomyResources` / `Faction` Codable schema，不改 `GameState`、命令、围城、补给、胜负或地图控制规则，也未做截图/布局验收。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1480,6 +1487,10 @@ AppContainer.selectedValidatedCommandHint
   -> 调用 CommandValidator.validate 做有限预校验
   -> HUD 下一步提示显示规则确认可执行项
   -> 不提交 Command，不调用 RuleEngine.execute，不写状态
+UnitInspectorView / RegionInspectorView
+  -> 唐宋场景读取 isTangSongScenario 与 GameState.displayName(for:)
+  -> 军队/州府检查面板显示唐宋字段、资源、兵种和围城摘要
+  -> 不改底层 schema，不写 GameState，不参与命令执行
 NewGameButton
   -> RootGameView confirmationDialog
   -> 用户确认后调用 AppContainer.resetGame()

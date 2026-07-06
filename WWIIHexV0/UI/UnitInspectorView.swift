@@ -3,17 +3,19 @@ import SwiftUI
 struct UnitInspectorView: View {
     let division: Division?
     let playerFaction: Faction
+    let isTangSongScenario: Bool
+    let factionDisplayName: (Faction) -> String
     let strategicState: UnitInspectorStrategicState?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Unit Details")
+            Text(isTangSongScenario ? "军队详情" : "Unit Details")
                 .font(.headline)
 
             if let division {
                 unitDetails(division)
             } else {
-                Text("No unit selected.")
+                Text(isTangSongScenario ? "未选择军队。" : "No unit selected.")
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -28,36 +30,36 @@ struct UnitInspectorView: View {
             Text(division.name)
                 .font(.subheadline.weight(.semibold))
 
-            LabeledContent("Faction") {
-                Text(division.faction.displayName)
+            LabeledContent(isTangSongScenario ? "政权" : "Faction") {
+                Text(factionDisplayName(division.faction))
             }
 
-            LabeledContent("Mode") {
-                Text(division.faction == playerFaction ? "Player" : "Read-only")
+            LabeledContent(isTangSongScenario ? "指挥" : "Mode") {
+                Text(commandModeText(for: division))
             }
 
             if let strategicState {
-                LabeledContent("Hex") {
+                LabeledContent(isTangSongScenario ? "地块" : "Hex") {
                     Text("\(strategicState.coord.q),\(strategicState.coord.r)")
                 }
 
-                LabeledContent("Region") {
-                    Text(strategicState.regionId?.rawValue ?? "None")
+                LabeledContent(isTangSongScenario ? "州府" : "Region") {
+                    Text(strategicState.regionId?.rawValue ?? noneText)
                 }
 
-                LabeledContent("Dynamic Theater") {
-                    Text(strategicState.dynamicTheaterId?.rawValue ?? "None")
+                LabeledContent(isTangSongScenario ? "动态方面" : "Dynamic Theater") {
+                    Text(strategicState.dynamicTheaterId?.rawValue ?? noneText)
                 }
 
-                LabeledContent("FrontZone") {
-                    Text(strategicState.frontZoneId?.rawValue ?? "None")
+                LabeledContent(isTangSongScenario ? "防区" : "FrontZone") {
+                    Text(strategicState.frontZoneId?.rawValue ?? noneText)
                 }
 
-                LabeledContent("Deploy") {
-                    Text(strategicState.deploymentRole.displayName)
+                LabeledContent(isTangSongScenario ? "部署" : "Deploy") {
+                    Text(strategicState.deploymentRole.displayName(isTangSongScenario: isTangSongScenario))
                 }
 
-                LabeledContent("FrontLine") {
+                LabeledContent(isTangSongScenario ? "战线" : "FrontLine") {
                     Text(frontLineSummary(strategicState.frontLineIds))
                         .multilineTextAlignment(.trailing)
                 }
@@ -68,27 +70,27 @@ struct UnitInspectorView: View {
                 }
             }
 
-            LabeledContent("Strength") {
+            LabeledContent(isTangSongScenario ? "兵力" : "Strength") {
                 Text(division.inspectorStrengthText)
             }
 
-            LabeledContent("Retreat Mode") {
-                Text(division.retreatMode.displayName)
+            LabeledContent(isTangSongScenario ? "退却口径" : "Retreat Mode") {
+                Text(division.retreatMode.displayName(isTangSongScenario: isTangSongScenario))
             }
 
-            LabeledContent("Supply") {
-                Text(division.supplyState.displayName)
+            LabeledContent(isTangSongScenario ? "补给" : "Supply") {
+                Text(division.supplyState.displayName(isTangSongScenario: isTangSongScenario))
             }
 
-            LabeledContent("Has Acted") {
-                Text(division.hasActed ? "Yes" : "No")
+            LabeledContent(isTangSongScenario ? "本回合" : "Has Acted") {
+                Text(division.hasActed ? actedYesText : actedNoText)
             }
 
-            LabeledContent("Status") {
-                Text(division.inspectorStatusText)
+            LabeledContent(isTangSongScenario ? "状态" : "Status") {
+                Text(division.inspectorStatusText(isTangSongScenario: isTangSongScenario))
             }
 
-            LabeledContent("Components") {
+            LabeledContent(isTangSongScenario ? "编成" : "Components") {
                 Text(componentSummary(for: division))
                     .multilineTextAlignment(.trailing)
             }
@@ -97,16 +99,16 @@ struct UnitInspectorView: View {
 
     private func componentSummary(for division: Division) -> String {
         division.components
-            .map { "\($0.type.displayCode) \(Int(($0.weight * 100).rounded()))%" }
+            .map { "\($0.type.displayCode(isTangSongScenario: isTangSongScenario)) \(Int(($0.weight * 100).rounded()))%" }
             .joined(separator: " / ")
     }
 
     private func frontLineSummary(_ ids: [FrontLineId]) -> String {
-        ids.isEmpty ? "None" : ids.map(\.rawValue).joined(separator: ", ")
+        ids.isEmpty ? noneText : ids.map(\.rawValue).joined(separator: ", ")
     }
 
     private func supplyRouteSummary(_ summary: SupplyRouteSummary, isTangSongScenario: Bool) -> String {
-        let sourceName = summary.nearestSourceRegionId?.rawValue ?? summary.nearestSourceId ?? "None"
+        let sourceName = summary.nearestSourceRegionId?.rawValue ?? summary.nearestSourceId ?? noneText
         let sourceCoord = summary.nearestSourceCoord.map { "(\($0.q),\($0.r))" } ?? ""
 
         if isTangSongScenario {
@@ -121,6 +123,25 @@ struct UnitInspectorView: View {
         }
         return "Cut; nearest \(sourceName) \(sourceCoord), exits \(summary.safeRetreatExitCount)"
     }
+
+    private func commandModeText(for division: Division) -> String {
+        if isTangSongScenario {
+            return division.faction == playerFaction ? "玩家亲征" : "只读查看"
+        }
+        return division.faction == playerFaction ? "Player" : "Read-only"
+    }
+
+    private var noneText: String {
+        isTangSongScenario ? "无" : "None"
+    }
+
+    private var actedYesText: String {
+        isTangSongScenario ? "已行动" : "Yes"
+    }
+
+    private var actedNoText: String {
+        isTangSongScenario ? "未行动" : "No"
+    }
 }
 
 private extension Division {
@@ -128,23 +149,32 @@ private extension Division {
         "\(strength) / \(maxStrength)"
     }
 
-    var inspectorStatusText: String {
+    func inspectorStatusText(isTangSongScenario: Bool) -> String {
         var statuses: [String] = []
 
         if isRetreating {
-            statuses.append("Retreating")
+            statuses.append(isTangSongScenario ? "退却中" : "Retreating")
         }
 
         if isDestroyed {
-            statuses.append("Destroyed")
+            statuses.append(isTangSongScenario ? "溃散" : "Destroyed")
         }
 
-        return statuses.isEmpty ? "Ready" : statuses.joined(separator: ", ")
+        return statuses.isEmpty ? (isTangSongScenario ? "可行动" : "Ready") : statuses.joined(separator: ", ")
     }
 }
 
 private extension RetreatMode {
-    var displayName: String {
+    func displayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .retreatable:
+                return "准许退却"
+            case .hold:
+                return "死守"
+            }
+        }
+
         switch self {
         case .retreatable:
             return "Retreatable"
@@ -155,7 +185,20 @@ private extension RetreatMode {
 }
 
 private extension ComponentType {
-    var displayCode: String {
+    func displayCode(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .tank:
+                return "禁军"
+            case .motorizedInfantry:
+                return "骑军"
+            case .infantry:
+                return "厢军"
+            case .artillery:
+                return "器械"
+            }
+        }
+
         switch self {
         case .tank:
             return "ARM"
@@ -170,7 +213,18 @@ private extension ComponentType {
 }
 
 private extension SupplyState {
-    var displayName: String {
+    func displayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .supplied:
+                return "粮道通"
+            case .lowSupply:
+                return "粮草紧"
+            case .encircled:
+                return "断粮被围"
+            }
+        }
+
         switch self {
         case .supplied:
             return "Supplied"
@@ -183,7 +237,18 @@ private extension SupplyState {
 }
 
 private extension UnitDeploymentRole {
-    var displayName: String {
+    func displayName(isTangSongScenario: Bool) -> String {
+        if isTangSongScenario {
+            switch self {
+            case .frontUnit:
+                return "前锋"
+            case .depthUnit:
+                return "纵深"
+            case .garrisonUnit:
+                return "守备"
+            }
+        }
+
         switch self {
         case .frontUnit:
             return "FRONT"
@@ -194,6 +259,7 @@ private extension UnitDeploymentRole {
         }
     }
 }
+
 
 private extension Set where Element == HexDirection {
     var displaySummary: String {
