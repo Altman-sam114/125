@@ -431,6 +431,13 @@ v5.7a 当前已落地：
 - `HUDView` 接收 `nextActionHint` 后在首屏 HUD 中显示“下一步”提示，帮助玩家发现选军、行军、围城、招抚、解围、修城、结束回合和查看战报等既有入口。
 - 该提示不调用 `RuleEngine`，不提交 `Command`，不写 `eventLog`，不改变任何规则判定；真实执行仍必须由玩家点击命令后进入 `Command -> RuleEngine`。
 
+v5.7b 当前已落地：
+
+- `HUDView.objectiveGuideText` 是唐宋场景专用的统一目标锚点，不存入 `GameState`。
+- 它复用 `VictoryRules.objectiveProgress(in:)` 的主要 `majorVictory` 条件，并通过 `MapState.controllerOfObjective(named:)` 把关键州府拆成“已据”和“待取”。
+- HUD 在首屏显示“目标”提示，例如开封、洛阳已据，太原、金陵、成都、杭州待取，帮助玩家理解 `统一进度 2/4` 对应哪些地图目标。
+- 该提示不新增 objective，不改变 `VictoryRules`，不提交 `Command`，不写 `eventLog`，不修改 hex / region / theater / front / diplomacy。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1372,6 +1379,11 @@ RootGameView.nextActionHint
   -> 只读派生唐宋首屏下一步提示
   -> HUD 显示选军、围城、招抚、解围、修城、结束回合等建议
   -> 不提交 Command，不写 GameState 或 eventLog
+HUDView.objectiveGuideText
+  -> 只读派生唐宋统一目标锚点
+  -> 复用 VictoryRules.objectiveProgress + MapState.controllerOfObjective
+  -> HUD 显示已据/待取关键州府
+  -> 不改变 VictoryRules，不写 GameState 或 eventLog
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId

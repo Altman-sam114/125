@@ -68,6 +68,31 @@ struct HUDView: View {
                 }
             }
 
+            if let objectiveGuideText, gameState.isTangSongScenario {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "scope")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.orange)
+                        .frame(width: 18)
+                        .accessibilityHidden(true)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("目标")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.orange)
+                        Text(objectiveGuideText)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(8)
+                .background(.orange.opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+
             if let nextActionHint, gameState.isTangSongScenario {
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "lightbulb")
@@ -144,6 +169,40 @@ struct HUDView: View {
             return nil
         }
         return "\(mandateScore)/\(mandateThreshold)"
+    }
+
+    private var objectiveGuideText: String? {
+        guard gameState.isTangSongScenario,
+              let progress = primaryObjectiveProgress,
+              progress.status == "majorVictory" else {
+            return nil
+        }
+
+        let controlledNames = progress.objectiveNames.filter {
+            gameState.map.controllerOfObjective(named: $0) == progress.faction
+        }
+        let pendingNames = progress.objectiveNames.filter {
+            gameState.map.controllerOfObjective(named: $0) != progress.faction
+        }
+
+        if pendingNames.isEmpty {
+            return "关键州府已全部达成；保持天命并查看战报确认胜负。"
+        }
+
+        let controlledPart: String
+        if controlledNames.isEmpty {
+            controlledPart = ""
+        } else {
+            controlledPart = "已据 \(limitedList(controlledNames, limit: 3))；"
+        }
+
+        let pendingPart = "待取 \(limitedList(pendingNames, limit: 4))"
+        return "\(controlledPart)\(pendingPart)，凑足 \(progress.requiredCount) 处并保持天命。"
+    }
+
+    private func limitedList(_ names: [String], limit: Int) -> String {
+        let visible = names.prefix(limit).joined(separator: "、")
+        return names.count > limit ? "\(visible)等" : visible
     }
 
     private var primaryObjectiveProgress: VictoryObjectiveProgress? {
