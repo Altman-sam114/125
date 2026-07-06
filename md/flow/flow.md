@@ -471,6 +471,14 @@ v5.7g 当前已落地：
 - 提示会说明当前可攻击目标数量和可行军格数量，帮助玩家把“下一步”与地图红色目标/高亮格对应起来。
 - 这些数量来自既有 UI 高亮派生结果：行军高亮由 `MovementRules.movementRange` 生成，攻击高亮由敌对关系和射程筛出；提示不新增命令、不调用 `RuleEngine`、不写 `GameState` 或 `eventLog`，也不替代真实按钮提交后的 `CommandValidator` / `RuleEngine` 校验。
 
+v5.7h 当前已落地：
+
+- `RootGameView` 在唐宋场景把“亲征”分段选择与既有“观战”入口并列，玩家可在当前 legacy `.allies/.germany` 桥上切换亲征阵营。
+- `DataLoader.initialTurnOrderState` 的唐宋路径读取场景 JSON 的 `playerFaction` / `aiFaction`，初始化 `PowerProfile.controlMode` 与 `playerControlledPowerIds`；`AppContainer` 默认从运行态 `playerControlledPowerIds` 推导初始亲征势力。
+- `AppContainer.playerFaction` 从初始化常量变为运行时 UI 状态；`setPlayerFaction(_:)` 同步 `TurnOrderState.playerControlledPowerIds` 和带 legacy bridge 的 `PowerProfile.controlMode`，清空当前选中军队与移动/攻击高亮，并在当前回合需要 AI 时继续调用 `runAIIfNeeded()`。
+- `RootGameView.nextActionHint` 的唐宋文案读取当前亲征势力名称，不再把所有可行动提示硬写为宋军。
+- 该切片不新增 `Faction` case，不新增真实吴越/南唐/后蜀等多政权选择，不写新的 `GameState` schema，不新增存档槽，不改变 `Command`、`RuleEngine`、`TurnManager` 或 `WarCommandExecutor` 的执行边界。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1436,7 +1444,15 @@ EventLogView.turnReportSummary
 HUDView commandIdentity
   -> 只读读取 playerFaction / observerModeEnabled / activeFaction / phase
   -> 显示宋可下令、宋待命、观战各方、玩家亲征或只读观战
-  -> 不改变 playerFaction，不实现真实势力选择
+RootGameView player faction picker
+  -> AppContainer.setPlayerFaction
+  -> 同步 AppContainer.playerFaction / TurnOrderState.playerControlledPowerIds / legacy profile controlMode
+  -> 清空当前选中军队与移动/攻击高亮，必要时继续 runAIIfNeeded
+  -> 不新增真实多政权 schema，不绕过命令规则系统
+DataLoader.initialTurnOrderState
+  -> 唐宋路径读取 scenario.playerFaction / aiFaction
+  -> 初始化 PowerProfile.controlMode 和 playerControlledPowerIds
+  -> AppContainer 默认从 playerControlledPowerIds 推导初始亲征势力
 RootGameView.nextActionHint
   -> 只读读取 movementHighlights.count / attackHighlights.count
   -> 提示当前可行军格和可攻击目标数量

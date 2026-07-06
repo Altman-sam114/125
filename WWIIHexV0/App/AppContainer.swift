@@ -14,12 +14,12 @@ final class AppContainer: ObservableObject {
     @Published private(set) var lastAgentDecisionRecord: AgentDecisionRecord?
     @Published private(set) var lastWarDirectiveRecords: [WarDirectiveRecord]
     @Published private(set) var observerModeEnabled: Bool
+    @Published private(set) var playerFaction: Faction
     @Published private(set) var mapDisplayLayer: MapDisplayLayer
 
     let commandHandler: GameCommandHandling
     let dataLoader: DataLoader
     let generalRegistry: GeneralRegistry
-    let playerFaction: Faction
     let warPipelineMode: WarPipelineMode
     let turnManager: TurnManager?
     private var isRunningAI = false
@@ -30,18 +30,22 @@ final class AppContainer: ObservableObject {
         commandHandler: GameCommandHandling,
         dataLoader: DataLoader,
         generalRegistry: GeneralRegistry = .empty,
-        playerFaction: Faction = .allies,
+        playerFaction: Faction? = nil,
         turnManager: TurnManager? = nil,
         warPipelineMode: WarPipelineMode = .marshalDirective,
         observerModeEnabled: Bool = false,
         mapDisplayLayer: MapDisplayLayer = .hex
     ) {
         let bootstrappedState = StrategicStateBootstrapper().bootstrapIfNeeded(gameState)
-        self.gameState = Self.refreshGeneralAssignments(in: bootstrappedState, registry: generalRegistry)
+        let configuredPlayerFaction = playerFaction ?? Self.playerFaction(from: bootstrappedState)
+        self.gameState = Self.configuredState(
+            Self.refreshGeneralAssignments(in: bootstrappedState, registry: generalRegistry),
+            playerFaction: configuredPlayerFaction
+        )
         self.commandHandler = commandHandler
         self.dataLoader = dataLoader
         self.generalRegistry = generalRegistry
-        self.playerFaction = playerFaction
+        self.playerFaction = configuredPlayerFaction
         self.warPipelineMode = warPipelineMode
         self.turnManager = turnManager
         self.selectedUnitId = nil
@@ -370,6 +374,30 @@ final class AppContainer: ObservableObject {
 
     func setObserverModeEnabled(_ enabled: Bool) {
         observerModeEnabled = enabled
+        if enabled {
+            refreshSelectionAfterStateChange()
+            runAIIfNeeded()
+        }
+    }
+
+    func setPlayerFaction(_ faction: Faction) {
+        guard playerFaction != faction else {
+            return
+        }
+
+        playerFaction = faction
+        gameState = Self.configuredState(gameState, playerFaction: faction)
+        selectedUnitId = nil
+        movementHighlights = []
+        attackHighlights = []
+        let factionName = gameState.displayName(for: faction)
+        appendInteractionEvent(
+            gameState.isTangSongScenario
+                ? "已切换亲征势力：\(factionName)。"
+                : "Player faction changed: \(factionName)."
+        )
+        refreshSelectionAfterStateChange()
+        runAIIfNeeded()
     }
 
     func setMapDisplayLayer(_ layer: MapDisplayLayer) {
@@ -378,8 +406,11 @@ final class AppContainer: ObservableObject {
 
     func resetGame() {
         isRunningAI = false
-        gameState = refreshGeneralAssignments(
-            in: StrategicStateBootstrapper().bootstrapIfNeeded(dataLoader.loadInitialGameState())
+        gameState = Self.configuredState(
+            refreshGeneralAssignments(
+                in: StrategicStateBootstrapper().bootstrapIfNeeded(dataLoader.loadInitialGameState())
+            ),
+            playerFaction: playerFaction
         )
         selectedUnitId = nil
         selectedHex = nil
@@ -849,6 +880,31 @@ final class AppContainer: ObservableObject {
         zone.generalAssignment = assignment.registeringPlayerIntervention(cost: 2)
         next.warDeploymentState.frontZones[zoneId] = zone
         return next
+    }
+
+    private static func configuredState(_ state: GameState, playerFaction: Faction) -> GameState {
+        var next = state
+        let playerPowerId = playerFaction.powerId
+        next.turnOrderState.playerControlledPowerIds = [playerPowerId]
+        next.turnOrderState.profiles = next.turnOrderState.profiles.map { profile in
+            var updated = profile
+            if profile.id == playerPowerId {
+                updated.controlMode = .human
+            } else if profile.legacyFactionBridge != nil {
+                updated.controlMode = .ai
+            }
+            return updated
+        }
+        return next
+    }
+
+    private static func playerFaction(from state: GameState) -> Faction {
+        let turnOrder = state.effectiveTurnOrderState
+        if let playerPowerId = turnOrder.playerControlledPowerIds.first,
+           let faction = turnOrder.legacyFaction(for: playerPowerId) {
+            return faction
+        }
+        return .allies
     }
 
     private func inferredPlayerCommandZone() -> FrontZone? {

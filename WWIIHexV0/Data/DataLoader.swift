@@ -229,18 +229,18 @@ struct DataLoader {
                     id: Faction.allies.powerId,
                     displayName: "宋",
                     shortName: "宋",
-                    controlMode: .human,
+                    controlMode: playerFaction == .allies ? .human : (aiFaction == .allies ? .ai : .inactive),
                     legacyFactionBridge: .allies
                 ),
                 PowerProfile(
                     id: Faction.germany.powerId,
                     displayName: "北方与割据诸政权",
                     shortName: "割据",
-                    controlMode: .ai,
+                    controlMode: playerFaction == .germany ? .human : (aiFaction == .germany ? .ai : .inactive),
                     legacyFactionBridge: .germany
                 )
             ],
-            playerControlledPowerIds: [Faction.allies.powerId],
+            playerControlledPowerIds: [playerFaction.powerId],
             relations: [
                 PowerRelation(
                     firstPowerId: Faction.allies.powerId,

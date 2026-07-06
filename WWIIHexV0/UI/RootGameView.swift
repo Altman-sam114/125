@@ -50,15 +50,39 @@ struct RootGameView: View {
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
                     .padding(.horizontal, 8)
 
-                    Toggle(isTangSongScenario ? "观战" : "Observer", isOn: Binding(
-                        get: { container.observerModeEnabled },
-                        set: { container.setObserverModeEnabled($0) }
-                    ))
-                    .toggleStyle(.button)
-                    .font(.caption.weight(.semibold))
-                    .padding(8)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
-                    .padding(.horizontal, 8)
+                    if isTangSongScenario {
+                        HStack(spacing: 8) {
+                            Picker("亲征", selection: Binding(
+                                get: { container.playerFaction },
+                                set: { container.setPlayerFaction($0) }
+                            )) {
+                                ForEach(Faction.allCases, id: \.self) { faction in
+                                    Text(container.gameState.displayName(for: faction)).tag(faction)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+
+                            Toggle("观战", isOn: Binding(
+                                get: { container.observerModeEnabled },
+                                set: { container.setObserverModeEnabled($0) }
+                            ))
+                            .toggleStyle(.button)
+                            .font(.caption.weight(.semibold))
+                        }
+                        .padding(8)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                        .padding(.horizontal, 8)
+                    } else {
+                        Toggle("Observer", isOn: Binding(
+                            get: { container.observerModeEnabled },
+                            set: { container.setObserverModeEnabled($0) }
+                        ))
+                        .toggleStyle(.button)
+                        .font(.caption.weight(.semibold))
+                        .padding(8)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
+                        .padding(.horizontal, 8)
+                    }
 
                     Spacer()
                 }
@@ -131,8 +155,10 @@ struct RootGameView: View {
             return "打开战报查看胜负原因、目标进度和最近战事，再决定是否新开一局。"
         }
 
+        let playerName = container.gameState.displayName(for: container.playerFaction)
+
         if container.observerModeEnabled {
-            return "观战模式下不会下令；可切回指挥后选择宋军，或继续结束回合观察各方行动。"
+            return "观战模式下不会下令；可切回指挥后选择\(playerName)军队，或继续结束回合观察各方行动。"
         }
 
         let commandsAllowed = container.gameState.effectiveTurnOrderState.allowsCommands(
@@ -146,11 +172,11 @@ struct RootGameView: View {
         }
 
         guard let selectedDivision = container.selectedDivision else {
-            return "先点选一支宋军，再用军令面板行军、围城、整补或招抚；也可查看州府与统一进度。"
+            return "先点选一支\(playerName)军队，再用军令面板行军、围城、整补或招抚；也可查看州府与统一进度。"
         }
 
         guard selectedDivision.faction == container.playerFaction else {
-            return "已选中敌军；改选宋军下令，或打开州府/战报面板判断下一处目标。"
+            return "已选中非亲征军队；改选\(playerName)军队下令，或打开州府/战报面板判断下一处目标。"
         }
 
         if selectedDivision.hasActed {
@@ -188,7 +214,7 @@ struct RootGameView: View {
         if movementCount > 0 {
             return "该军可行动；当前有 \(movementCount) 处可行军格，可沿高亮格靠近待取州府、粮道或围城目标。"
         }
-        return "该军暂无可攻击目标或可行军格；可先固守、整补，或改选其他未行动宋军。"
+        return "该军暂无可攻击目标或可行军格；可先固守、整补，或改选其他未行动\(playerName)军队。"
     }
 
     private func infoOverlay(isLandscape: Bool, size: CGSize) -> some View {
