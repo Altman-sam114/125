@@ -37,6 +37,7 @@
   -> v5.8d 起战报日志默认主路径读法硬化
   -> v5.8e 起 MapEditor 默认资源和可见读法硬化
   -> v5.8g 起主游戏默认启动不再静默回退阿登
+  -> v5.8h 起唐宋将领注册表默认读取 tangsong_characters
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -629,9 +630,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    GJSON["将军数据<br/>generals.json<br/>六位历史将军、倾向、技能、忠诚/满意度"]:::data
+    GJSON["将领数据<br/>唐宋默认 tangsong_characters.json<br/>legacy 阿登保留 generals.json"]:::data
     RJSON["Region 种子<br/>唐宋/legacy region JSON assignedGeneralId<br/>开局指定某 region 所属将军"]:::data
-    DL["加载器<br/>DataLoader.loadGeneralRegistry<br/>读取 GeneralRegistry"]:::loader
+    DL["加载器<br/>DataLoader.loadGeneralRegistry(for:)<br/>按 scenarioId 选择人物注册表"]:::loader
     DISP["将军指派器<br/>GeneralDispatcher.assignGenerals<br/>种子 -> 偏好 -> 同阵营后备池"]:::rules
     FZ["战区部署<br/>FrontZone.generalAssignment<br/>generalId、HQ region、辖下 division、忠诚/满意度"]:::state
     POOL["将军池<br/>TheaterCommanderPool<br/>用 GeneralData 生成 ZoneCommanderAgentConfig"]:::ai

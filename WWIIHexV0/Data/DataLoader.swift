@@ -450,9 +450,23 @@ struct DataLoader {
         try loadJSON(GeneralAgentCatalogDefinition.self, named: "general_agents").agents
     }
 
-    func loadGeneralRegistry() throws -> GeneralRegistry {
+    func loadGeneralRegistry(for scenarioId: String? = nil) throws -> GeneralRegistry {
+        if scenarioId == ScenarioResource.tangSongJianlong {
+            return try loadTangSongGeneralRegistry()
+        }
+
         let catalog = try loadJSON(GeneralCatalogDefinition.self, named: "generals")
         return GeneralRegistry(generals: catalog.generals)
+    }
+
+    private func loadTangSongGeneralRegistry() throws -> GeneralRegistry {
+        let catalog = try loadJSON(TangSongCharacterCatalogDefinition.self, named: "tangsong_characters")
+        guard catalog.scenarioId == ScenarioResource.tangSongJianlong else {
+            throw DataLoaderError.validationFailed([
+                DataValidationError(message: "Tang Song character catalog scenarioId \(catalog.scenarioId) does not match \(ScenarioResource.tangSongJianlong).")
+            ])
+        }
+        return GeneralRegistry(generals: catalog.characters.map { $0.toGeneralData() })
     }
 
     /// v0.2: 加载阿登省份图数据。失败时抛 DataLoaderError。
@@ -774,7 +788,7 @@ struct DataLoader {
         map: MapState,
         regionData: RegionDataSet
     ) -> WarDeploymentState {
-        let registry = (try? loadGeneralRegistry()) ?? .empty
+        let registry = (try? loadGeneralRegistry(for: regionData.scenarioId)) ?? .empty
         let seedAssignments = Dictionary(uniqueKeysWithValues: regionData.regions.compactMap { definition in
             definition.assignedGeneralId.map { (definition.id, $0) }
         })

@@ -43,19 +43,19 @@ struct GeneralCommandPanelView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(general.localizedName)
                                 .font(.subheadline.weight(.semibold))
-                            Text("\(general.rank) / \(styleLabel(general.commandStyle))")
+                            Text("\(rankLabel(for: general)) / \(styleLabel(general.commandStyle))")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
 
-                    Text(general.biography)
+                    Text(biographyText(for: general))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(3)
 
                     if !general.skills.isEmpty {
-                        Text(general.skills.joined(separator: ", "))
+                        Text(general.skills.map(skillLabel).joined(separator: "、"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -176,6 +176,50 @@ struct GeneralCommandPanelView: View {
         case .cautious:
             return "Cautious"
         }
+    }
+
+    private func rankLabel(for general: GeneralData) -> String {
+        guard isTangSongScenario else {
+            return general.rank
+        }
+        if !containsLatinLetters(general.rank) {
+            return general.rank
+        }
+        return general.faction == .allies ? "禁军都部署" : "方面都部署"
+    }
+
+    private func biographyText(for general: GeneralData) -> String {
+        guard isTangSongScenario else {
+            return general.biography
+        }
+        if !containsLatinLetters(general.biography) {
+            return general.biography
+        }
+        return "\(general.localizedName)受命统辖本方面军务，按州府、粮道与战线形势调度军队。"
+    }
+
+    private func skillLabel(_ skill: String) -> String {
+        guard isTangSongScenario else {
+            return skill.replacingOccurrences(of: "_", with: " ")
+        }
+        switch skill {
+        case "set_piece_attack", "offensive_planning":
+            return "筹攻"
+        case "logistics", "staff_coordination", "coalition_coordination":
+            return "转运"
+        case "defensive_master", "fortress_operations", "reserve_control", "disciplined_retreat":
+            return "守城"
+        case "armor_theory", "armor_expert", "breakthrough", "rapid_exploitation", "counterattack":
+            return "突进"
+        case "political_will", "pressure_management", "army_group_coordination":
+            return "统军"
+        default:
+            return containsLatinLetters(skill) ? "军务" : skill
+        }
+    }
+
+    private func containsLatinLetters(_ text: String) -> Bool {
+        text.range(of: #"[A-Za-z]"#, options: .regularExpression) != nil
     }
 
     private func unitIcon(for division: Division) -> String {

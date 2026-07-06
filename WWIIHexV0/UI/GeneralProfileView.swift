@@ -47,11 +47,11 @@ struct GeneralProfileView: View {
                 .frame(width: 112, height: 144)
                 .background(PlatformStyles.selectionTint)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .accessibilityLabel("\(general.localizedName) portrait placeholder")
+                .accessibilityLabel(isTangSongScenario ? "\(general.localizedName)头像占位" : "\(general.localizedName) portrait placeholder")
 
             Text(general.localizedName)
                 .font(.title3.weight(.semibold))
-            Text(general.rank)
+            Text(rankLabel(for: general))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Text(factionDisplayName(general.faction))
@@ -68,7 +68,7 @@ struct GeneralProfileView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text(isTangSongScenario ? "履历" : "Biography")
                 .font(.headline)
-            Text(general.biography)
+            Text(biographyText(for: general))
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -113,7 +113,7 @@ struct GeneralProfileView: View {
             } else {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], alignment: .leading, spacing: 8) {
                     ForEach(general.skills, id: \.self) { skill in
-                        Label(skill.replacingOccurrences(of: "_", with: " "), systemImage: "star.fill")
+                        Label(skillLabel(skill), systemImage: "star.fill")
                             .font(.caption.weight(.semibold))
                             .lineLimit(2)
                             .padding(8)
@@ -184,5 +184,49 @@ struct GeneralProfileView: View {
         case .cautious:
             return "Cautious"
         }
+    }
+
+    private func rankLabel(for general: GeneralData) -> String {
+        guard isTangSongScenario else {
+            return general.rank
+        }
+        if !containsLatinLetters(general.rank) {
+            return general.rank
+        }
+        return general.faction == .allies ? "禁军都部署" : "方面都部署"
+    }
+
+    private func biographyText(for general: GeneralData) -> String {
+        guard isTangSongScenario else {
+            return general.biography
+        }
+        if !containsLatinLetters(general.biography) {
+            return general.biography
+        }
+        return "\(general.localizedName)受命统辖本方面军务，按州府、粮道与战线形势调度军队。"
+    }
+
+    private func skillLabel(_ skill: String) -> String {
+        guard isTangSongScenario else {
+            return skill.replacingOccurrences(of: "_", with: " ")
+        }
+        switch skill {
+        case "set_piece_attack", "offensive_planning":
+            return "筹攻"
+        case "logistics", "staff_coordination", "coalition_coordination":
+            return "转运"
+        case "defensive_master", "fortress_operations", "reserve_control", "disciplined_retreat":
+            return "守城"
+        case "armor_theory", "armor_expert", "breakthrough", "rapid_exploitation", "counterattack":
+            return "突进"
+        case "political_will", "pressure_management", "army_group_coordination":
+            return "统军"
+        default:
+            return containsLatinLetters(skill) ? "军务" : skill
+        }
+    }
+
+    private func containsLatinLetters(_ text: String) -> Bool {
+        text.range(of: #"[A-Za-z]"#, options: .regularExpression) != nil
     }
 }

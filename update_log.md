@@ -74,7 +74,44 @@
 遗留事项：
 
 - 唐宋默认资源失败时目前是空地图错误态，后续可设计专门的发布态错误 UI。
-- UI/accessibility 子 Agent 仍发现 legacy `generals.json`、命令面板 raw validation、inspector raw id、EventLog relatedRecordId 和部分 VoiceOver 文案残留，建议作为后续 v5.8/v5.9 小切片。
+- legacy `generals.json` 在唐宋默认将领面板中的残留已由 v5.8h 收口；命令面板 raw validation、inspector raw id、EventLog relatedRecordId 和部分 VoiceOver 文案残留仍建议作为后续 v5.8/v5.9 小切片。
+
+## v5.8h - 唐宋将领注册表默认路径硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 新增 `TangSongCharacterCatalogDefinition` / `TangSongCharacterDefinition` 到兼容 `GeneralData` 的映射，复用已入资源包的 `tangsong_characters.json`。
+- `DataLoader.loadGeneralRegistry(for:)` 在 `scenarioId == jianlong_960_unification` 时读取唐宋人物注册表；legacy `generals.json` 保留给阿登历史路径和显式 legacy 调用。
+- `DataLoader.assignGenerals` 与 `AppContainer.bootstrap()` 按当前 scenario 加载将领注册表，唐宋默认主路径不再把蒙哥马利、古德里安等 WWII 将领分配到方面防区。
+- `GeneralCommandPanelView` 与 `GeneralProfileView` 在唐宋场景下对 rank、biography、skills 增加中文显示桥；即使后续遇到 legacy 将领数据，也不直接显示 `Field Marshal`、英文 biography 或下划线技能 key。
+- `GeneralProfileView` 的唐宋头像 accessibility label 改为中文“头像占位”。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8h 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/Agents/GeneralRegistry.swift`
+- `WWIIHexV0/Data/DataLoader.swift`
+- `WWIIHexV0/App/AppContainer.swift`
+- `WWIIHexV0/UI/GeneralCommandPanelView.swift`
+- `WWIIHexV0/UI/GeneralProfileView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8h_tangsong_general_registry_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- `tangsong_characters.json` 当前是轻量人物表，只映射为兼容 `GeneralData`；后续可扩展更完整的唐宋将领 catalog，但不应恢复唐宋默认读取 legacy `generals.json`。
+- 命令面板 `lastCommandMessage`、EventLog `relatedRecordId`、Unit/Region inspector raw id 和部分 accessibility 文案仍有玩家可见残留，建议作为后续 v5.8i 小切片。
 
 ## v0 - 六角格测试板
 

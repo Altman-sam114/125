@@ -1123,6 +1123,8 @@ unit_templates.json
 
 DEBUG 下 `DataLoader` 仍优先读源码目录 `WWIIHexV0/Data/*.json`；bundle resources 是 release / fallback 路径。
 
+v5.8h 起，唐宋主游戏默认路径按 `scenarioId == jianlong_960_unification` 调用 `DataLoader.loadGeneralRegistry(for:)` 读取 `tangsong_characters.json` 并映射为兼容 `GeneralRegistry`。`generals.json` 仍保留给显式 legacy 阿登和历史回归参考，不再作为唐宋默认将领池。
+
 `BoardSceneView` 现在有平台分支：
 
 ```text
@@ -2313,8 +2315,15 @@ Marshal / ZoneDirective
 该分支把 0.41-0.48 的将军与玩家命令链路收口到当前代码，仍保持命令权威不变：
 
 ```text
+唐宋默认:
+Data/tangsong_characters.json
+  -> DataLoader.loadGeneralRegistry(for: jianlong_960_unification)
+  -> TangSongCharacterDefinition.toGeneralData()
+  -> GeneralRegistry / GeneralDispatcher
+
+legacy 阿登:
 Data/generals.json
-  -> DataLoader.loadGeneralRegistry
+  -> DataLoader.loadGeneralRegistry(for: legacy or nil)
   -> GeneralRegistry / GeneralDispatcher
   -> FrontZone.generalAssignment
   -> AppContainer.selectedGeneral*

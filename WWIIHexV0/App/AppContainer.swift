@@ -66,7 +66,7 @@ final class AppContainer: ObservableObject {
         let dataLoader = DataLoader()
         let gameState = dataLoader.loadInitialGameState()
         let commandHandler = RuleEngine()
-        let generalRegistry = (try? dataLoader.loadGeneralRegistry()) ?? .empty
+        let generalRegistry = (try? dataLoader.loadGeneralRegistry(for: gameState.scenarioId)) ?? .empty
         let bootstrappedState = Self.refreshGeneralAssignments(
             in: StrategicStateBootstrapper().bootstrapIfNeeded(gameState),
             registry: generalRegistry

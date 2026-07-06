@@ -5,6 +5,21 @@ struct GeneralCatalogDefinition: Codable, Equatable {
     let generals: [GeneralData]
 }
 
+struct TangSongCharacterCatalogDefinition: Codable, Equatable {
+    let schemaVersion: Int
+    let scenarioId: String
+    let characters: [TangSongCharacterDefinition]
+}
+
+struct TangSongCharacterDefinition: Codable, Equatable {
+    let id: String
+    let name: String
+    let powerId: String
+    let role: String
+    let commandStyle: String
+    let traits: [String]
+}
+
 struct GeneralData: Identifiable, Codable, Equatable {
     let id: String
     let name: String
@@ -73,6 +88,59 @@ struct GeneralData: Identifiable, Codable, Equatable {
 
     private static func clampPercent(_ value: Int) -> Int {
         max(0, min(100, value))
+    }
+}
+
+extension TangSongCharacterDefinition {
+    func toGeneralData() -> GeneralData {
+        GeneralData(
+            id: id,
+            name: name,
+            localizedName: name,
+            rank: role,
+            faction: legacyFaction,
+            commandStyle: legacyCommandStyle,
+            skills: traits,
+            portrait: nil,
+            biography: biography,
+            baseLoyalty: baseLoyalty,
+            baseSatisfaction: baseSatisfaction
+        )
+    }
+
+    private var legacyFaction: Faction {
+        powerId == "power_song" ? .allies : .germany
+    }
+
+    private var legacyCommandStyle: ZoneCommanderAgentConfig.CommandStyle {
+        switch commandStyle {
+        case "central_unification", "regional_warlord":
+            return .aggressive
+        case "defensive_hold", "river_defense", "mountain_defense":
+            return .cautious
+        default:
+            return .balanced
+        }
+    }
+
+    private var biography: String {
+        let traitText = traits.isEmpty ? "无特长配置" : traits.joined(separator: "、")
+        return "\(name)，\(role)，当前剧本人物。特长：\(traitText)。"
+    }
+
+    private var baseLoyalty: Int {
+        powerId == "power_song" ? 78 : 66
+    }
+
+    private var baseSatisfaction: Int {
+        switch commandStyle {
+        case "submission_diplomacy":
+            return 72
+        case "defensive_hold", "river_defense", "mountain_defense":
+            return 68
+        default:
+            return 70
+        }
     }
 }
 
