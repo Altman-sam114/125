@@ -550,6 +550,12 @@ v5.8p 当前已落地：
 - `MapDisplayAdapter` 在唐宋地图 overlay 上把围城城防和粮道成本标签中的 ASCII `/` 改为“／”。
 - 该切片只改玩家可见 UI 与地图标签的只读显示桥，不改变 `Division`、`SupplyRouteSummary`、`SiegeOverlayState`、生产、补给、围城、命令、AI 决策、事件写入职责或 Codable schema。
 
+v5.8q 当前已落地：
+
+- `AppContainer.submit(_:)` 在唐宋场景下把 `lastCommandMessage` 和交互日志改为动作级中文摘要，避免默认把 `Command.displayName` 中的单位 id、region id 或 ASCII 标点写给玩家。
+- `AppContainer` 的常见本地 guard 反馈已做唐宋分流：无可行动军队、围城/修城/解围/招降/招抚目标缺失、将领军令入口拒绝、府库观战拒绝、选中军队、敌方/非敌对军队和地块坐标均优先写入中文文案。
+- 非唐宋路径继续保留 legacy 英文 fallback，便于阿登历史回归；该切片不改变 `CommandResult`、`GameLogEntry`、`CommandValidator`、`RuleEngine`、`WarCommandExecutor`、AI 决策、事件 schema 或 Codable raw 值。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
@@ -560,7 +566,7 @@ v5.8d 当前已落地：
 
 - `EventLogView` 在唐宋场景下让战报正文 `GameLogEntry.message` 和本回合摘要 highlight 统一经过 `TangSongEventLogMessage` 显示桥，常见英文命令、交互、战斗、退却、补给、AI 执行和 validation rawValue 显示为唐宋读法。
 - 该显示桥覆盖 `Command accepted/rejected`、选中地块/州府/军队、`attacked/counterattacked`、`strength`、自动退却、整补、退却失败、AI command result 和常见 `CommandValidationError.rawValue`，减少默认战报主路径英文和内部枚举外露。
-- 该切片只改战报 UI 读法，不改变 `GameLogEntry.message`、`CommandResultLogEntry`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、事件写入职责、日志 Codable schema 或任何规则结果。更完整的结构化 event payload 与写入端唐宋化仍留后续。
+- 该切片只改战报 UI 读法，不改变 `GameLogEntry.message`、`CommandResultLogEntry`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、事件写入职责、日志 Codable schema 或任何规则结果。v5.8q 已覆盖常见 AppContainer 交互反馈写入端；更完整的结构化 event payload、真 LLM 输出本地化和全项目写入端唐宋化仍留后续。
 
 v5.8k 当前已落地：
 
@@ -1059,8 +1065,8 @@ mapDisplayLayer
 submit(command)
   -> commandHandler.execute(command, in: gameState)
   -> StrategicStateBootstrapper.bootstrapIfNeeded(result.state)
-  -> lastCommandMessage = result.message
-  -> appendInteractionEvent(...)
+  -> 唐宋路径 lastCommandMessage = 动作级中文反馈
+  -> appendInteractionEvent(唐宋路径写入中文反馈，legacy 路径保留旧文案)
   -> refreshSelectionAfterStateChange()
   -> runAIIfNeeded()
 ```
@@ -1232,7 +1238,7 @@ RuleEngine.execute(command, in: state)
   -> valid: CommandExecutor.execute(command, in: preparedState)
 ```
 
-v5.8i 起，唐宋场景下 `CommandValidationError.displayName(isTangSongScenario:)` 会把 `wrongPhase`、`wrongFaction`、`regionNotFound`、`submissionNotReady` 等 raw validation key 显示为中文拒绝原因；`RuleEngine` 仍保留原始 enum case 和 Codable raw 值，不改变校验语义。`AppContainer` 的 AI 回合完成、玩家方面军令反馈、选中州府日志和 `CommandPanelView.lastCommandMessage` 也优先显示唐宋文案；`EventLogView` 唐宋 metadata 不再展示内部 `relatedRecordId`，legacy 阿登路径保持旧 metadata。
+v5.8i 起，唐宋场景下 `CommandValidationError.displayName(isTangSongScenario:)` 会把 `wrongPhase`、`wrongFaction`、`regionNotFound`、`submissionNotReady` 等 raw validation key 显示为中文拒绝原因；`RuleEngine` 仍保留原始 enum case 和 Codable raw 值，不改变校验语义。`AppContainer` 的 AI 回合完成、玩家方面军令反馈、选中州府日志和 `CommandPanelView.lastCommandMessage` 也优先显示唐宋文案；`EventLogView` 唐宋 metadata 不再展示内部 `relatedRecordId`，legacy 阿登路径保持旧 metadata。v5.8q 起，`AppContainer` 的常见玩家交互反馈进一步从写入端分流为唐宋文案：命令接受/驳回、无可行动军队、围城/修城/解围/招降/招抚目标缺失、将领军令、府库观战拒绝、选中军队和地块坐标不再默认写入英文或 raw id 摘要。
 
 v5.8j 起，唐宋军队/州府检查面板不再默认把 `RegionId`、`TheaterId`、`FrontZoneId`、`FrontLineId`、补给源 id 或 `MapDisplayAdapter` 生成的英文 `None/controlled` 作为玩家文案。`MapDisplayAdapter` 仍保存 raw id 供逻辑和 legacy 显示使用，同时为 inspector state 补运行态州府、动态方面、防区和粮源名称；`UnitInspectorView` / `RegionInspectorView` 在唐宋路径优先显示这些名称，缺失时使用“未知州府 / 未命名方面 / 未命名防区 / 无目标”等兜底。该变化只影响 UI 派生显示，不改变任何 id schema、目标控制、补给判定或命令执行。
 

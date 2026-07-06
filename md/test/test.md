@@ -1,11 +1,12 @@
 # 本地轻量检查与云端重验证规范
 
-> 当前规则：默认云端重验证，本机只做轻量语法、格式和配置文件检查。历史 Probe、Smoke、Stage Regression、Dynamic Theater Regression、Full 记录只作回归参考，不再是每轮本机默认要求。
+> 当前规则：默认云端重验证；若人工未另行限制，本机只做轻量语法、格式和配置文件检查。当前 v5.8q 起按人工明确要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`，只做只读审查、git diff/status、commit/push，验证交给 GitHub Actions。历史 Probe、Smoke、Stage Regression、Dynamic Theater Regression、Full 记录只作回归参考，不再是每轮本机默认要求。
 
 ## 0. 总原则
 
 - 每轮实现或验收前仍要读本文件，但目的从“选择测试层级”改为“确认哪些检查允许执行、哪些检查禁止执行”。
 - 默认不在本机跑任何耗费性能的测试、构建、模拟器启动或 app 启动。
+- 若人工明确要求“都去云端测试”，本机连轻量检查也不跑；只能阅读文件、审查 diff、提交并推送，由云端 workflow 给出验证结果。
 - Swift / Xcode / 业务逻辑相关改动完成后，默认由 Agent B commit 并 push 到 `origin/main`，触发 GitHub Actions 云端重验证。
 - GitHub Actions 上传未加密 CI 结果包，Agent C 下载后核对 manifest、JUnit、主构建日志、failure summary 和项目原生结果文件。
 - 默认不新增或修改测试文件；可以阅读既有测试理解历史语义。

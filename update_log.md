@@ -356,6 +356,39 @@
 - 本轮只改将领面板与州府详情面板的玩家可见显示桥，不改变 `PlayerPlannedOperation`、`RegionInspectorState`、`SiegeRecord`、命令、围城规则、AI 决策、事件写入或 Codable schema。
 - 这不是完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收或 v5.9 发布验收；全局 accessibility 和其他玩家可见残留仍需后续切片继续收口。
 
+## v5.8q - AppContainer 源头反馈中文化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 与主线程只读扫描指出 `AppContainer` 仍会在唐宋路径写入英文交互反馈、ASCII 标点、`enemy/non-hostile` 关系标签和 `q,r` 地块坐标。
+- `AppContainer.submit(_:)` 唐宋路径的 `lastCommandMessage` 与交互日志改为动作级中文摘要，规则拒绝原因继续读取 `CommandValidationError.displayName(isTangSongScenario:)`。
+- 固守、准许退却、整补、围城、修城、解围、招降、招抚、将领军令和府库观战拒绝的本地 guard 反馈在唐宋路径改为中文写入，legacy 英文 fallback 保留。
+- 观战查看军队、选中本方/敌方/非敌对军队和选中地块坐标改为唐宋读法；地块坐标写为“第 q 列，第 r 行”。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8q 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/App/AppContainer.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/test/test.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8q_appcontainer_source_feedback_localization_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只覆盖 `AppContainer` 常见玩家交互反馈写入端，不改变 `Command`、`CommandResult`、`GameLogEntry`、`CommandValidator`、`RuleEngine`、`WarCommandExecutor`、AI 决策或 Codable schema。
+- 这不是结构化 event payload、全项目写入端本地化、真 LLM 输出本地化、完整 VoiceOver 实机、截图、横竖屏布局或 v5.9 发布验收。
+
 ## v5.8p - 兵力、粮道与数值标记 ASCII UI 硬化
 
 完成日期：2026-07-06

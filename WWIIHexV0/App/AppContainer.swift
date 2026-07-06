@@ -102,14 +102,14 @@ final class AppContainer: ObservableObject {
             )
         }
         gameState = refreshGeneralAssignments(in: nextState)
-        lastCommandMessage = result.message
+        lastCommandMessage = commandFeedbackMessage(for: result, command: command)
 
         let commandName = command.displayName(isTangSongScenario: gameState.isTangSongScenario)
         let status = result.succeeded ? "accepted" : "rejected"
         let statusText = gameState.isTangSongScenario
             ? (result.succeeded ? "军令接受" : "军令驳回")
             : "Command \(status)"
-        appendInteractionEvent("\(statusText): \(commandName). \(result.message)")
+        appendInteractionEvent(commandInteractionMessage(for: result, commandName: commandName, statusText: statusText))
         refreshSelectionAfterStateChange()
         runAIIfNeeded()
     }
@@ -196,7 +196,12 @@ final class AppContainer: ObservableObject {
 
     func holdSelected() {
         guard let division = selectedActionDivision else {
-            appendInteractionEvent("Hold rejected: no active allied unit selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "固守被驳回：未选中可行动本方军队。",
+                    legacy: "Hold rejected: no active allied unit selected."
+                )
+            )
             return
         }
 
@@ -205,7 +210,12 @@ final class AppContainer: ObservableObject {
 
     func allowRetreatSelected() {
         guard let division = selectedActionDivision else {
-            appendInteractionEvent("Allow retreat rejected: no active allied unit selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "准许退却被驳回：未选中可行动本方军队。",
+                    legacy: "Allow retreat rejected: no active allied unit selected."
+                )
+            )
             return
         }
 
@@ -214,7 +224,12 @@ final class AppContainer: ObservableObject {
 
     func resupplySelected() {
         guard let division = selectedActionDivision else {
-            appendInteractionEvent("Resupply rejected: no active allied unit selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "整补被驳回：未选中可行动本方军队。",
+                    legacy: "Resupply rejected: no active allied unit selected."
+                )
+            )
             return
         }
 
@@ -223,12 +238,22 @@ final class AppContainer: ObservableObject {
 
     func besiegeSelected() {
         guard let division = selectedActionDivision else {
-            appendInteractionEvent("Besiege rejected: no active allied unit selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "围城被驳回：未选中可行动本方军队。",
+                    legacy: "Besiege rejected: no active allied unit selected."
+                )
+            )
             return
         }
 
         guard let target = selectedBesiegeTarget else {
-            appendInteractionEvent("Besiege rejected: no adjacent enemy city, pass, or granary selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "围城被驳回：未选中相邻敌方州府、关隘或粮仓。",
+                    legacy: "Besiege rejected: no adjacent enemy city, pass, or granary selected."
+                )
+            )
             return
         }
 
@@ -237,12 +262,22 @@ final class AppContainer: ObservableObject {
 
     func repairFortificationSelected() {
         guard let division = selectedActionDivision else {
-            appendInteractionEvent("Repair fortification rejected: no active allied unit selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "修城被驳回：未选中可行动本方军队。",
+                    legacy: "Repair fortification rejected: no active allied unit selected."
+                )
+            )
             return
         }
 
         guard let target = selectedRepairFortificationTarget else {
-            appendInteractionEvent("Repair fortification rejected: no damaged friendly besieged city selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "修城被驳回：未选中受损且被围的本方州府。",
+                    legacy: "Repair fortification rejected: no damaged friendly besieged city selected."
+                )
+            )
             return
         }
 
@@ -251,12 +286,22 @@ final class AppContainer: ObservableObject {
 
     func relieveSiegeSelected() {
         guard let division = selectedActionDivision else {
-            appendInteractionEvent("Relieve siege rejected: no active allied unit selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "解围被驳回：未选中可行动本方军队。",
+                    legacy: "Relieve siege rejected: no active allied unit selected."
+                )
+            )
             return
         }
 
         guard let target = selectedRelieveSiegeTarget else {
-            appendInteractionEvent("Relieve siege rejected: no friendly besieged city in range.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "解围被驳回：射程内没有被围本方州府。",
+                    legacy: "Relieve siege rejected: no friendly besieged city in range."
+                )
+            )
             return
         }
 
@@ -265,12 +310,22 @@ final class AppContainer: ObservableObject {
 
     func demandSurrenderSelected() {
         guard let division = selectedActionDivision else {
-            appendInteractionEvent("Demand surrender rejected: no active allied unit selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "招降被驳回：未选中可行动本方军队。",
+                    legacy: "Demand surrender rejected: no active allied unit selected."
+                )
+            )
             return
         }
 
         guard let target = selectedDemandSurrenderTarget else {
-            appendInteractionEvent("Demand surrender rejected: no broken enemy siege target in range.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "招降被驳回：范围内没有可招降的敌方围城目标。",
+                    legacy: "Demand surrender rejected: no broken enemy siege target in range."
+                )
+            )
             return
         }
 
@@ -279,12 +334,22 @@ final class AppContainer: ObservableObject {
 
     func proposeSubmissionSelected() {
         guard let division = selectedActionDivision else {
-            appendInteractionEvent("Submission rejected: no active allied unit selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "招抚被驳回：未选中可行动本方军队。",
+                    legacy: "Submission rejected: no active allied unit selected."
+                )
+            )
             return
         }
 
         guard let target = selectedSubmissionTarget else {
-            appendInteractionEvent("Submission rejected: no eligible foreign capital selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "招抚被驳回：未选中可招抚的外国都城。",
+                    legacy: "Submission rejected: no eligible foreign capital selected."
+                )
+            )
             return
         }
 
@@ -299,7 +364,12 @@ final class AppContainer: ObservableObject {
 
     func orderSelectedGeneralHoldLine() {
         guard let zone = selectedGeneralCommandZone else {
-            appendInteractionEvent("General order rejected: no allied front zone selected.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "将领军令被驳回：未选中本方方面防区。",
+                    legacy: "General order rejected: no allied front zone selected."
+                )
+            )
             return
         }
 
@@ -321,11 +391,21 @@ final class AppContainer: ObservableObject {
 
     func orderSelectedGeneralAttackRegion() {
         guard let target = selectedAttackTarget else {
-            appendInteractionEvent("General order rejected: select an enemy front region to attack.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "将领军令被驳回：请选择要进攻的敌方前线州府。",
+                    legacy: "General order rejected: select an enemy front region to attack."
+                )
+            )
             return
         }
         guard let zone = selectedGeneralCommandZone else {
-            appendInteractionEvent("General order rejected: no allied source front zone available.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "将领军令被驳回：没有可用的本方出兵方面。",
+                    legacy: "General order rejected: no allied source front zone available."
+                )
+            )
             return
         }
 
@@ -351,7 +431,12 @@ final class AppContainer: ObservableObject {
 
     func queueProduction(_ kind: ProductionKind) {
         guard !observerModeEnabled else {
-            appendInteractionEvent("Production rejected: observer mode is read-only.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "府库军备被驳回：观战模式只能查看。",
+                    legacy: "Production rejected: observer mode is read-only."
+                )
+            )
             return
         }
 
@@ -966,18 +1051,33 @@ final class AppContainer: ObservableObject {
         targetRegionId: RegionId?
     ) {
         guard canIssuePlayerDirective else {
-            appendInteractionEvent("General order rejected: not in the player command phase.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "将领军令被驳回：当前不是玩家军令阶段。",
+                    legacy: "General order rejected: not in the player command phase."
+                )
+            )
             return
         }
         guard gameState.warDeploymentState.frontZones[directive.zoneId]?.faction == playerFaction else {
-            appendInteractionEvent("General order rejected: source zone is not controlled by the player.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "将领军令被驳回：出兵方面不归玩家指挥。",
+                    legacy: "General order rejected: source zone is not controlled by the player."
+                )
+            )
             return
         }
 
         let startState = refreshedRuntimeState(gameState)
         guard let refreshedZone = startState.warDeploymentState.frontZones[directive.zoneId],
               refreshedZone.faction == playerFaction else {
-            appendInteractionEvent("General order rejected: source zone changed during refresh.")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "将领军令被驳回：方面状态已刷新，请重新选择。",
+                    legacy: "General order rejected: source zone changed during refresh."
+                )
+            )
             return
         }
         let lockedIds = startState.playerCommandState.micromanagedDivisionIds
@@ -1076,6 +1176,66 @@ final class AppContainer: ObservableObject {
         let type = directive.type == .attack ? "进攻" : "固守"
         let zoneName = gameState.warDeploymentState.frontZones[directive.zoneId]?.name ?? "未命名方面"
         return "方面军令提交：\(type) \(zoneName)。"
+    }
+
+    private func commandFeedbackMessage(for result: CommandResult, command: Command) -> String {
+        guard gameState.isTangSongScenario else {
+            return result.message
+        }
+        let action = commandActionLabel(for: command)
+        guard result.succeeded else {
+            let reasons = result.validation.errors
+                .map { $0.displayName(isTangSongScenario: true) }
+                .joined(separator: "、")
+            return reasons.isEmpty
+                ? "\(action)被驳回。"
+                : "\(action)被驳回：\(reasons)。"
+        }
+        return "\(action)已执行。"
+    }
+
+    private func commandInteractionMessage(
+        for result: CommandResult,
+        commandName: String,
+        statusText: String
+    ) -> String {
+        guard gameState.isTangSongScenario else {
+            return "\(statusText): \(commandName). \(result.message)"
+        }
+        return "\(statusText)：\(commandFeedbackMessage(for: result, command: result.command))"
+    }
+
+    private func commandActionLabel(for command: Command) -> String {
+        switch command {
+        case .move:
+            return "行军"
+        case .attack:
+            return "进攻"
+        case .besiege:
+            return "围城"
+        case .repairFortification:
+            return "修城"
+        case .relieveSiege:
+            return "解围"
+        case .demandSurrender:
+            return "招降"
+        case .proposeSubmission:
+            return "招抚"
+        case .hold:
+            return "固守"
+        case .allowRetreat:
+            return "准许退却"
+        case .resupply:
+            return "整补"
+        case .queueProduction:
+            return "府库军备"
+        case .endTurn:
+            return "结束回合"
+        }
+    }
+
+    private func feedbackText(tangSong: String, legacy: String) -> String {
+        gameState.isTangSongScenario ? tangSong : legacy
     }
 
     private func aiTurnMessage(for record: AgentDecisionRecord) -> String {
@@ -1192,13 +1352,23 @@ final class AppContainer: ObservableObject {
     private func handleDivisionTap(_ division: Division) {
         if observerModeEnabled {
             selectDivision(division)
-            appendInteractionEvent("Inspecting unit: \(division.name).")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "查看军队：\(division.name)。",
+                    legacy: "Inspecting unit: \(division.name)."
+                )
+            )
             return
         }
 
         if division.faction == playerFaction {
             selectDivision(division)
-            appendInteractionEvent("Selected unit: \(division.name).")
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "已选军队：\(division.name)。",
+                    legacy: "Selected unit: \(division.name)."
+                )
+            )
             return
         }
 
@@ -1210,7 +1380,13 @@ final class AppContainer: ObservableObject {
             let relationLabel = warRelationRules.canTarget(attacker: playerFaction, target: division.faction, in: gameState)
                 ? "enemy"
                 : "non-hostile"
-            appendInteractionEvent("Selected \(relationLabel) unit: \(division.name).")
+            let tangSongRelationLabel = relationLabel == "enemy" ? "敌方" : "非敌对"
+            appendInteractionEvent(
+                feedbackText(
+                    tangSong: "已选\(tangSongRelationLabel)军队：\(division.name)。",
+                    legacy: "Selected \(relationLabel) unit: \(division.name)."
+                )
+            )
         }
     }
 
@@ -1265,7 +1441,7 @@ final class AppContainer: ObservableObject {
         guard let selectedRegionId,
               let region = gameState.map.region(id: selectedRegionId) else {
             return gameState.isTangSongScenario
-                ? "已选地块：\(coord.q),\(coord.r)。"
+                ? "已选地块：第 \(coord.q) 列，第 \(coord.r) 行。"
                 : "Selected hex \(coord.q),\(coord.r)."
         }
         if gameState.isTangSongScenario {
