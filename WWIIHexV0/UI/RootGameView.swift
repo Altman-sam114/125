@@ -185,7 +185,7 @@ struct RootGameView: View {
         }
 
         if selectedDivision.hasActed {
-            return "该军本回合已行动；继续选择其他未行动\(playerName)军队，或结束回合让 AI 推进。"
+            return "该军本回合已行动；继续选择其他未行动\(playerName)军队，或结束回合让各方军议推进。"
         }
 
         if let validatedHint = container.selectedValidatedCommandHint {

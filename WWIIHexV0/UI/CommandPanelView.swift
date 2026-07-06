@@ -240,6 +240,6 @@ struct CommandPanelView: View {
         if message.contains("wrongFaction") {
             return "军令被拒：不可指挥该政权军队。"
         }
-        return message
+        return TangSongEventLogMessage.display(message)
     }
 }

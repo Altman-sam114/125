@@ -541,6 +541,12 @@ v5.8d 当前已落地：
 - 该显示桥覆盖 `Command accepted/rejected`、选中地块/州府/军队、`attacked/counterattacked`、`strength`、自动退却、整补、退却失败、AI command result 和常见 `CommandValidationError.rawValue`，减少默认战报主路径英文和内部枚举外露。
 - 该切片只改战报 UI 读法，不改变 `GameLogEntry.message`、`CommandResultLogEntry`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、事件写入职责、日志 Codable schema 或任何规则结果。更完整的结构化 event payload 与写入端唐宋化仍留后续。
 
+v5.8k 当前已落地：
+
+- `CommandPanelView` 在唐宋场景下把未命中的命令反馈继续交给 `TangSongEventLogMessage.display`，让命令面板和战报面板共用同一套默认显示桥。
+- `EventLogView` 对退却路线、被围损耗、玩家方面军令诊断、州府归属变化、动态方面变更等常见英文事件补中文映射；显示桥处理后若仍含拉丁字母，唐宋路径降级为“战报已更新；原始记录留在调试日志中。”，不把 raw 英文、内部 key 或 legacy 术语直接展示给玩家。
+- `RootGameView.nextActionHint` 的已行动提示改为“各方军议推进”，不再在唐宋 HUD 提示中显示 `AI`。该切片只改 UI 兜底，不改变 `GameLogEntry.message`、事件写入端、命令执行、AI 决策、规则判定或 Codable schema。
+
 v5.6b 的 UI 到规则链路：
 
 ```text

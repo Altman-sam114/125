@@ -475,29 +475,29 @@ private struct TurnReportCategoryCount {
     let count: Int
 }
 
-private enum TangSongEventLogMessage {
+enum TangSongEventLogMessage {
     static func display(_ message: String) -> String {
         if let exact = exactTranslations[message] {
-            return exact
+            return finalized(exact)
         }
 
         if let command = commandResult(message) {
-            return command
+            return finalized(command)
         }
         if let selection = selectionMessage(message) {
-            return selection
+            return finalized(selection)
         }
         if let combat = combatMessage(message) {
-            return combat
+            return finalized(combat)
         }
         if let supply = supplyMessage(message) {
-            return supply
+            return finalized(supply)
         }
         if let ai = aiMessage(message) {
-            return ai
+            return finalized(ai)
         }
 
-        return validationErrors(in: message)
+        return finalized(validationErrors(in: message))
     }
 
     private static let exactTranslations: [String: String] = [
@@ -636,13 +636,20 @@ private enum TangSongEventLogMessage {
         if message.contains(" retreated from ") {
             let parts = message.components(separatedBy: " retreated from ")
             if parts.count == 2 {
-                return "\(parts[0])退却：\(trimTrailingPeriod(parts[1]))。"
+                let route = trimTrailingPeriod(parts[1])
+                    .replacingOccurrences(of: " to ", with: " 退至 ")
+                return "\(parts[0])自 \(route)。"
             }
         }
         if message.contains(" failed to retreat and lost ") {
             let name = message.components(separatedBy: " failed to retreat and lost ").first ?? "军队"
             let amount = number(after: "lost ", in: message) ?? "?"
             return "\(name)退却失败：兵力 -\(amount)。"
+        }
+        if message.contains(" suffered encirclement attrition: ") {
+            let name = message.components(separatedBy: " suffered encirclement attrition: ").first ?? "军队"
+            let amount = number(after: "-", in: message) ?? "?"
+            return "\(name)被围损耗：兵力 -\(amount)。"
         }
         if message.hasSuffix(" completed retreat recovery.") {
             let name = message.replacingOccurrences(of: " completed retreat recovery.", with: "")
@@ -655,6 +662,20 @@ private enum TangSongEventLogMessage {
         if message.hasPrefix("AI "), message.contains(" resolved "), message.contains(" command result") {
             let count = number(after: " resolved ", in: message) ?? "若干"
             return "军议执行：完成 \(count) 条军令结果。"
+        }
+        if message.hasPrefix("AI turn requested") {
+            return "军议回合暂未执行：当前阶段或政权不符合自动推进条件。"
+        }
+        if message.hasPrefix("Player directive generated no executable commands.") {
+            return "将领军令未生成可执行命令。"
+        }
+        if message.contains(" command(s) were rejected by rules.") {
+            let count = leadingNumber(in: message) ?? "若干"
+            return "将领军令有 \(count) 道命令被规则驳回。"
+        }
+        if message.contains(" micromanaged division(s) excluded.") {
+            let count = leadingNumber(in: message) ?? "若干"
+            return "\(count) 支已手动指挥军队未纳入方面军令。"
         }
         if message.hasPrefix("Pacification target "), message.contains(" skipped:") {
             return "招抚候选已跳过：目标或谈判军队不符合当前规则。"
@@ -697,12 +718,31 @@ private enum TangSongEventLogMessage {
         for (raw, localized) in validationErrorNames {
             output = output.replacingOccurrences(of: raw, with: localized)
         }
+        if output.hasPrefix("Region "), output.contains(" controller changed to ") {
+            let body = output
+                .replacingOccurrences(of: "Region ", with: "州府 ")
+                .replacingOccurrences(of: " controller changed to ", with: " 归属改为 ")
+                .replacingOccurrences(of: ".", with: "")
+            return "\(body)。"
+        }
+        if output.hasPrefix("Hex "), output.contains(" reassigned to dynamic theater ") {
+            let body = output
+                .replacingOccurrences(of: "Hex ", with: "地块 ")
+                .replacingOccurrences(of: " reassigned to dynamic theater ", with: " 归入动态方面 ")
+                .replacingOccurrences(of: ".", with: "")
+            return "\(body)。"
+        }
+        if containsLatinLetters(output) {
+            return "战报已更新；原始记录留在调试日志中。"
+        }
         return output
     }
 
     private static func validationReason(in message: String) -> String {
         let localized = validationErrors(in: message)
-        let knownReasons = validationErrorNames.map { $0.value }.filter { localized.contains($0) }
+        let knownReasons = validationErrorNames
+            .filter { message.contains($0.raw) || localized.contains($0.value) }
+            .map(\.value)
         guard !knownReasons.isEmpty else {
             return ""
         }
@@ -759,6 +799,16 @@ private enum TangSongEventLogMessage {
     private static func leadingNumber(in text: String) -> String? {
         let digits = text.prefix { $0.isNumber }
         return digits.isEmpty ? nil : String(digits)
+    }
+
+    private static func containsLatinLetters(_ text: String) -> Bool {
+        text.unicodeScalars.contains { scalar in
+            (65...90).contains(Int(scalar.value)) || (97...122).contains(Int(scalar.value))
+        }
+    }
+
+    private static func finalized(_ output: String) -> String {
+        containsLatinLetters(output) ? "战报已更新；原始记录留在调试日志中。" : output
     }
 }
 

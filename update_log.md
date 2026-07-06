@@ -186,6 +186,41 @@
 - 本轮只处理军队/州府检查面板的 raw id 与目标状态显示；完整 accessibility、截图/布局验收和其他默认主路径英文/raw id 残留仍待后续 v5.8/v5.9 小切片。
 - raw id 字段仍保留在 inspector state 和底层 schema 中，供 legacy 显示、排序、调试和规则使用；唐宋路径仅改变玩家可见显示桥。
 
+## v5.8k - 命令面板与战报 raw 英文兜底硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 只读扫描 UI/SpriteKit 与 Rules/App/Turn 残留后，选择重叠度低的命令反馈与战报兜底作为本轮小切片。
+- `TangSongEventLogMessage` 改为模块内可复用，`CommandPanelView` 的唐宋命令反馈兜底复用同一显示桥，减少命令面板直出英文诊断或 raw validation key。
+- `EventLogView` 补退却路线、被围损耗、玩家方面军令诊断、州府归属变化和动态方面变更等常见英文事件映射。
+- `EventLogView` 在唐宋显示桥处理后若仍含拉丁字母，降级为中文“战报已更新；原始记录留在调试日志中。”，不把未归档 raw 英文/内部 key 直接展示给玩家。
+- `RootGameView.nextActionHint` 的已行动提示改为“各方军议推进”，不再显示 `AI`。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8k 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/EventLogView.swift`
+- `WWIIHexV0/UI/CommandPanelView.swift`
+- `WWIIHexV0/UI/RootGameView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8k_command_event_raw_english_fallback_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只处理玩家可见 UI 兜底，不改事件写入端；`SupplyRules`、`CommandExecutor`、`StrategicStateSynchronizer`、`TurnManager` 等源头仍可能写入英文日志，后续可逐步源头唐宋化或改结构化 event payload。
+- AI 面板 diagnostics/raw JSON、GeneralCommandPanelView 已拟军令 raw id、DiplomacyPanelView 数据名 Latin guard、macOS 菜单和 SpriteKit 空地图提示仍建议作为后续 v5.8/v5.9 小切片。
+
 ## v0 - 六角格测试板
 
 完成日期：2026-06-14 至 2026-06-15
