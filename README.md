@@ -82,7 +82,9 @@
 
 > **v5.8s 小切片：** MapEditor 玩家/编辑器可见 raw 技术词继续硬化：资源区按钮和状态栏不再默认显示“JSON”或 `.json` 文件名，默认资源说明改为“建隆元年剧本 / 州府数据”，信息面板、状态栏和导出错误中的地块坐标改用“第 q 列，第 r 行”，底图区只显示底图文件名，导出校验错误不再直出州府 raw id、地形 rawValue 或底层英文编码错误，自动州城/粮仓 fallback 改用中文读法。该切片只改 MapEditor 显示桥和错误包装，不改变导出的 JSON schema、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId` 或主游戏规则。
 
-> **v5.8t 最新小切片：** accessibility / VoiceOver 可读文案硬化首轮：主游戏信息面板按钮和通用详情按钮补充展开/收起状态与提示，棋盘 accessibility value 显示当前选中地块/州府，唐宋将领档案头像占位不再被读屏朗读，MapEditor 底图偏移输入框和地图编辑画布补中文可访问名称/提示。该切片只改 SwiftUI 可读语义和文案，不改变地图交互、focus order、布局、hit target、规则、导出 JSON schema 或任何 Codable raw 值；完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局和发布级 UI 验收仍未完成。
+> **v5.8t 小切片：** accessibility / VoiceOver 可读文案硬化首轮：主游戏信息面板按钮和通用详情按钮补充展开/收起状态与提示，棋盘 accessibility value 显示当前选中地块/州府，唐宋将领档案头像占位不再被读屏朗读，MapEditor 底图偏移输入框和地图编辑画布补中文可访问名称/提示。该切片只改 SwiftUI 可读语义和文案，不改变地图交互、focus order、布局、hit target、规则、导出 JSON schema 或任何 Codable raw 值；完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局和发布级 UI 验收仍未完成。
+
+> **v5.8u 最新小切片：** accessibility 控件状态提示继续硬化：军令按钮补可用/停用值和停用原因提示，府库军备按钮把费用与观战/阶段/资源不足原因绑定到读屏提示，亲征选择与观战切换说明会影响指挥权限，统一目标锚点按钮补“查看目标”和地图聚焦提示。该切片只改 SwiftUI 控件可读语义，不改变命令、经济、胜利、地图聚焦逻辑、focus order、hit target、规则或 Codable schema；完整 VoiceOver 实机验收、截图验收、横竖屏布局和发布级 UI 验收仍未完成。
 
 ---
 
@@ -234,7 +236,7 @@ WWIIHexV0/
 | v5.5 | 已完成首轮 | HUD、图层、面板、战报、地图视觉 token、军旗棋子和只读粮道 overlay 已改为唐宋场景读法。 |
 | v5.6 | 已完成多轮首轮闭环 | 外交归附、天命、玩家招抚、AI 招抚辅助桥、关系投影、战术候选关系感知、数据驱动胜利条件、胜负原因和目标进度只读显示已接入。 |
 | v5.7 | 已完成多轮可玩性首轮 | 下一步提示、统一目标锚点/定位/spotlight、每回合战报摘要、新局确认、亲征/观战入口、结算预览、合法性提示、检查面板、将领面板和 tooltip 唐宋读法已接入。 |
-| v5.8a-v5.8t | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI、外交 Latin/ASCII 显示、AI 面板原始文本兜底、将领/州府面板 ASCII 显示、兵力/粮道/地图数值标记、AppContainer 源头交互反馈、胜利/粮道/军议摘要、MapEditor raw UI 和 accessibility / VoiceOver 可读文案硬化已做默认主路径首轮。完整 RC 审计仍未完成。 |
+| v5.8a-v5.8u | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI、外交 Latin/ASCII 显示、AI 面板原始文本兜底、将领/州府面板 ASCII 显示、兵力/粮道/地图数值标记、AppContainer 源头交互反馈、胜利/粮道/军议摘要、MapEditor raw UI、accessibility / VoiceOver 可读文案和控件状态提示硬化已做默认主路径首轮。完整 RC 审计仍未完成。 |
 | v5.9 | 未开始 | 可发布验收、完整 artifact 审计、README/flow/update_log 统一发布口径仍待后续。 |
 
 ### 当前仍未完成

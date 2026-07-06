@@ -61,12 +61,16 @@ struct RootGameView: View {
                                 }
                             }
                             .pickerStyle(.segmented)
+                            .accessibilityValue(container.gameState.displayName(for: container.playerFaction))
+                            .accessibilityHint("切换当前亲征政权；切换后会清空当前选中军队和高亮。")
 
                             Toggle("观战", isOn: Binding(
                                 get: { container.observerModeEnabled },
                                 set: { container.setObserverModeEnabled($0) }
                             ))
                             .toggleStyle(.button)
+                            .accessibilityValue(container.observerModeEnabled ? "已开启" : "已关闭")
+                            .accessibilityHint(container.observerModeEnabled ? "当前只能查看战局，不能下令；关闭后恢复亲征指挥。" : "开启后进入只读观战，军令和府库命令会停用。")
                             .font(.caption.weight(.semibold))
                         }
                         .padding(8)
@@ -78,6 +82,8 @@ struct RootGameView: View {
                             set: { container.setObserverModeEnabled($0) }
                         ))
                         .toggleStyle(.button)
+                        .accessibilityValue(container.observerModeEnabled ? "Enabled" : "Disabled")
+                        .accessibilityHint(container.observerModeEnabled ? "Observer mode is read-only." : "Enable read-only observer mode.")
                         .font(.caption.weight(.semibold))
                         .padding(8)
                         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))

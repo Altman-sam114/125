@@ -63,6 +63,8 @@ struct EconomyPanelView: View {
                 }
                 .buttonStyle(.bordered)
                 .disabled(!canQueue(kind))
+                .accessibilityValue(productionAccessibilityValue(for: kind))
+                .accessibilityHint(productionAccessibilityHint(for: kind))
 
                 Text(productionCostLine(for: kind))
                     .font(.caption)
@@ -130,6 +132,42 @@ struct EconomyPanelView: View {
         }
 
         return "Cost \(resourceSummary(kind.cost)) | \(kind.buildTurns) turn(s)"
+    }
+
+    private func productionAccessibilityValue(for kind: ProductionKind) -> String {
+        if gameState.isTangSongScenario {
+            return canQueue(kind) ? "可用" : "停用"
+        }
+        return canQueue(kind) ? "Available" : "Unavailable"
+    }
+
+    private func productionAccessibilityHint(for kind: ProductionKind) -> String {
+        let costLine = productionCostLine(for: kind)
+        guard !canQueue(kind) else {
+            return gameState.isTangSongScenario
+                ? "\(costLine)。加入当前府库军备队列。"
+                : "\(costLine). Add this item to the production queue."
+        }
+
+        if observerModeEnabled {
+            return gameState.isTangSongScenario
+                ? "\(costLine)。观战模式只能查看府库，不能下达军备令。"
+                : "\(costLine). Observer mode is read-only."
+        }
+
+        let commandsAllowed = gameState.effectiveTurnOrderState.allowsCommands(
+            activeFaction: playerFaction,
+            phase: gameState.phase
+        )
+        if !commandsAllowed {
+            return gameState.isTangSongScenario
+                ? "\(costLine)。当前阶段不可下达军备令。"
+                : "\(costLine). Production is unavailable during the current phase."
+        }
+
+        return gameState.isTangSongScenario
+            ? "\(costLine)。当前丁口、钱帛或粮草不足。"
+            : "\(costLine). Insufficient resources."
     }
 
     private func iconName(for kind: ProductionKind) -> String {

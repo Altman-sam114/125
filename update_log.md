@@ -39,7 +39,7 @@
 
 遗留事项：
 
-- 仍需完整 v5.8 RC 玩家可见残留清单、剩余全局 accessibility、主棋盘逐地块可访问操作路径、截图/布局/完整 VoiceOver 实机验收计划；主游戏 `DataLoader` 默认 fallback 策略已由 v5.8g 收口，accessibility / VoiceOver 可读文案已由 v5.8t 做首轮收口。
+- 仍需完整 v5.8 RC 玩家可见残留清单、剩余全局 accessibility、主棋盘逐地块可访问操作路径、截图/布局/完整 VoiceOver 实机验收计划；主游戏 `DataLoader` 默认 fallback 策略已由 v5.8g 收口，accessibility / VoiceOver 可读文案与控件状态提示已由 v5.8t-v5.8u 做首轮收口。
 - v0.x 历史段落仍保留在文档中作为技术地基；后续只应在必要处继续压缩，不应删除影响回归理解的历史事实。
 
 ## v5.8g - 主游戏默认启动 fallback 硬化
@@ -429,6 +429,42 @@
 遗留事项：
 
 - 本轮只改 SwiftUI 可读语义和文案，不改变 SpriteKit 地图交互、逐 hex focus、focus order、hit target、布局、规则、导出 JSON schema 或 Codable raw 值。
+- 主棋盘每个地块/军队/可攻击目标的 VoiceOver 可聚焦与可操作路径仍未实现；完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
+
+## v5.8u - accessibility 控件状态提示硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出军令、府库、亲征/观战和统一目标锚点按钮在禁用或改变权限时缺少读屏原因；本轮选择低风险 SwiftUI modifier 小切片，不做主棋盘逐 hex focus 大改。
+- `CommandPanelView` 为固守、可退、整补、围城、修城、解围、招降、招抚和结束回合按钮补充 accessibility value/hint，唐宋路径会朗读“可用 / 停用”以及观战、阶段、未选军队、已行动或缺目标等原因。
+- `EconomyPanelView` 军备按钮补充 accessibility value/hint，把费用、建造回合、观战模式、当前阶段不可下令和资源不足原因绑定到按钮读法。
+- `RootGameView` 亲征选择与观战切换补充当前值和提示，说明切换亲征政权会清空选择/高亮，观战会停用军令和府库命令。
+- `HUDView` 统一目标锚点按钮补充“查看目标”可访问标签、已据/待取状态和地图聚焦提示。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8u 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/CommandPanelView.swift`
+- `WWIIHexV0/UI/EconomyPanelView.swift`
+- `WWIIHexV0/UI/RootGameView.swift`
+- `WWIIHexV0/UI/HUDView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8u_accessibility_control_state_hints_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 SwiftUI 控件可读语义，不改变命令执行、经济规则、胜利目标、地图聚焦逻辑、SpriteKit 地图交互、逐 hex focus、focus order、hit target、布局、JSON schema 或 Codable raw 值。
 - 主棋盘每个地块/军队/可攻击目标的 VoiceOver 可聚焦与可操作路径仍未实现；完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
 
 ## v5.8r - 胜利、粮道与军议摘要显示硬化

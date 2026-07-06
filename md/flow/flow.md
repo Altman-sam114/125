@@ -582,6 +582,14 @@ v5.8t 当前已落地：
 - MapEditor 底图偏移输入框使用“底图横向偏移 / 底图纵向偏移”可访问标签，地图编辑画布补“地图编辑画布”名称和编辑提示。
 - 该切片只改 SwiftUI 可读语义和文案，不改变 SpriteKit 地图交互、逐 hex focus、focus order、hit target、布局、规则、导出 JSON schema 或 Codable raw 值；完整 VoiceOver 实机、截图、横竖屏布局和发布级 UI 验收仍未完成。
 
+v5.8u 当前已落地：
+
+- `CommandPanelView` 的固守、可退、整补、围城、修城、解围、招降、招抚和结束回合按钮补充 accessibility value/hint；唐宋路径会朗读“可用 / 停用”，并说明观战、阶段不对、未选军队、已行动或缺少目标等停用原因。
+- `EconomyPanelView` 的军备按钮补充 accessibility value/hint，把费用、建造回合、观战模式、当前阶段不可下令和资源不足原因绑定到按钮读法。
+- `RootGameView` 的亲征选择与观战切换补充当前值和提示，说明切换亲征政权会清空选择/高亮，观战会停用军令和府库命令。
+- `HUDView` 的统一目标锚点按钮补充“查看目标”可访问标签、已据/待取状态和地图聚焦提示。
+- 该切片只改 SwiftUI 控件可读语义，不改变命令执行、经济规则、胜利目标、地图聚焦逻辑、SpriteKit 地图交互、逐 hex focus、focus order、hit target、布局、JSON schema 或 Codable raw 值；完整 VoiceOver 实机、截图、横竖屏布局和发布级 UI 验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

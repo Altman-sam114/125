@@ -40,16 +40,22 @@ struct CommandPanelView: View {
                     Label(isTangSongScenario ? "固守" : "Hold", systemImage: "shield.fill")
                 }
                 .disabled(!canSetHold)
+                .accessibilityValue(commandAccessibilityValue(isEnabled: canSetHold))
+                .accessibilityHint(holdAccessibilityHint)
 
                 Button(action: onAllowRetreat) {
                     Label(isTangSongScenario ? "可退" : "Retreat OK", systemImage: "arrow.uturn.backward.circle")
                 }
                 .disabled(!canSetRetreatable)
+                .accessibilityValue(commandAccessibilityValue(isEnabled: canSetRetreatable))
+                .accessibilityHint(retreatAccessibilityHint)
 
                 Button(action: onResupply) {
                     Label(isTangSongScenario ? "整补" : "Reinforce", systemImage: "cross.circle")
                 }
                 .disabled(!canCommandSelectedUnit)
+                .accessibilityValue(commandAccessibilityValue(isEnabled: canCommandSelectedUnit))
+                .accessibilityHint(resupplyAccessibilityHint)
             }
             .buttonStyle(.bordered)
 
@@ -59,6 +65,12 @@ struct CommandPanelView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!canBesiege)
+            .accessibilityValue(commandAccessibilityValue(isEnabled: canBesiege))
+            .accessibilityHint(targetCommandAccessibilityHint(
+                isEnabled: canBesiege,
+                ready: isTangSongScenario ? "对当前选中的敌方城池、关隘或粮仓登记围城压力。" : "Besiege the selected enemy city, pass, or granary.",
+                missingTarget: isTangSongScenario ? "需先在地图选择相邻敌方城池、关隘或粮仓。" : "Select an adjacent enemy city, pass, or granary first."
+            ))
 
             Button(action: onRepairFortification) {
                 Label(repairFortificationButtonTitle, systemImage: "hammer")
@@ -66,6 +78,12 @@ struct CommandPanelView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!canRepairFortification)
+            .accessibilityValue(commandAccessibilityValue(isEnabled: canRepairFortification))
+            .accessibilityHint(targetCommandAccessibilityHint(
+                isEnabled: canRepairFortification,
+                ready: isTangSongScenario ? "让当前军队修补所选受围州府的城防。" : "Repair fortifications in the selected besieged friendly region.",
+                missingTarget: isTangSongScenario ? "需先选择己方受围且城防受损的州府。" : "Select a damaged friendly besieged region first."
+            ))
 
             Button(action: onRelieveSiege) {
                 Label(relieveSiegeButtonTitle, systemImage: "flag.checkered")
@@ -73,6 +91,12 @@ struct CommandPanelView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!canRelieveSiege)
+            .accessibilityValue(commandAccessibilityValue(isEnabled: canRelieveSiege))
+            .accessibilityHint(targetCommandAccessibilityHint(
+                isEnabled: canRelieveSiege,
+                ready: isTangSongScenario ? "让当前军队驰援射程内的己方受围州府。" : "Relieve a friendly besieged region in range.",
+                missingTarget: isTangSongScenario ? "需先选择或靠近己方受围州府。" : "Select or move near a friendly besieged region first."
+            ))
 
             Button(action: onDemandSurrender) {
                 Label(demandSurrenderButtonTitle, systemImage: "checkmark.seal")
@@ -80,6 +104,12 @@ struct CommandPanelView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!canDemandSurrender)
+            .accessibilityValue(commandAccessibilityValue(isEnabled: canDemandSurrender))
+            .accessibilityHint(targetCommandAccessibilityHint(
+                isEnabled: canDemandSurrender,
+                ready: isTangSongScenario ? "对城防已破且断粮的围城目标发起招降。" : "Demand surrender from a broken siege target.",
+                missingTarget: isTangSongScenario ? "需先选中城防已破且断粮的敌方围城目标。" : "Select a broken enemy siege target first."
+            ))
 
             Button(action: onProposeSubmission) {
                 Label(submissionButtonTitle, systemImage: "seal")
@@ -87,12 +117,19 @@ struct CommandPanelView: View {
             }
             .buttonStyle(.bordered)
             .disabled(!canProposeSubmission)
+            .accessibilityValue(commandAccessibilityValue(isEnabled: canProposeSubmission))
+            .accessibilityHint(targetCommandAccessibilityHint(
+                isEnabled: canProposeSubmission,
+                ready: isTangSongScenario ? "向当前可招抚的外方国都提出归附。" : "Propose submission to the eligible foreign capital.",
+                missingTarget: isTangSongScenario ? "需先选择可招抚的外方国都，或等待外交条件成熟。" : "Select an eligible foreign capital first."
+            ))
 
             Button(action: onEndTurn) {
                 Label(isTangSongScenario ? "结束回合" : "End Turn", systemImage: "forward.end")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .accessibilityHint(isTangSongScenario ? "结束当前军令阶段，推进各方军议和下一回合。" : "End the current turn and advance the game.")
 
             if let lastCommandMessage {
                 Text(commandMessageText(lastCommandMessage))
@@ -213,6 +250,50 @@ struct CommandPanelView: View {
         }
 
         return isTangSongScenario ? "可行军或进攻。" : "Move/Attack ready."
+    }
+
+    private func commandAccessibilityValue(isEnabled: Bool) -> String {
+        if isTangSongScenario {
+            return isEnabled ? "可用" : "停用"
+        }
+        return isEnabled ? "Available" : "Unavailable"
+    }
+
+    private var holdAccessibilityHint: String {
+        if canSetHold {
+            return isTangSongScenario ? "命当前军队固守阵地，不主动退却。" : "Order the selected unit to hold position."
+        }
+        if canCommandSelectedUnit {
+            return isTangSongScenario ? "当前军队已经按固守口径行动。" : "The selected unit is already set to hold."
+        }
+        return statusText
+    }
+
+    private var retreatAccessibilityHint: String {
+        if canSetRetreatable {
+            return isTangSongScenario ? "准许当前军队在不利战斗后退却。" : "Allow the selected unit to retreat after combat."
+        }
+        if canCommandSelectedUnit {
+            return isTangSongScenario ? "当前军队已经按可退口径行动。" : "The selected unit is already allowed to retreat."
+        }
+        return statusText
+    }
+
+    private var resupplyAccessibilityHint: String {
+        if canCommandSelectedUnit {
+            return isTangSongScenario ? "消耗当前军队行动机会进行整补。" : "Spend the selected unit's action to reinforce."
+        }
+        return statusText
+    }
+
+    private func targetCommandAccessibilityHint(isEnabled: Bool, ready: String, missingTarget: String) -> String {
+        if isEnabled {
+            return ready
+        }
+        if canCommandSelectedUnit {
+            return missingTarget
+        }
+        return statusText
     }
 
     private func commandMessageText(_ message: String) -> String {

@@ -66,7 +66,7 @@ displayName: 建隆元年：陈桥兵变与山河一统
 
 ## 3. 当前迁移进度快照
 
-截至当前工作树，唐宋迁移已推进到 v5.8t accessibility / VoiceOver 可读文案硬化首轮。当前主线是唐宋 v5.x / `main` 直推；v0.x 阿登内容只作为 legacy 架构地基和回归参考。
+截至当前工作树，唐宋迁移已推进到 v5.8u accessibility 控件状态提示硬化首轮。当前主线是唐宋 v5.x / `main` 直推；v0.x 阿登内容只作为 legacy 架构地基和回归参考。
 
 - v5.0 已建立迁移总提示词和审计合同，明确首发 960 剧本、架构边界、版本路线、禁止项和验收标准。
 - v5.1 已加入 `PowerId` / `PowerProfile` / `PowerRelation` / `TurnOrderState` / `WarRelationRules` 兼容地基，回合和 AI 控制权主路径开始脱离硬编码 Germany/Allies。
@@ -119,12 +119,13 @@ displayName: 建隆元年：陈桥兵变与山河一统
 - v5.8r 已完成胜利、粮道与军议摘要显示硬化首轮：`VictoryObjectiveProgress.summary`、HUD 统一/天命进度、战报评分估算、军队详情粮道近源坐标、府库资源摘要和旧日志选中地块坐标继续改用唐宋读法；战报本回合军议摘要遇到 Latin、JSON 痕迹或 raw key 时降级为中文摘要。
 - v5.8s 已完成 MapEditor raw UI 硬化首轮：MapEditor 资源区、底图区、信息区、状态栏和导出错误继续收口默认可见技术词；地块坐标改用“第 q 列，第 r 行”，默认资源显示为“建隆元年剧本 / 州府数据”，底图只显示文件名，导出校验错误不再默认直出州府 raw id、地形 rawValue 或底层英文编码错误。
 - v5.8t 已完成 accessibility / VoiceOver 可读文案硬化首轮：`RootGameView` 信息面板按钮补展开/收起状态与提示，棋盘 accessibility value 显示当前选中地块/州府；`InfoPanelToggle` 通用详情按钮补状态和提示；`GeneralProfileView` 不再朗读头像占位；MapEditor 底图偏移输入框和地图编辑画布补中文可访问名称/提示。
+- v5.8u 已完成 accessibility 控件状态提示硬化首轮：`CommandPanelView` 军令按钮补可用/停用值与禁用原因提示，`EconomyPanelView` 军备按钮补费用和观战/阶段/资源不足提示，`RootGameView` 亲征选择与观战切换补权限说明，`HUDView` 统一目标锚点按钮补查看目标和地图聚焦提示。
 
 仍未完成的关键项：
 
 - `Faction` 底层仍是 `.allies` / `.germany` legacy 桥，真实多政权数据驱动未收口。
 - `ProductionKind`、`EconomyResources`、`Division`、`ComponentType` 的 Codable schema 仍保留二战兼容名。
-- 自动破城、完整外交纳土交割、完整漕运/粮队/仓储容量、正式评分系统、治理政策和完整发布级 UI 美术/截图验收仍未落地；v5.8t 仍是玩家可见/读屏可读文案硬化首轮，不是结构化 event payload、全项目写入端本地化、真 LLM 输出本地化、完整 VoiceOver 实机验收或发布级 UI 验收。
+- 自动破城、完整外交纳土交割、完整漕运/粮队/仓储容量、正式评分系统、治理政策和完整发布级 UI 美术/截图验收仍未落地；v5.8u 仍是玩家可见/读屏可读语义硬化首轮，不是结构化 event payload、全项目写入端本地化、真 LLM 输出本地化、完整 VoiceOver 实机验收或发布级 UI 验收。
 - AI 默认 issuer、simulated rationale、AI 面板默认主路径显示桥和 AI 面板玩家态/开发态分层已做首轮迁移，但完整皇帝/朝廷/枢密/节度使/转运使/州府守臣/外交使者 schema、真实多 Agent JSON 和真 LLM 接入仍待后续；legacy Agent D、阿登数据与测试中的 Guderian/Rundstedt/Eisenhower 仍保留作兼容参考。
 
 下一轮优先继续 v5.8 / v5.9 发布候选收口：剩余全局 accessibility、主棋盘逐地块可访问操作路径、截图/布局验收计划、玩家可见英文/raw id 残留扫尾和完整 artifact 复核。若回到功能开发，真实行动仍必须经 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`，不得让 UI、事件或 Agent 直接改 `GameState`。
@@ -184,7 +185,7 @@ md/
 | v5.5 | 发布级 UI 与地图视觉 | 已完成术语桥、视觉 token、只读粮道 overlay 首轮 | 第一屏地图、HUD、军令、州府、府库、外交、战报、军议可读；移除默认二战文案 | `v5.5_ui_visual_record.md` |
 | v5.6 | 外交、归附、天命与治理 | 已完成规则合同、玩家入口/只读展示、AI 招抚辅助桥、天命胜利评价、关系投影、战术候选关系感知、数据驱动胜利条件、胜负原因和胜利目标进度显示首轮 | 多政权关系、归附、天命/国威、治理和事件闭环 | `v5.6a_diplomacy_mandate_contract_record.md`、`v5.6b_player_submission_diplomacy_panel_record.md`、`v5.6c_ai_pacification_submission_record.md`、`v5.6d_tangsong_victory_mandate_record.md`、`v5.6e_diplomacy_turn_order_projection_record.md`、`v5.6f_relation_aware_war_candidates_record.md`、`v5.6g_data_driven_victory_conditions_record.md`、`v5.6h_victory_reason_battle_report_record.md`、`v5.6i_victory_objective_progress_record.md`、`v5.6_diplomacy_mandate_record.md` |
 | v5.7 | 教程、剧本包装与可玩闭环 | 已开始：v5.7a 下一步提示、v5.7b 统一目标锚点、v5.7c 目标定位、v5.7d 地图目标 spotlight、v5.7e 每回合战报摘要、v5.7f 新局/指挥身份包装、v5.7g 高亮数量提示、v5.7h 亲征/观战入口、v5.7i 结算预览/评分估算、v5.7j 合法性提示、v5.7k 检查面板读法、v5.7l 将领面板读法、v5.7m 常驻 tooltip 读法首轮 | 开局引导、势力选择、战报、新局/重置，让普通玩家能完成首发剧本 | `v5.7a_next_action_hint_record.md`、`v5.7b_objective_anchor_record.md`、`v5.7c_objective_focus_record.md`、`v5.7d_objective_spotlight_record.md`、`v5.7e_turn_report_summary_record.md`、`v5.7f_new_game_identity_observer_record.md`、`v5.7g_next_action_highlight_counts_record.md`、`v5.7h_start_power_observer_entry_record.md`、`v5.7i_victory_settlement_score_summary_record.md`、`v5.7j_next_action_legality_hint_record.md`、`v5.7k_inspector_tangsong_reading_record.md`、`v5.7l_general_panels_tangsong_reading_record.md`、`v5.7m_unit_tooltip_tangsong_reading_record.md`、`v5.7_playable_loop_record.md` |
-| v5.8 | 发布候选硬化 | 已完成 v5.8a-v5.8t 首轮：AI 面板、玩家态/开发态分层、外交面板、战报日志、MapEditor 默认路径、文档定位、主游戏默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI、外交 Latin/ASCII 显示、AI 面板原始文本兜底、将领/州府面板 ASCII UI、兵力/粮道/地图数值标记、AppContainer 源头交互反馈、胜利/粮道/军议摘要、MapEditor raw UI 和 accessibility / VoiceOver 可读文案硬化；完整 RC 未完成 | 玩家可见残留扫描、资源授权、性能、文档口径和云端 artifact 验收收口 | `v5.8a_ai_panel_default_path_hardening_record.md`、`v5.8b_ai_panel_debug_player_dev_split_record.md`、`v5.8c_diplomacy_panel_default_path_hardening_record.md`、`v5.8d_event_log_default_path_hardening_record.md`、`v5.8e_mapeditor_default_path_hardening_record.md`、`v5.8f_docs_product_positioning_record.md`、`v5.8g_main_game_default_loader_hardening_record.md`、`v5.8h_tangsong_general_registry_hardening_record.md`、`v5.8i_command_feedback_event_metadata_hardening_record.md`、`v5.8j_inspector_raw_id_hardening_record.md`、`v5.8k_command_event_raw_english_fallback_record.md`、`v5.8l_general_plan_fixed_english_ui_record.md`、`v5.8m_diplomacy_latin_ascii_hardening_record.md`、`v5.8n_ai_panel_raw_text_fallback_record.md`、`v5.8o_accessibility_fixed_english_ui_record.md`、`v5.8p_numeric_marker_ascii_hardening_record.md`、`v5.8q_appcontainer_source_feedback_localization_record.md`、`v5.8r_victory_supply_summary_hardening_record.md`、`v5.8s_mapeditor_raw_ui_hardening_record.md`、`v5.8t_accessibility_voiceover_text_hardening_record.md`、`v5.8_release_candidate_audit.md` |
+| v5.8 | 发布候选硬化 | 已完成 v5.8a-v5.8u 首轮：AI 面板、玩家态/开发态分层、外交面板、战报日志、MapEditor 默认路径、文档定位、主游戏默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI、外交 Latin/ASCII 显示、AI 面板原始文本兜底、将领/州府面板 ASCII UI、兵力/粮道/地图数值标记、AppContainer 源头交互反馈、胜利/粮道/军议摘要、MapEditor raw UI、accessibility / VoiceOver 可读文案和控件状态提示硬化；完整 RC 未完成 | 玩家可见残留扫描、资源授权、性能、文档口径和云端 artifact 验收收口 | `v5.8a_ai_panel_default_path_hardening_record.md`、`v5.8b_ai_panel_debug_player_dev_split_record.md`、`v5.8c_diplomacy_panel_default_path_hardening_record.md`、`v5.8d_event_log_default_path_hardening_record.md`、`v5.8e_mapeditor_default_path_hardening_record.md`、`v5.8f_docs_product_positioning_record.md`、`v5.8g_main_game_default_loader_hardening_record.md`、`v5.8h_tangsong_general_registry_hardening_record.md`、`v5.8i_command_feedback_event_metadata_hardening_record.md`、`v5.8j_inspector_raw_id_hardening_record.md`、`v5.8k_command_event_raw_english_fallback_record.md`、`v5.8l_general_plan_fixed_english_ui_record.md`、`v5.8m_diplomacy_latin_ascii_hardening_record.md`、`v5.8n_ai_panel_raw_text_fallback_record.md`、`v5.8o_accessibility_fixed_english_ui_record.md`、`v5.8p_numeric_marker_ascii_hardening_record.md`、`v5.8q_appcontainer_source_feedback_localization_record.md`、`v5.8r_victory_supply_summary_hardening_record.md`、`v5.8s_mapeditor_raw_ui_hardening_record.md`、`v5.8t_accessibility_voiceover_text_hardening_record.md`、`v5.8u_accessibility_control_state_hints_record.md`、`v5.8_release_candidate_audit.md` |
 | v5.9 | 可发布版本收口 | 未开始 | 首发剧本可完整试玩，Agent C 验收通过，README/flow/update_log 反映唐宋产品 | `v5.9_release_acceptance.md` |
 
 阶段状态只能按真实源码和真实检查结果推进。一个阶段可以有多轮“小切片”，但不能因为写了路线或 prompt 就把状态写成已完成。
@@ -410,6 +411,9 @@ md/prompt/v5.0-唐宋迁移/
 ├── v5.8p_numeric_marker_ascii_hardening_record.md # 已创建：兵力、粮道与数值标记 ASCII UI 硬化
 ├── v5.8q_appcontainer_source_feedback_localization_record.md # 已创建：AppContainer 源头反馈中文化
 ├── v5.8r_victory_supply_summary_hardening_record.md # 已创建：胜利、粮道与军议摘要硬化
+├── v5.8s_mapeditor_raw_ui_hardening_record.md # 已创建：MapEditor raw UI 硬化
+├── v5.8t_accessibility_voiceover_text_hardening_record.md # 已创建：accessibility / VoiceOver 可读文案硬化
+├── v5.8u_accessibility_control_state_hints_record.md # 已创建：accessibility 控件状态提示硬化
 ├── v5.8_release_candidate_audit.md
 └── v5.9_release_acceptance.md
 ```

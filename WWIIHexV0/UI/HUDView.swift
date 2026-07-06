@@ -116,6 +116,9 @@ struct HUDView: View {
                                         .buttonStyle(.bordered)
                                         .controlSize(.mini)
                                         .disabled(onFocusObjective == nil)
+                                        .accessibilityLabel("查看目标 \(item.label)")
+                                        .accessibilityValue(item.isControlled ? "已据" : "待取")
+                                        .accessibilityHint(onFocusObjective == nil ? "当前无法在地图上聚焦目标。" : "在地图上聚焦该胜利目标州府。")
                                     }
                                 }
                             }
