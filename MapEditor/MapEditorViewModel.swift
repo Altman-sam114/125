@@ -199,7 +199,7 @@ final class MapEditorViewModel: ObservableObject {
         guard let hex = document.hexes[coord] else {
             inspectedRegionName = ""
             inspectedTheaterName = ""
-            lastStatusMessage = "坐标 \(coord.mapEditorKey) 没有地块。"
+            lastStatusMessage = "\(coord.mapEditorDisplayName) 没有地块。"
             markChanged()
             return
         }
@@ -216,7 +216,7 @@ final class MapEditorViewModel: ObservableObject {
             inspectedRegionName = ""
             inspectedTheaterName = ""
         }
-        lastStatusMessage = "已选中：\(coord.mapEditorKey)。"
+        lastStatusMessage = "已选中：\(coord.mapEditorDisplayName)。"
         markChanged()
     }
 
@@ -287,7 +287,7 @@ final class MapEditorViewModel: ObservableObject {
             lastErrorMessage = nil
             lastStatusMessage = "已保存 \(url.lastPathComponent)。"
         } catch {
-            lastErrorMessage = error.localizedDescription
+            lastErrorMessage = "保存地图草案失败。"
         }
     }
 
@@ -299,7 +299,7 @@ final class MapEditorViewModel: ObservableObject {
             lastStatusMessage = "已读取 \(url.lastPathComponent)。"
             markChanged()
         } catch {
-            lastErrorMessage = error.localizedDescription
+            lastErrorMessage = "读取地图草案失败。"
         }
     }
 
@@ -322,7 +322,7 @@ final class MapEditorViewModel: ObservableObject {
             let result = try MapEditorGameResourceBridge.overwriteDefaultGameResources(document: document)
             lastExportResult = result
             lastErrorMessage = nil
-            lastStatusMessage = "已覆盖 \(result.scenarioFileName).json 和 \(result.regionFileName).json。"
+            lastStatusMessage = "已覆盖唐宋默认剧本与州府数据。"
         } catch {
             lastErrorMessage = String(describing: error)
         }
@@ -334,7 +334,7 @@ final class MapEditorViewModel: ObservableObject {
             let result = try MapEditorExporter.export(document: document)
             lastExportResult = result
             lastErrorMessage = nil
-            lastStatusMessage = "已在内存中导出 JSON。"
+            lastStatusMessage = "已生成游戏资源数据。"
             return result
         } catch {
             lastErrorMessage = String(describing: error)
@@ -348,10 +348,10 @@ final class MapEditorViewModel: ObservableObject {
         do {
             try MapEditorExporter.write(result, to: directory)
             lastErrorMessage = nil
-            lastStatusMessage = "已导出 JSON 到 \(directory.lastPathComponent)。"
+            lastStatusMessage = "已导出游戏资源到 \(directory.lastPathComponent)。"
             return result
         } catch {
-            lastErrorMessage = error.localizedDescription
+            lastErrorMessage = "写出游戏资源失败。"
             return nil
         }
     }
@@ -363,7 +363,7 @@ final class MapEditorViewModel: ObservableObject {
         }
         if hexTool == .extend {
             if document.addHex(at: coord, terrain: .plain) {
-                lastStatusMessage = "已扩展地块：\(coord.mapEditorKey)。"
+                lastStatusMessage = "已扩展地块：\(coord.mapEditorDisplayName)。"
             } else if !document.contains(coord) {
                 lastStatusMessage = "扩展失败：新地块必须贴着已有地块。"
             }
@@ -376,7 +376,7 @@ final class MapEditorViewModel: ObservableObject {
         hex.isSupplySource = paintSupply
         hex.supplyFaction = paintSupply ? supplyFaction : nil
         if selectedTerrain == .city, hex.cityName == nil {
-            hex.cityName = "州城 \(coord.q),\(coord.r)"
+            hex.cityName = "州城 \(nextCityIndex())"
         } else if selectedTerrain != .city {
             hex.cityName = nil
         }
@@ -501,6 +501,15 @@ final class MapEditorViewModel: ObservableObject {
             used: document.theaters.keys.map(\.rawValue),
             prefix: "theater_"
         )
+    }
+
+    private func nextCityIndex() -> Int {
+        let usedNames = Set(document.hexes.values.compactMap(\.cityName))
+        var candidate = 1
+        while usedNames.contains("州城 \(candidate)") {
+            candidate += 1
+        }
+        return candidate
     }
 
     private func nextNumericSuffix(used: [String], prefix: String) -> Int {

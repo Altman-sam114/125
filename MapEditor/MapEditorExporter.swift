@@ -11,23 +11,23 @@ struct MapEditorExportResult: Equatable {
 
 enum MapEditorExportError: Error, CustomStringConvertible, Equatable {
     case unassignedHex(HexCoord)
-    case emptyRegion(RegionId)
-    case missingRegion(RegionId)
+    case emptyRegion(String)
+    case missingRegion
     case invalidTerrain(BaseTerrain)
     case encodingFailed(String)
 
     var description: String {
         switch self {
         case .unassignedHex(let coord):
-            return "地块 \(coord.mapEditorKey) 尚未归入州府。"
-        case .emptyRegion(let id):
-            return "州府 \(id.rawValue) 没有地块。"
-        case .missingRegion(let id):
-            return "地块引用了未定义的州府：\(id.rawValue)。"
+            return "\(coord.mapEditorDisplayName) 尚未归入州府。"
+        case .emptyRegion(let name):
+            return "州府“\(name)”没有地块。"
+        case .missingRegion:
+            return "有地块引用了未登记的州府；请重新分配州府。"
         case .invalidTerrain(let terrain):
-            return "地形 \(terrain.rawValue) 不能导出。"
-        case .encodingFailed(let message):
-            return "编码 JSON 失败：\(message)"
+            return "地形“\(terrain.mapEditorDisplayName)”不能导出。"
+        case .encodingFailed(_):
+            return "生成游戏资源数据失败。"
         }
     }
 }
@@ -76,7 +76,7 @@ enum MapEditorExporter {
         }
 
         for regionId in Set(document.hexes.values.compactMap(\.regionId)) where document.regions[regionId] == nil {
-            throw MapEditorExportError.missingRegion(regionId)
+            throw MapEditorExportError.missingRegion
         }
     }
 
@@ -94,7 +94,7 @@ enum MapEditorExporter {
 
         let keyLocations = document.sortedHexes.compactMap { hex -> KeyLocationDefinition? in
             guard hex.cityName != nil || hex.fortressName != nil || hex.isSupplySource else { return nil }
-            let name = hex.cityName ?? hex.fortressName ?? "粮仓 \(hex.coord.mapEditorKey)"
+            let name = hex.cityName ?? hex.fortressName ?? "粮仓 \(hex.coord.mapEditorDisplayName)"
             return KeyLocationDefinition(
                 id: name.normalizedMapEditorIdentifier,
                 name: name,
@@ -184,7 +184,7 @@ enum MapEditorExporter {
 
         let regionDefinitions = try document.regions.values.sorted { $0.id.rawValue < $1.id.rawValue }.map { draft in
             guard let regionHexes = hexesByRegion[draft.id], !regionHexes.isEmpty else {
-                throw MapEditorExportError.emptyRegion(draft.id)
+                throw MapEditorExportError.emptyRegion(draft.name.isEmpty ? "未命名州府" : draft.name)
             }
 
             let representativeHex = representativeHex(for: regionHexes)
@@ -307,5 +307,24 @@ private extension String {
         lowercased()
             .map { $0.isLetter || $0.isNumber ? String($0) : "_" }
             .joined()
+    }
+}
+
+private extension BaseTerrain {
+    var mapEditorDisplayName: String {
+        switch self {
+        case .plain:
+            return "平原"
+        case .forest:
+            return "林地"
+        case .mountain:
+            return "山地"
+        case .hill:
+            return "丘陵"
+        case .city:
+            return "州城"
+        case .fortress:
+            return "关隘"
+        }
     }
 }

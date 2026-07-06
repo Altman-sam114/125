@@ -119,7 +119,7 @@ struct MapEditorRegionDraft: Codable, Equatable, Identifiable {
         assignedGeneralId: String? = nil
     ) {
         self.id = id
-        self.name = name ?? id.rawValue
+        self.name = name ?? "未命名州府"
         self.owner = owner
         self.controller = controller
         self.infrastructure = infrastructure
@@ -136,7 +136,7 @@ struct MapEditorTheaterDraft: Codable, Equatable, Identifiable {
 
     init(id: TheaterId, name: String? = nil) {
         self.id = id
-        self.name = name ?? id.rawValue
+        self.name = name ?? "未命名方面"
     }
 }
 
@@ -382,5 +382,9 @@ enum MapEditorStorage {
 extension HexCoord {
     var mapEditorKey: String {
         "\(q),\(r)"
+    }
+
+    var mapEditorDisplayName: String {
+        "第 \(q) 列，第 \(r) 行"
     }
 }

@@ -7,9 +7,9 @@ enum MapEditorGameResourceBridgeError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .missingTerrain(let terrain):
-            return "游戏资源中存在无法识别的地形：\(terrain)。"
-        case .missingResource(let url):
-            return "缺少唐宋默认资源：\(url.lastPathComponent)。"
+            return terrain.isEmpty ? "游戏资源中存在无法识别的地形。" : "游戏资源中存在无法识别的地形；请检查唐宋地形数据。"
+        case .missingResource(_):
+            return "缺少唐宋默认剧本或州府数据。"
         }
     }
 }

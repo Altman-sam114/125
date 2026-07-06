@@ -78,7 +78,9 @@
 
 > **v5.8q 小切片：** 唐宋 `AppContainer` 源头反馈中文化首轮：`submit(_:)` 的 `lastCommandMessage` 与交互日志在唐宋路径改用动作级中文摘要和中文标点，常见无可行动军队、围城/修城/解围/招降/招抚、将领军令、府库观战拒绝、选中军队与地块坐标反馈从写入端分流为唐宋文案。该切片只改 AppContainer 反馈写入与 legacy fallback，不改变 `Command`、`CommandResult`、`GameLogEntry`、`RuleEngine`、`CommandValidator`、`WarCommandExecutor`、AI 决策或 Codable schema。
 
-> **v5.8r 最新小切片：** 唐宋胜利进度、粮道坐标与军议摘要继续硬化：`VictoryObjectiveProgress.summary`、HUD 统一/天命进度和战报评分估算改用“／”，`EconomyResources.summary` 唐宋路径改用“、”，军队详情粮道近源坐标和旧日志地块坐标改用中文列/行读法，战报本回合军议摘要遇到 Latin、JSON 痕迹或 raw key 时降级为中文摘要。该切片只改主游戏玩家可见显示桥，不改变胜利规则、经济规则、补给规则、AI 决策记录、事件 schema 或 Codable raw 值。
+> **v5.8r 小切片：** 唐宋胜利进度、粮道坐标与军议摘要继续硬化：`VictoryObjectiveProgress.summary`、HUD 统一/天命进度和战报评分估算改用“／”，`EconomyResources.summary` 唐宋路径改用“、”，军队详情粮道近源坐标和旧日志地块坐标改用中文列/行读法，战报本回合军议摘要遇到 Latin、JSON 痕迹或 raw key 时降级为中文摘要。该切片只改主游戏玩家可见显示桥，不改变胜利规则、经济规则、补给规则、AI 决策记录、事件 schema 或 Codable raw 值。
+
+> **v5.8s 最新小切片：** MapEditor 玩家/编辑器可见 raw 技术词继续硬化：资源区按钮和状态栏不再默认显示“JSON”或 `.json` 文件名，默认资源说明改为“建隆元年剧本 / 州府数据”，信息面板、状态栏和导出错误中的地块坐标改用“第 q 列，第 r 行”，底图区只显示底图文件名，导出校验错误不再直出州府 raw id、地形 rawValue 或底层英文编码错误，自动州城/粮仓 fallback 改用中文读法。该切片只改 MapEditor 显示桥和错误包装，不改变导出的 JSON schema、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId` 或主游戏规则。
 
 ---
 

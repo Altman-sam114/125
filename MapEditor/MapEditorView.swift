@@ -200,13 +200,12 @@ struct MapEditorView: View {
             Button("读取唐宋默认资源", action: viewModel.loadDefaultGameResources)
             Button("覆盖保存为唐宋资源", action: viewModel.overwriteDefaultGameResources)
                 .buttonStyle(.borderedProminent)
-            Button("导出 JSON 到内存") {
+            Button("生成资源预览") {
                 _ = viewModel.export()
             }
-            Text("默认文件：\(MapEditorGameResourceBridge.scenarioResourceName).json / \(MapEditorGameResourceBridge.regionResourceName).json")
+            Text("默认资源：建隆元年剧本 / 州府数据")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-                .textSelection(.enabled)
         }
     }
 
@@ -236,10 +235,9 @@ struct MapEditorView: View {
             .textFieldStyle(.roundedBorder)
             Button("应用底图参数", systemImage: "checkmark.circle", action: viewModel.updateBackgroundImageSettings)
             if let path = viewModel.document.backgroundImage?.filePath {
-                Text(path)
+                Text("底图文件：\(URL(fileURLWithPath: path).lastPathComponent)")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
             }
         }
         .onChange(of: viewModel.backgroundOpacity) { _, _ in viewModel.updateBackgroundImageSettings() }
@@ -254,7 +252,7 @@ struct MapEditorView: View {
                 .font(.headline)
             if let coord = viewModel.inspectedCoord,
                let hex = viewModel.document.hexes[coord] {
-                Text("坐标：\(coord.mapEditorKey)")
+                Text("地块：\(coord.mapEditorDisplayName)")
                 Text("地形：\(hex.terrain.chineseName)")
                 Text("道路：\(hex.hasRoad ? "有" : "无")")
                 if let regionId = hex.regionId {

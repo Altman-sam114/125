@@ -564,6 +564,15 @@ v5.8r 当前已落地：
 - `EventLogView` 本回合战报的军议摘要遇到 Latin、JSON 痕迹、schema key 或 raw id 风险时降级为“军议摘要已形成 / 已形成方面军令”，不直接把上游原文铺给玩家。
 - 该切片只改主游戏玩家可见显示桥，不改变胜利规则、经济规则、补给规则、`AgentDecisionRecord`、`WarDirectiveRecord`、事件写入职责、AI 决策或 Codable raw 值。
 
+v5.8s 当前已落地：
+
+- MapEditor 信息面板、状态栏和导出错误统一通过 `HexCoord.mapEditorDisplayName` 显示“第 q 列，第 r 行”，不再默认显示 `q,r` 坐标。
+- MapEditor 资源区把“导出 JSON 到内存”改为“生成资源预览”，默认资源说明显示为“建隆元年剧本 / 州府数据”；覆盖和导出状态也改为唐宋资源口径，不默认铺开 `.json` 文件名。
+- MapEditor 底图区只显示底图文件名，不在默认侧栏直出完整本机路径。
+- MapEditor 导出错误和默认资源桥错误改为中文包装，避免默认暴露州府 raw id、地形 rawValue 或底层英文编码错误。
+- 自动州城名、粮仓 fallback、默认州府/方面名继续收口为中文读法。
+- 该切片只改 MapEditor 玩家/编辑器可见显示桥和错误包装，不改变导出的 JSON schema、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId`、主游戏 `DataLoader`、规则系统、AI 决策或 Codable raw 值。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

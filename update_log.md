@@ -356,6 +356,45 @@
 - 本轮只改将领面板与州府详情面板的玩家可见显示桥，不改变 `PlayerPlannedOperation`、`RegionInspectorState`、`SiegeRecord`、命令、围城规则、AI 决策、事件写入或 Codable schema。
 - 这不是完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收或 v5.9 发布验收；全局 accessibility 和其他玩家可见残留仍需后续切片继续收口。
 
+## v5.8s - MapEditor raw UI 硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 MapEditor 默认工具路径仍有 `JSON` 技术词、`.json` 文件名、`q,r` 坐标、底图完整路径、导出校验 raw id 和底层错误信息直出风险。
+- `HexCoord.mapEditorDisplayName` 新增 MapEditor 中文坐标读法，信息面板、状态栏、扩展地块反馈和导出错误改用“第 q 列，第 r 行”。
+- MapEditor 资源区按钮改为“生成资源预览”，默认资源说明改为“建隆元年剧本 / 州府数据”，覆盖/导出状态不再默认显示 `.json` 文件名或 JSON 技术词。
+- 底图区只显示底图文件名，不在默认侧栏直出完整本机路径。
+- `MapEditorExportError` 与 `MapEditorGameResourceBridgeError` 的默认描述改为中文包装，不再默认暴露 `RegionId.rawValue`、`terrain.rawValue` 或底层英文编码错误。
+- 自动州城名、粮仓 fallback 和默认州府/方面名继续收口为中文读法。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8s 阶段记录。
+
+关键文件：
+
+- `MapEditor/MapEditorDocument.swift`
+- `MapEditor/MapEditorView.swift`
+- `MapEditor/MapEditorViewModel.swift`
+- `MapEditor/MapEditorExporter.swift`
+- `MapEditor/MapEditorGameResourceBridge.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8s_mapeditor_raw_ui_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 MapEditor 玩家/编辑器可见显示桥和错误包装，不改变导出的 JSON schema、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId`、主游戏 `DataLoader`、规则系统、AI 决策或 Codable raw 值。
+- MapEditor 仍保留底层 `.json` 输出、legacy faction/phase raw 值、`region_#` / `theater_#` 内部 id 和测试夹具历史命名；这些属于后续 schema / 数据驱动迁移范围。
+- 这不是结构化 event payload、真 LLM 输出本地化、完整 VoiceOver 实机、截图、横竖屏布局或 v5.9 发布验收。
+
 ## v5.8r - 胜利、粮道与军议摘要显示硬化
 
 完成日期：2026-07-06
@@ -391,7 +430,7 @@
 遗留事项：
 
 - 本轮只改主游戏玩家可见显示桥，不改变胜利规则、经济规则、补给规则、`AgentDecisionRecord`、`WarDirectiveRecord`、事件写入职责、AI 决策或 Codable raw 值。
-- MapEditor 仍有 raw 文件名、`q,r` 坐标、`JSON` 文案和导出错误 raw id 残留，建议作为后续 v5.8s 小切片。
+- MapEditor 默认可见 raw 文件名、`q,r` 坐标、`JSON` 文案和导出错误 raw id 已由 v5.8s 做首轮收口；底层 JSON schema 与 legacy raw 值仍留后续迁移。
 - 这不是结构化 event payload、真 LLM 输出本地化、完整 VoiceOver 实机、截图、横竖屏布局或 v5.9 发布验收。
 
 ## v5.8q - AppContainer 源头反馈中文化
