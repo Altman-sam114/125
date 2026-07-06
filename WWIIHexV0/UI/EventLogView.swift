@@ -2,8 +2,12 @@ import SwiftUI
 
 struct EventLogView: View {
     let entries: [GameLogEntry]
+    var summaryEntries: [GameLogEntry] = []
+    var agentDecisionRecord: AgentDecisionRecord?
+    var directiveRecords: [WarDirectiveRecord] = []
     var victoryState: VictoryState = .ongoing
     var objectiveProgress: [VictoryObjectiveProgress] = []
+    var currentTurn: Int?
     var isTangSongScenario = false
     var factionDisplayName: ((Faction) -> String)?
 
@@ -24,6 +28,42 @@ struct EventLogView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(8)
                 .background(.blue.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+
+            if let turnReportSummary {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text(turnReportSummary.title)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.orange)
+
+                        Spacer()
+
+                        Text(turnReportSummary.turnText)
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Text(turnReportSummary.summaryText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if !turnReportSummary.highlights.isEmpty {
+                        VStack(alignment: .leading, spacing: 3) {
+                            ForEach(turnReportSummary.highlights) { highlight in
+                                Text(highlight.text)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(8)
+                .background(.orange.opacity(0.10))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
             }
 
@@ -155,6 +195,135 @@ struct EventLogView: View {
         }
         return "\(turnLabel) \(entry.turn) - \(faction) - \(phase)"
     }
+
+    private var turnReportSummary: TurnReportSummary? {
+        guard isTangSongScenario else {
+            return nil
+        }
+        let sourceEntries = summaryEntries.isEmpty ? entries : summaryEntries
+        guard !sourceEntries.isEmpty || agentDecisionRecord != nil || !directiveRecords.isEmpty else {
+            return nil
+        }
+
+        let agentTurns = agentDecisionRecord.map { [$0.turn] } ?? []
+        let knownTurns = sourceEntries.map(\.turn) + directiveRecords.map(\.turn) + agentTurns
+        let latestTurn = knownTurns.max() ?? currentTurn ?? 0
+        let preferredTurn = currentTurn ?? latestTurn
+        let preferredEntries = sourceEntries.filter { $0.turn == preferredTurn }
+        let selectedTurn = preferredEntries.isEmpty ? latestTurn : preferredTurn
+        let turnEntries = preferredEntries.isEmpty
+            ? sourceEntries.filter { $0.turn == latestTurn }
+            : preferredEntries
+        let turnDirectives = directiveRecords.filter { $0.turn == selectedTurn }
+        let turnAgentRecord = agentDecisionRecord?.turn == selectedTurn ? agentDecisionRecord : nil
+
+        let displayEntries = turnEntries.map {
+            LogDisplayEntry(entry: $0, category: LogDisplayCategory(entry: $0))
+        }
+        let counts = turnReportCounts(
+            from: displayEntries,
+            agentRecord: turnAgentRecord,
+            directiveRecords: turnDirectives
+        )
+        let summaryText = turnReportText(
+            counts: counts,
+            entryCount: turnEntries.count,
+            directiveCount: turnDirectives.count,
+            hasAgentRecord: turnAgentRecord != nil
+        )
+        let logHighlights = displayEntries
+            .reversed()
+            .filter { $0.category != .event || counts.isEmpty }
+            .prefix(3)
+            .map {
+                TurnReportHighlight(text: "• \($0.category.displayName(isTangSongScenario: true))：\($0.entry.message)")
+            }
+        let aiHighlights = turnReportAIHighlights(agentRecord: turnAgentRecord, directiveRecords: turnDirectives)
+        let highlights = Array((aiHighlights + logHighlights).prefix(4))
+
+        return TurnReportSummary(
+            title: selectedTurn == preferredTurn ? "本回合战报" : "最近战报",
+            turnText: "回合 \(selectedTurn)",
+            summaryText: summaryText,
+            highlights: Array(highlights)
+        )
+    }
+
+    private func turnReportCounts(
+        from entries: [LogDisplayEntry],
+        agentRecord: AgentDecisionRecord?,
+        directiveRecords: [WarDirectiveRecord]
+    ) -> [TurnReportCategoryCount] {
+        let preferredOrder: [LogDisplayCategory] = [
+            .combat,
+            .regionOwnerChange,
+            .siege,
+            .supply,
+            .diplomacy,
+            .frontChange,
+            .theaterChange,
+            .retreat,
+            .reinforcement,
+            .encirclement
+        ]
+        let grouped = Dictionary(grouping: entries, by: \.category)
+        var counts = preferredOrder.compactMap { category in
+            guard let count = grouped[category]?.count, count > 0 else {
+                return nil
+            }
+            return TurnReportCategoryCount(
+                category: category,
+                label: category.displayName(isTangSongScenario: true),
+                count: count
+            )
+        }
+        if agentRecord != nil || !directiveRecords.isEmpty {
+            counts.append(TurnReportCategoryCount(
+                category: nil,
+                label: "军议",
+                count: directiveRecords.count + (agentRecord == nil ? 0 : 1)
+            ))
+        }
+        return counts
+    }
+
+    private func turnReportText(
+        counts: [TurnReportCategoryCount],
+        entryCount: Int,
+        directiveCount: Int,
+        hasAgentRecord: Bool
+    ) -> String {
+        guard !counts.isEmpty else {
+            return "本回合暂无战斗、围城、粮道、外交、州府变化或军议记录。"
+        }
+
+        let parts = counts.prefix(5).map { "\($0.label) \($0.count)" }
+        let suffix = counts.count > 5 ? "等" : ""
+        let total = entryCount + directiveCount + (hasAgentRecord ? 1 : 0)
+        return "本回合汇总 \(total) 项：\(parts.joined(separator: "、"))\(suffix)。"
+    }
+
+    private func turnReportAIHighlights(
+        agentRecord: AgentDecisionRecord?,
+        directiveRecords: [WarDirectiveRecord]
+    ) -> [TurnReportHighlight] {
+        var highlights: [TurnReportHighlight] = []
+        if let summary = agentRecord?.theaterDirectiveSummary?.summary,
+           !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            highlights.append(TurnReportHighlight(text: "• 军议：\(summary)"))
+        } else if let parsedIntent = agentRecord?.parsedIntent,
+                  !parsedIntent.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            highlights.append(TurnReportHighlight(text: "• 军议：\(parsedIntent)"))
+        }
+
+        for record in directiveRecords.suffix(2).reversed() {
+            let directiveName = record.directiveType?.displayName(isTangSongScenario: true) ?? "方面军令"
+            let tacticName = record.tactic?.displayName(isTangSongScenario: true)
+            let detail = tacticName.map { "\(directiveName) / \($0)" } ?? directiveName
+            highlights.append(TurnReportHighlight(text: "• 方面：\(detail)"))
+        }
+        return highlights
+    }
 }
 
 private struct LogDisplayEntry: Identifiable {
@@ -166,7 +335,25 @@ private struct LogDisplayEntry: Identifiable {
     }
 }
 
-private enum LogDisplayCategory {
+private struct TurnReportSummary {
+    let title: String
+    let turnText: String
+    let summaryText: String
+    let highlights: [TurnReportHighlight]
+}
+
+private struct TurnReportHighlight: Identifiable {
+    let id = UUID()
+    let text: String
+}
+
+private struct TurnReportCategoryCount {
+    let category: LogDisplayCategory?
+    let label: String
+    let count: Int
+}
+
+private enum LogDisplayCategory: Hashable {
     case combat
     case retreat
     case reinforcement

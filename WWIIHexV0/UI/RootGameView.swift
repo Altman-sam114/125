@@ -270,8 +270,12 @@ struct RootGameView: View {
                 case .log:
                     EventLogView(
                         entries: container.displayEventLog,
+                        summaryEntries: container.gameState.eventLog,
+                        agentDecisionRecord: container.lastAgentDecisionRecord,
+                        directiveRecords: container.gameState.warDirectiveRecords,
                         victoryState: container.gameState.victoryState,
                         objectiveProgress: VictoryRules().objectiveProgress(in: container.gameState),
+                        currentTurn: container.gameState.turn,
                         isTangSongScenario: container.gameState.isTangSongScenario,
                         factionDisplayName: { container.gameState.displayName(for: $0) }
                     )

@@ -20,6 +20,7 @@ flowchart TD
     GOAL["HUDView.objectiveGuideText<br/>统一目标锚点<br/>只读显示已据/待取关键州府"]:::ui
     FOCUS["AppContainer.focusObjective<br/>目标聚焦<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["MapDisplayAdapter.objectiveOverlays<br/>目标州府 spotlight<br/>只读绘制已据/待取目标"]:::ui
+    TURNREPORT["EventLogView.turnReportSummary<br/>每回合战报摘要<br/>只读汇总 eventLog / AI 军议 / 方面军令"]:::ui
     HINT["RootGameView.nextActionHint<br/>HUD 下一步提示<br/>只读派生选军/围城/招抚/解围/修城/结束回合建议"]:::ui
 
     PLAYER["玩家操作<br/>tap / move / attack / proposeSubmission / endTurn"]:::input
@@ -83,6 +84,7 @@ flowchart TD
     RE --> LOG
     VICT --> LOG
     WCE --> LOG
+    LOG --> TURNREPORT --> UI
 
     classDef editor fill:#f6d365,stroke:#8a5a00,color:#1f1b10
     classDef data fill:#f8f9fb,stroke:#6b7280,color:#111827

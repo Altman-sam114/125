@@ -452,6 +452,13 @@ v5.7d 当前已落地：
 - 该 spotlight 不新增 objective，不改变 `VictoryRules`，不提交 `Command`，不写 `GameState` 或 `eventLog`，不参与移动/攻击/围城/外交合法性判断。
 - HUD 目标按钮仍只负责选中聚焦；地图 spotlight 只是帮助玩家在地图上识别统一目标州府，不做自动镜头移动、路线指引或持续追踪系统。
 
+v5.7e 当前已落地：
+
+- `EventLogView` 新增唐宋场景“本回合战报 / 最近战报”摘要区。
+- 摘要统计只读取 `summaryEntries`，由 `RootGameView` 传入 `gameState.eventLog`，避免把 `displayEventLog` 中的点击、选中、定位等 `interactionLog` 当成规则战报。
+- 摘要额外读取最近 `AgentDecisionRecord` 和 `GameState.warDirectiveRecords`，把 AI 军议与方面军令作为“军议”计入展示。
+- 该摘要只读聚合战斗、州府、围城、粮道、外交、前线、方面、军议等已有记录，不写 `GameState.eventLog`，不新增事件源，不改变 `WarDirectiveRecord` / `AgentDecisionRecord` 生成职责，也不参与规则、胜负或 AI 决策。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1409,6 +1416,11 @@ MapDisplayAdapter.objectiveOverlays
   -> BoardScene.drawObjectiveOverlays
   -> 地图只读绘制已据/待取目标州府 spotlight
   -> 不提交 Command，不写 GameState 或 eventLog
+EventLogView.turnReportSummary
+  -> 只读读取 gameState.eventLog
+  -> 额外读取最近 AgentDecisionRecord / WarDirectiveRecord
+  -> 战报面板显示本回合或最近回合摘要
+  -> 不写 GameState.eventLog，不改变规则或 AI 记录生成
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId
