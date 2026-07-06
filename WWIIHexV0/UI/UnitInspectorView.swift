@@ -113,7 +113,7 @@ struct UnitInspectorView: View {
         if isTangSongScenario {
             return ids.isEmpty ? noneText : "相关战线 \(ids.count) 条"
         }
-        ids.isEmpty ? noneText : ids.map(\.rawValue).joined(separator: ", ")
+        return ids.isEmpty ? noneText : ids.map(\.rawValue).joined(separator: ", ")
     }
 
     private func regionText(for state: UnitInspectorStrategicState) -> String {
