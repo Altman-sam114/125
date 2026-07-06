@@ -416,6 +416,14 @@ v5.6h 当前已落地：
 - `EventLogView` 接收 `VictoryState` 并在战报顶部派生只读胜负摘要；该摘要不写入 `eventLog`，不作为规则权威。
 - `RootGameView` 只把当前 `gameState.victoryState` 传入战报面板，胜负仍只由 `VictoryRules.updateVictoryState` 写入。
 
+v5.6i 当前已落地：
+
+- `VictoryObjectiveProgress` 是从当前 `GameState` 派生的只读快照，不存入 `GameState`。
+- `VictoryRules.objectiveProgress(in:)` 读取 `GameState.victoryConditions`、`MapState.controllerOfObjective(id:)` 和 `MandateState.legitimacy(for:)`，按与 v5.6g 一致的 objective id、count、turn / turns、`mandateThreshold` 口径生成进度。
+- 旧场景或旧存档缺少 `victoryConditions` 时，进度展示使用 v5.6d 的关键州府/天命 fallback，和唐宋胜负 fallback 保持同一口径。
+- `HUDView` 只读显示主要统一条件的州府进度与天命进度；`EventLogView` 在战报中只读列出主要胜利目标、门槛与当前达成状态。
+- 该查询不调用 `updateVictoryState(in:)`，不写 `VictoryState`、`eventLog`、hex、region、theater 或 diplomacy。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1349,6 +1357,10 @@ VictoryRules.updateVictoryState
      -> 条件缺失时 fallback 到 v5.6d 关键州府与天命阈值
   -> 非唐宋场景：沿用 Bastogne / St. Vith / 单位损失 / 装甲断补 legacy 条件
   -> HUD 和战报面板只读显示 VictoryState.reason，不反向改胜负
+VictoryRules.objectiveProgress
+  -> 只读派生胜利目标进度
+  -> HUD / 战报显示州府、天命、回合门槛当前达成度
+  -> 不写 VictoryState 或 eventLog
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId

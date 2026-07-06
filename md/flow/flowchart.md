@@ -17,6 +17,7 @@
   -> v5.6f 起 UI/AI/WarCommandExecutor 的战术候选也读取 WarRelationRules.canTarget
   -> v5.6g 起唐宋胜利评价优先读取场景 JSON victoryConditions
   -> v5.6h 起 HUD/战报只读显示 VictoryState.reason
+  -> v5.6i 起 HUD/战报只读显示 VictoryRules.objectiveProgress
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -52,7 +53,7 @@ flowchart TD
     TURN["回合与势力桥<br/>TurnOrderState / PowerProfile<br/>power order、active power、控制模式、关系表"]:::state
     RELCAND["战术敌我候选<br/>WarRelationRules.canTarget<br/>UI 高亮、AI 敌区、执行器候选先读关系表"]:::rules
     VICT["胜负规则<br/>VictoryRules.updateVictoryState<br/>唐宋优先读取 victoryConditions 与天命；缺失时 fallback；非唐宋沿用阿登条件"]:::rules
-    VICTEXT["胜负说明<br/>VictoryState.reason + VictoryReason.displayName<br/>HUD/战报只读显示原因"]:::ui
+    VICTEXT["胜负说明与目标进度<br/>VictoryState.reason + VictoryRules.objectiveProgress<br/>HUD/战报只读显示原因与门槛"]:::ui
     PLAYER["玩家输入<br/>点击地图、移动、攻击、招抚、结束回合"]:::input
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
     DEC["元帅 JSON 解码<br/>TheaterDirectiveDecoder<br/>提取 fenced JSON、校验 id 与 schema"]:::command

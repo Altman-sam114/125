@@ -1,5 +1,97 @@
 import Foundation
 
+struct VictoryObjectiveProgress: Equatable, Identifiable {
+    let id: String
+    let description: String
+    let type: String
+    let status: String
+    let faction: Faction
+    let objectiveNames: [String]
+    let controlledCount: Int
+    let requiredCount: Int
+    let mandateScore: Int?
+    let mandateThreshold: Int?
+    let turnRequirement: Int?
+    let currentTurn: Int
+
+    var isSatisfied: Bool {
+        objectiveRequirementMet && mandateRequirementMet && turnRequirementMet
+    }
+
+    var objectiveRequirementMet: Bool {
+        controlledCount >= requiredCount
+    }
+
+    var mandateRequirementMet: Bool {
+        guard let mandateScore, let mandateThreshold else {
+            return true
+        }
+        return mandateScore >= mandateThreshold
+    }
+
+    var turnRequirementMet: Bool {
+        guard let turnRequirement else {
+            return true
+        }
+        return currentTurn >= turnRequirement
+    }
+
+    func title(isTangSongScenario: Bool, factionDisplayName: (Faction) -> String) -> String {
+        let factionName = factionDisplayName(faction)
+        if isTangSongScenario {
+            switch status {
+            case "majorVictory":
+                return "\(factionName)统一"
+            case "survival":
+                return "\(factionName)守成"
+            default:
+                return factionName
+            }
+        }
+
+        switch status {
+        case "majorVictory":
+            return "\(factionName) Major Victory"
+        case "survival":
+            return "\(factionName) Survival"
+        default:
+            return factionName
+        }
+    }
+
+    func summary(isTangSongScenario: Bool) -> String {
+        let objectiveLabel = isTangSongScenario ? "州府 \(controlledCount)/\(requiredCount)" : "Objectives \(controlledCount)/\(requiredCount)"
+        var parts = [objectiveLabel]
+
+        if let mandateScore, let mandateThreshold {
+            parts.append(isTangSongScenario ? "天命 \(mandateScore)/\(mandateThreshold)" : "Mandate \(mandateScore)/\(mandateThreshold)")
+        }
+
+        if let turnRequirement {
+            if isTangSongScenario {
+                parts.append(currentTurn >= turnRequirement ? "回合达标" : "需至 \(turnRequirement) 回合")
+            } else {
+                parts.append(currentTurn >= turnRequirement ? "Turn met" : "Need turn \(turnRequirement)")
+            }
+        }
+
+        return parts.joined(separator: isTangSongScenario ? "；" : "; ")
+    }
+
+    func detail(isTangSongScenario: Bool) -> String {
+        let objectiveList = objectiveNames.prefix(4).joined(separator: isTangSongScenario ? "、" : ", ")
+        if objectiveList.isEmpty {
+            return description
+        }
+
+        if objectiveNames.count > 4 {
+            let suffix = isTangSongScenario ? "等" : "..."
+            return "\(objectiveList)\(suffix)"
+        }
+        return objectiveList
+    }
+}
+
 struct VictoryRules {
     func updateVictoryState(in state: inout GameState) {
         guard state.victoryState.winner == nil else {
@@ -62,6 +154,57 @@ struct VictoryRules {
         if state.turn >= state.maxTurns && bastogneController == .allies {
             state.victoryState.winner = .allies
             state.victoryState.reason = .bastogneHeldByAlliesAtFinalTurn
+        }
+    }
+
+    func objectiveProgress(in state: GameState) -> [VictoryObjectiveProgress] {
+        guard state.isTangSongScenario else {
+            return []
+        }
+
+        if state.victoryConditions.isEmpty {
+            return fallbackTangSongObjectiveProgress(in: state)
+        }
+
+        return state.victoryConditions.compactMap { condition in
+            guard let faction = Faction(rawValue: condition.faction),
+                  condition.type == "controlObjectives" || condition.type == "holdObjectives" else {
+                return nil
+            }
+
+            let objectiveIds = objectiveIds(for: condition)
+            guard !objectiveIds.isEmpty else {
+                return nil
+            }
+
+            let requiredCount = condition.count ?? objectiveIds.count
+            let controlledCount = controlledObjectiveCount(
+                ids: objectiveIds,
+                by: faction,
+                in: state
+            )
+            let objectiveNames = objectiveIds.map { objectiveId in
+                state.map.objective(id: objectiveId)?.name ?? objectiveId
+            }
+            let turnRequirement = condition.turn ?? condition.turns
+            let mandateScore = condition.mandateThreshold.map { _ in
+                state.mandateState.legitimacy(for: faction)
+            }
+
+            return VictoryObjectiveProgress(
+                id: condition.id,
+                description: condition.description,
+                type: condition.type,
+                status: condition.status,
+                faction: faction,
+                objectiveNames: objectiveNames,
+                controlledCount: controlledCount,
+                requiredCount: requiredCount,
+                mandateScore: mandateScore,
+                mandateThreshold: condition.mandateThreshold,
+                turnRequirement: turnRequirement,
+                currentTurn: state.turn
+            )
         }
     }
 
@@ -204,5 +347,41 @@ struct VictoryRules {
             count += 1
         }
         return count
+    }
+
+    private func fallbackTangSongObjectiveProgress(in state: GameState) -> [VictoryObjectiveProgress] {
+        let unificationObjectiveNames = ["开封", "洛阳", "太原", "金陵", "成都", "杭州"]
+        let separatistCoreObjectiveNames = ["太原", "金陵", "成都"]
+
+        return [
+            VictoryObjectiveProgress(
+                id: "fallback_song_unification",
+                description: "宋控制多数关键州府且天命达标。",
+                type: "controlObjectives",
+                status: "majorVictory",
+                faction: .allies,
+                objectiveNames: unificationObjectiveNames,
+                controlledCount: controlledObjectiveCount(named: unificationObjectiveNames, by: .allies, in: state),
+                requiredCount: 4,
+                mandateScore: state.mandateState.legitimacy(for: .allies),
+                mandateThreshold: 60,
+                turnRequirement: nil,
+                currentTurn: state.turn
+            ),
+            VictoryObjectiveProgress(
+                id: "fallback_separatist_survival",
+                description: "割据阵营守住核心州府至终局且天命达标。",
+                type: "holdObjectives",
+                status: "survival",
+                faction: .germany,
+                objectiveNames: separatistCoreObjectiveNames,
+                controlledCount: controlledObjectiveCount(named: separatistCoreObjectiveNames, by: .germany, in: state),
+                requiredCount: 2,
+                mandateScore: state.mandateState.legitimacy(for: .germany),
+                mandateThreshold: 35,
+                turnRequirement: state.maxTurns,
+                currentTurn: state.turn
+            )
+        ]
     }
 }

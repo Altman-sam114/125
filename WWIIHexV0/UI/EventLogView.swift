@@ -3,6 +3,7 @@ import SwiftUI
 struct EventLogView: View {
     let entries: [GameLogEntry]
     var victoryState: VictoryState = .ongoing
+    var objectiveProgress: [VictoryObjectiveProgress] = []
     var isTangSongScenario = false
     var factionDisplayName: ((Faction) -> String)?
 
@@ -24,6 +25,47 @@ struct EventLogView: View {
                 .padding(8)
                 .background(.blue.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+
+            if !progressItems.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(isTangSongScenario ? "胜利目标" : "Victory Objectives")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    ForEach(progressItems) { progress in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Text(progress.title(
+                                    isTangSongScenario: isTangSongScenario,
+                                    factionDisplayName: displayName(for:)
+                                ))
+                                .font(.caption.weight(.semibold))
+                                .lineLimit(1)
+
+                                Spacer()
+
+                                Text(progress.isSatisfied ? completedText : pendingText)
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(progress.isSatisfied ? .green : .secondary)
+                            }
+
+                            Text(progress.summary(isTangSongScenario: isTangSongScenario))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+
+                            Text(progress.detail(isTangSongScenario: isTangSongScenario))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(8)
+                        .background(.secondary.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                }
             }
 
             ScrollView {
@@ -72,11 +114,15 @@ struct EventLogView: View {
             .map { LogDisplayEntry(entry: $0, category: LogDisplayCategory(entry: $0)) }
     }
 
+    private var progressItems: [VictoryObjectiveProgress] {
+        Array(objectiveProgress.prefix(3))
+    }
+
     private var victorySummary: String? {
         guard let winner = victoryState.winner else {
             return nil
         }
-        let winnerName = factionDisplayName?(winner) ?? winner.displayName
+        let winnerName = displayName(for: winner)
         if let reason = victoryState.reason {
             return reason.eventMessage(winnerName: winnerName, isTangSongScenario: isTangSongScenario)
         }
@@ -86,8 +132,20 @@ struct EventLogView: View {
         return "\(winnerName) victory."
     }
 
+    private var completedText: String {
+        isTangSongScenario ? "达成" : "Met"
+    }
+
+    private var pendingText: String {
+        isTangSongScenario ? "推进中" : "Pending"
+    }
+
+    private func displayName(for faction: Faction) -> String {
+        factionDisplayName?(faction) ?? faction.displayName
+    }
+
     private func metadata(for entry: GameLogEntry) -> String {
-        let faction = entry.faction.map { factionDisplayName?($0) ?? $0.displayName } ??
+        let faction = entry.faction.map { displayName(for: $0) } ??
             (isTangSongScenario ? "系统" : "System")
         let phase = entry.phase?.displayName(isTangSongScenario: isTangSongScenario) ??
             (isTangSongScenario ? "开局" : "Setup")

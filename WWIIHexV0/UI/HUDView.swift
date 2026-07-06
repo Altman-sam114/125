@@ -43,6 +43,13 @@ struct HUDView: View {
                     metric(victoryLabel, victoryText)
                 }
 
+                if let objectiveProgressText {
+                    GridRow {
+                        metric(objectiveProgressLabel, objectiveProgressText)
+                        metric(mandateProgressLabel, mandateProgressText ?? emptyProgressText)
+                    }
+                }
+
                 GridRow {
                     metric(manpowerLabel, "\(activeLedger.stockpile.manpower)")
                     metric(industryLabel, "\(activeLedger.stockpile.industry)")
@@ -89,6 +96,29 @@ struct HUDView: View {
         return "\(winnerName) Victory"
     }
 
+    private var objectiveProgressText: String? {
+        guard let progress = primaryObjectiveProgress else {
+            return nil
+        }
+        return gameState.isTangSongScenario
+            ? "\(progress.controlledCount)/\(progress.requiredCount) 州府"
+            : "\(progress.controlledCount)/\(progress.requiredCount)"
+    }
+
+    private var mandateProgressText: String? {
+        guard let progress = primaryObjectiveProgress,
+              let mandateScore = progress.mandateScore,
+              let mandateThreshold = progress.mandateThreshold else {
+            return nil
+        }
+        return "\(mandateScore)/\(mandateThreshold)"
+    }
+
+    private var primaryObjectiveProgress: VictoryObjectiveProgress? {
+        let progress = VictoryRules().objectiveProgress(in: gameState)
+        return progress.first { $0.status == "majorVictory" } ?? progress.first
+    }
+
     private var activeLedger: FactionEconomyLedger {
         gameState.economyState.ledger(for: gameState.activeFaction)
     }
@@ -123,6 +153,18 @@ struct HUDView: View {
 
     private var victoryLabel: String {
         gameState.isTangSongScenario ? "胜负" : "Victory"
+    }
+
+    private var objectiveProgressLabel: String {
+        gameState.isTangSongScenario ? "统一进度" : "Objective"
+    }
+
+    private var mandateProgressLabel: String {
+        gameState.isTangSongScenario ? "天命进度" : "Mandate"
+    }
+
+    private var emptyProgressText: String {
+        gameState.isTangSongScenario ? "无门槛" : "None"
     }
 
     private var queueLabel: String {

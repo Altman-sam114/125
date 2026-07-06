@@ -211,6 +211,7 @@ struct RootGameView: View {
                     EventLogView(
                         entries: container.displayEventLog,
                         victoryState: container.gameState.victoryState,
+                        objectiveProgress: VictoryRules().objectiveProgress(in: container.gameState),
                         isTangSongScenario: container.gameState.isTangSongScenario,
                         factionDisplayName: { container.gameState.displayName(for: $0) }
                     )
