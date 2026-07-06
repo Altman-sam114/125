@@ -262,6 +262,7 @@ struct GameState: Codable, Equatable {
     var diplomacyState: DiplomacyState
     var mandateState: MandateState
     var siegeState: SiegeState
+    var victoryConditions: [VictoryConditionDefinition]
     var divisions: [Division]
     var victoryState: VictoryState
     var selectedUnitSummary: String?
@@ -284,6 +285,7 @@ struct GameState: Codable, Equatable {
         diplomacyState: DiplomacyState = .empty,
         mandateState: MandateState = .empty,
         siegeState: SiegeState = .empty,
+        victoryConditions: [VictoryConditionDefinition] = [],
         divisions: [Division],
         victoryState: VictoryState,
         selectedUnitSummary: String?,
@@ -309,6 +311,7 @@ struct GameState: Codable, Equatable {
         self.diplomacyState = diplomacyState
         self.mandateState = mandateState
         self.siegeState = siegeState
+        self.victoryConditions = victoryConditions
         self.divisions = divisions
         self.victoryState = victoryState
         self.selectedUnitSummary = selectedUnitSummary
@@ -410,6 +413,7 @@ struct GameState: Codable, Equatable {
         case diplomacyState
         case mandateState
         case siegeState
+        case victoryConditions
         case divisions
         case victoryState
         case selectedUnitSummary
@@ -435,6 +439,7 @@ struct GameState: Codable, Equatable {
             diplomacyState: try container.decodeIfPresent(DiplomacyState.self, forKey: .diplomacyState) ?? .empty,
             mandateState: try container.decodeIfPresent(MandateState.self, forKey: .mandateState) ?? .empty,
             siegeState: try container.decodeIfPresent(SiegeState.self, forKey: .siegeState) ?? .empty,
+            victoryConditions: try container.decodeIfPresent([VictoryConditionDefinition].self, forKey: .victoryConditions) ?? [],
             divisions: try container.decode([Division].self, forKey: .divisions),
             victoryState: try container.decode(VictoryState.self, forKey: .victoryState),
             selectedUnitSummary: try container.decodeIfPresent(String.self, forKey: .selectedUnitSummary),

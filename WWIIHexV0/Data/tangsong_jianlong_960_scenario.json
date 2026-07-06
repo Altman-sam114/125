@@ -2443,6 +2443,7 @@
       "turns": null,
       "turn": null,
       "count": 4,
+      "mandateThreshold": 60,
       "status": "majorVictory",
       "description": "宋控制开封、洛阳、太原、金陵、成都、杭州中的四处。"
     },
@@ -2461,6 +2462,7 @@
       "turns": null,
       "turn": 24,
       "count": 2,
+      "mandateThreshold": 35,
       "status": "survival",
       "description": "北方与南方割据势力在第 24 回合仍保有两个核心都城。"
     }

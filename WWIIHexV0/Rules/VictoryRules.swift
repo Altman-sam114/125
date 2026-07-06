@@ -66,6 +66,10 @@ struct VictoryRules {
     }
 
     private func updateTangSongVictoryState(in state: inout GameState) {
+        if applyTangSongScenarioVictoryConditions(in: &state) {
+            return
+        }
+
         let songMandate = state.mandateState.legitimacy(for: .allies)
         let unificationObjectiveNames = ["开封", "洛阳", "太原", "金陵", "成都", "杭州"]
         let controlledUnificationObjectives = controlledObjectiveCount(
@@ -96,6 +100,88 @@ struct VictoryRules {
         }
     }
 
+    private func applyTangSongScenarioVictoryConditions(in state: inout GameState) -> Bool {
+        guard !state.victoryConditions.isEmpty else {
+            return false
+        }
+
+        for condition in state.victoryConditions {
+            guard let faction = Faction(rawValue: condition.faction),
+                  let reason = tangSongVictoryReason(for: condition),
+                  tangSongConditionIsSatisfied(condition, faction: faction, in: state) else {
+                continue
+            }
+
+            state.victoryState.winner = faction
+            state.victoryState.reason = reason
+            return true
+        }
+
+        return false
+    }
+
+    private func tangSongConditionIsSatisfied(
+        _ condition: VictoryConditionDefinition,
+        faction: Faction,
+        in state: GameState
+    ) -> Bool {
+        if let turn = condition.turn,
+           state.turn < turn {
+            return false
+        }
+
+        if let turns = condition.turns,
+           state.turn < turns {
+            return false
+        }
+
+        if let mandateThreshold = condition.mandateThreshold,
+           state.mandateState.legitimacy(for: faction) < mandateThreshold {
+            return false
+        }
+
+        switch condition.type {
+        case "controlObjectives", "holdObjectives":
+            let objectiveIds = objectiveIds(for: condition)
+            guard !objectiveIds.isEmpty else {
+                return false
+            }
+
+            let requiredCount = condition.count ?? objectiveIds.count
+            return controlledObjectiveCount(
+                ids: objectiveIds,
+                by: faction,
+                in: state
+            ) >= requiredCount
+        default:
+            return false
+        }
+    }
+
+    private func tangSongVictoryReason(for condition: VictoryConditionDefinition) -> VictoryReason? {
+        switch condition.status {
+        case "majorVictory":
+            return .tangSongUnificationByMandate
+        case "survival":
+            return .tangSongSeparatistSurvival
+        default:
+            return nil
+        }
+    }
+
+    private func objectiveIds(for condition: VictoryConditionDefinition) -> [String] {
+        if let objectiveIds = condition.objectiveIds,
+           !objectiveIds.isEmpty {
+            return objectiveIds
+        }
+
+        if let objectiveId = condition.objectiveId {
+            return [objectiveId]
+        }
+
+        return []
+    }
+
     private func controlledObjectiveCount(
         named objectiveNames: [String],
         by faction: Faction,
@@ -103,6 +189,18 @@ struct VictoryRules {
     ) -> Int {
         var count = 0
         for objectiveName in objectiveNames where state.map.controllerOfObjective(named: objectiveName) == faction {
+            count += 1
+        }
+        return count
+    }
+
+    private func controlledObjectiveCount(
+        ids objectiveIds: [String],
+        by faction: Faction,
+        in state: GameState
+    ) -> Int {
+        var count = 0
+        for objectiveId in objectiveIds where state.map.controllerOfObjective(id: objectiveId) == faction {
             count += 1
         }
         return count

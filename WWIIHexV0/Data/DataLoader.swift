@@ -118,6 +118,7 @@ struct DataLoader {
         let scenario = try loadScenarioDefinition(named: scenarioName)
         let regionData = try loadRegionDataSet(named: regionName)
         let unitTemplates = try loadUnitTemplates(named: unitTemplateName)
+        try validateScenarioReferences(in: scenario)
         var map = try makeMapState(from: scenario)
         try apply(regionData, to: &map)
         map = RegionOccupationRules().mapByAggregatingControllers(in: map)
@@ -173,6 +174,7 @@ struct DataLoader {
             warDeploymentState: warDeploymentState,
             diplomacyState: initialDiplomacyState(for: scenario, turn: turn),
             mandateState: initialMandateState(for: scenario, turn: turn),
+            victoryConditions: scenario.victoryConditions,
             divisions: divisions,
             victoryState: .ongoing,
             selectedUnitSummary: nil,
@@ -479,37 +481,7 @@ struct DataLoader {
             errors.append(DataValidationError(message: "Scenario is missing an Allied supply source."))
         }
 
-        let objectiveIds = scenario.objectives.map(\.id)
-        appendDuplicateErrors(objectiveIds, label: "objective id", to: &errors)
-        let objectiveIdSet = Set(objectiveIds)
-
-        let tileObjectiveIds = scenario.map.tiles.compactMap(\.objectiveId)
-        appendDuplicateErrors(tileObjectiveIds, label: "tile objective id", to: &errors)
-        for objectiveId in tileObjectiveIds where !objectiveIdSet.contains(objectiveId) {
-            errors.append(
-                DataValidationError(
-                    message: "Tile objective \(objectiveId) is not declared in scenario objectives."
-                )
-            )
-        }
-
-        for condition in scenario.victoryConditions {
-            if let objectiveId = condition.objectiveId, !objectiveIdSet.contains(objectiveId) {
-                errors.append(
-                    DataValidationError(
-                        message: "Victory condition \(condition.id) references unknown objective \(objectiveId)."
-                    )
-                )
-            }
-
-            for objectiveId in condition.objectiveIds ?? [] where !objectiveIdSet.contains(objectiveId) {
-                errors.append(
-                    DataValidationError(
-                        message: "Victory condition \(condition.id) references unknown objective \(objectiveId)."
-                    )
-                )
-            }
-        }
+        errors.append(contentsOf: scenarioReferenceErrors(in: scenario))
 
         let agentIds = dataSet.generalAgents.map(\.id)
         appendDuplicateErrors(agentIds, label: "general agent id", to: &errors)
@@ -544,6 +516,85 @@ struct DataLoader {
         if !errors.isEmpty {
             throw DataLoaderError.validationFailed(errors)
         }
+    }
+
+    private func validateScenarioReferences(in scenario: ScenarioDefinition) throws {
+        let errors = scenarioReferenceErrors(in: scenario)
+        if !errors.isEmpty {
+            throw DataLoaderError.validationFailed(errors)
+        }
+    }
+
+    private func scenarioReferenceErrors(in scenario: ScenarioDefinition) -> [DataValidationError] {
+        var errors: [DataValidationError] = []
+
+        let objectiveIds = scenario.objectives.map(\.id)
+        appendDuplicateErrors(objectiveIds, label: "objective id", to: &errors)
+        let objectiveIdSet = Set(objectiveIds)
+
+        let tileObjectiveIds = scenario.map.tiles.compactMap(\.objectiveId)
+        appendDuplicateErrors(tileObjectiveIds, label: "tile objective id", to: &errors)
+        for objectiveId in tileObjectiveIds where !objectiveIdSet.contains(objectiveId) {
+            errors.append(
+                DataValidationError(
+                    message: "Tile objective \(objectiveId) is not declared in scenario objectives."
+                )
+            )
+        }
+
+        let supportedVictoryTypes = Set(["controlObjectives", "holdObjectives"])
+        let supportedVictoryStatuses = Set(["majorVictory", "survival"])
+        for condition in scenario.victoryConditions {
+            if Faction(rawValue: condition.faction) == nil {
+                errors.append(
+                    DataValidationError(
+                        message: "Victory condition \(condition.id) references unknown faction \(condition.faction)."
+                    )
+                )
+            }
+
+            if !supportedVictoryTypes.contains(condition.type) {
+                errors.append(
+                    DataValidationError(
+                        message: "Victory condition \(condition.id) uses unsupported type \(condition.type)."
+                    )
+                )
+            }
+
+            if !supportedVictoryStatuses.contains(condition.status) {
+                errors.append(
+                    DataValidationError(
+                        message: "Victory condition \(condition.id) uses unsupported status \(condition.status)."
+                    )
+                )
+            }
+
+            if let count = condition.count, count <= 0 {
+                errors.append(
+                    DataValidationError(
+                        message: "Victory condition \(condition.id) count must be positive."
+                    )
+                )
+            }
+
+            if let objectiveId = condition.objectiveId, !objectiveIdSet.contains(objectiveId) {
+                errors.append(
+                    DataValidationError(
+                        message: "Victory condition \(condition.id) references unknown objective \(objectiveId)."
+                    )
+                )
+            }
+
+            for objectiveId in condition.objectiveIds ?? [] where !objectiveIdSet.contains(objectiveId) {
+                errors.append(
+                    DataValidationError(
+                        message: "Victory condition \(condition.id) references unknown objective \(objectiveId)."
+                    )
+                )
+            }
+        }
+
+        return errors
     }
 
     private func loadJSON<T: Decodable>(_ type: T.Type, named resourceName: String) throws -> T {

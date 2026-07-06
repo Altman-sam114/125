@@ -98,8 +98,74 @@ struct VictoryConditionDefinition: Codable, Equatable {
     let turns: Int?
     let turn: Int?
     let count: Int?
+    let mandateThreshold: Int?
     let status: String
     let description: String
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case type
+        case faction
+        case objectiveId
+        case objectiveIds
+        case targetFaction
+        case targetTemplateIds
+        case turns
+        case turn
+        case count
+        case mandateThreshold
+        case status
+        case description
+    }
+
+    init(
+        id: String,
+        type: String,
+        faction: String,
+        objectiveId: String?,
+        objectiveIds: [String]?,
+        targetFaction: String?,
+        targetTemplateIds: [String]?,
+        turns: Int?,
+        turn: Int?,
+        count: Int?,
+        mandateThreshold: Int?,
+        status: String,
+        description: String
+    ) {
+        self.id = id
+        self.type = type
+        self.faction = faction
+        self.objectiveId = objectiveId
+        self.objectiveIds = objectiveIds
+        self.targetFaction = targetFaction
+        self.targetTemplateIds = targetTemplateIds
+        self.turns = turns
+        self.turn = turn
+        self.count = count
+        self.mandateThreshold = mandateThreshold
+        self.status = status
+        self.description = description
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: try container.decode(String.self, forKey: .id),
+            type: try container.decode(String.self, forKey: .type),
+            faction: try container.decode(String.self, forKey: .faction),
+            objectiveId: try container.decodeIfPresent(String.self, forKey: .objectiveId),
+            objectiveIds: try container.decodeIfPresent([String].self, forKey: .objectiveIds),
+            targetFaction: try container.decodeIfPresent(String.self, forKey: .targetFaction),
+            targetTemplateIds: try container.decodeIfPresent([String].self, forKey: .targetTemplateIds),
+            turns: try container.decodeIfPresent(Int.self, forKey: .turns),
+            turn: try container.decodeIfPresent(Int.self, forKey: .turn),
+            count: try container.decodeIfPresent(Int.self, forKey: .count),
+            mandateThreshold: try container.decodeIfPresent(Int.self, forKey: .mandateThreshold),
+            status: try container.decode(String.self, forKey: .status),
+            description: try container.decode(String.self, forKey: .description)
+        )
+    }
 }
 
 struct TerrainRuleDefinition: Codable, Equatable {

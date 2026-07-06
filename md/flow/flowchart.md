@@ -15,6 +15,7 @@
   -> diplomacy / mandate 是国家级投影和展示来源，不替代战术敌我或控制权；唐宋胜利评价会读取天命
   -> turn order / power profile 是 v5.1 多势力回合桥
   -> v5.6f 起 UI/AI/WarCommandExecutor 的战术候选也读取 WarRelationRules.canTarget
+  -> v5.6g 起唐宋胜利评价优先读取场景 JSON victoryConditions
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -34,7 +35,7 @@
 ```mermaid
 flowchart TD
     ME["地图编辑器<br/>MapEditor<br/>用来画地块、州府、方面、初始军队"]:::editor
-    JSON["游戏数据 JSON<br/>ScenarioDefinition + RegionDataSet<br/>保存地图、单位、州府、初始方面"]:::data
+    JSON["游戏数据 JSON<br/>ScenarioDefinition + RegionDataSet<br/>保存地图、单位、州府、初始方面、胜利条件"]:::data
     DL["数据加载器<br/>DataLoader.loadGameState<br/>把 JSON 变成可运行 GameState"]:::loader
     GS["运行时总状态<br/>GameState<br/>一局游戏所有状态都在这里"]:::state
 
@@ -49,7 +50,7 @@ flowchart TD
     DIP["外交与天命<br/>DiplomacyState + MandateState<br/>国家关系、归附记录、天命分数"]:::state
     TURN["回合与势力桥<br/>TurnOrderState / PowerProfile<br/>power order、active power、控制模式、关系表"]:::state
     RELCAND["战术敌我候选<br/>WarRelationRules.canTarget<br/>UI 高亮、AI 敌区、执行器候选先读关系表"]:::rules
-    VICT["胜负规则<br/>VictoryRules.updateVictoryState<br/>唐宋读取关键州府控制与天命；非唐宋沿用阿登条件"]:::rules
+    VICT["胜负规则<br/>VictoryRules.updateVictoryState<br/>唐宋优先读取 victoryConditions 与天命；缺失时 fallback；非唐宋沿用阿登条件"]:::rules
     PLAYER["玩家输入<br/>点击地图、移动、攻击、招抚、结束回合"]:::input
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
     DEC["元帅 JSON 解码<br/>TheaterDirectiveDecoder<br/>提取 fenced JSON、校验 id 与 schema"]:::command
@@ -79,6 +80,7 @@ flowchart TD
     GS --> TURN
     DIP -->|v5.6e 保守投影| TURN
     TURN -->|v5.6f 候选过滤| RELCAND
+    JSON -->|v5.6g victoryConditions| VICT
 
     TURN --> PLAYER
     TURN --> AI
