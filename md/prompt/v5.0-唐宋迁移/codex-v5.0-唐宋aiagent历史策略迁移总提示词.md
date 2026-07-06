@@ -1,6 +1,6 @@
 # Codex v5.0-v5.9 任务提示词：从 WWIIHexV0 迁移为唐宋时代 AI Agent 历史策略游戏
 
-> 本文是交给后续实现 Agent / 子 Agent 的总提示词。它不是本轮代码实现记录，而是唐宋题材迁移的产品目标、架构合同、版本路线、并发分工、最终发布效果和验收标准。执行前必须先读 `AGENTS.md`、`update_log.md`、`md/flow/flow.md`、`md/flow/flowchart.md`、`md/test/test.md` 和本文件。不要凭旧 prompt、旧记忆或题材想象直接改代码。
+> 本文是交给后续实现 Agent / 子 Agent 的总提示词。它不是本轮代码实现记录，而是唐宋题材迁移的产品目标、架构合同、版本路线、并发分工、最终发布效果和验收标准。执行前必须先读 `AGENTS.md`、`update_log.md`、`md/flow/flow.md`、`md/flow/flowchart.md`、`md/test/test.md` 和本文件。不要凭旧 prompt、旧记忆或题材想象直接改代码。若本文中的分支策略、轻量检查、CI、artifact、版本状态或验收口径与当前入口文档冲突，以当前 `AGENTS.md`、`md/test/test.md`、`update_log.md`、`md/flow/*` 和真实源码为准，并在本轮同步修正文档。
 
 ---
 
@@ -311,6 +311,8 @@ EnvoyAgent
 ## 5. 多 Agent 并发工作流
 
 主 Agent 负责总体架构、接口合同、冲突整合和最终验收。子 Agent 只能在明确边界内并发，不得同时改同一 public API 或同一文件。
+
+当前默认不启用多分支并发；如人工未明确授权，多子 Agent 优先做只读扫描，或由主 Agent 串行实现。启用并发时，主 Agent 必须先写清每个子 Agent 的目标、允许修改文件、只读文件、禁止文件、公共 API 边界、预期交付、轻量检查和文档责任。多个子 Agent 不得同时修改同一 public API、同一 schema、同一 Xcode project 文件或同一 UI 入口文件。并发完成后，主 Agent 必须检查文件冲突、重复实现、命名/API/schema 分叉、project UUID、数据口径和文档口径。
 
 ### 5.1 并发前主 Agent 必做
 
@@ -853,6 +855,10 @@ xmllint --noout WWIIHexV0.xcodeproj/xcshareddata/xcschemes/WWIIHexV0.xcscheme
 - 地图操作可读。
 - 所有重测试未授权时明确写明未跑。
 
+v5.8 之后每轮必须拆成可审查小切片，例如：单一面板 raw 文案硬化、单一数据默认路径硬化、单一 accessibility 切片、单一 MapEditor 显示桥、单一 CI/文档口径收口。每个切片必须列出目标、非目标、关键文件、禁止项、验收标准、允许轻量检查、文档更新文件和 Agent C artifact 验收点。不得用“继续硬化 UI”这类宽泛目标直接开工。
+
+本节轻量检查命令只是候选清单，实际是否允许执行必须以当前任务授权和 `md/test/test.md` 为准。当前 v5.8q 之后的默认口径是：人工要求只走云端验证时，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`，只做只读审查、git diff/status、commit/push，重验证交给 GitHub Actions。
+
 ### v5.9 - 可发布版本收口
 
 目标：
@@ -878,6 +884,9 @@ xmllint --noout WWIIHexV0.xcodeproj/xcshareddata/xcschemes/WWIIHexV0.xcscheme
 - 核对 UI 术语。
 - 核对数据加载默认路径。
 - 核对命令管线没有被绕过。
+- 只验收 `origin/main` 最新 commit 对应的 GitHub Actions run，不验收旧 run 或 Agent B 文字说明。
+- 下载未加密结果包到 `/private/tmp/wwiihexv0-c-review-<run_id>/`，核对 `ci-artifact-manifest.json` 的 `branch=main`、`commitSha`、`runId`、`runAttempt` 与 `origin/main` 完全一致，并阅读 `junit.xml`、`xcodebuild.log`、`ci-failure-summary.md`、`static-checks.log` 和 `artifact-name.txt`。
+- 云端失败时不回滚 `main`，默认退回 Agent B 追加修复 commit。
 
 ---
 
@@ -915,10 +924,14 @@ rg -n "<<<<<<<|=======|>>>>>>>" WWIIHexV0 MapEditor md README.md update_log.md
 1. 完成了什么。
 2. 改了哪些关键文件。
 3. 跑了哪些轻量检查，具体结果是什么。
-4. 哪些重测试没跑，原因是什么。
-5. 还剩什么风险或下一步。
+4. 是否已 push 到 `origin/main`；若触发云端验证，说明 commit SHA、workflow/run id/run attempt、artifact 名称和云端结果。
+5. Agent C 是否下载并核对结果包；若不能下载，说明权限或环境阻塞。
+6. 哪些重测试没跑，原因是什么。
+7. 还剩什么风险或下一步。
 
 若进行了 git stage / commit / push，只能在实际成功后按 Codex 桌面规范输出对应 directive。
+
+Agent B 完成实现后，必须在 `main` 上同步 `origin/main`，确认无无关改动；本机只运行 `md/test/test.md` 当前允许的轻量检查，或在人工要求只读/云端验证时不运行本机检查。通过后 commit 并 push 到 `origin/main`，触发 GitHub Actions `WWIIHexV0 CI Results`。若源码行为、默认数据路径、UI 玩家可见读法、检查规则、CI 结果包、核心流程、版本状态或分支策略变化，必须同步更新对应文档：`update_log.md` 记录版本/关键文件/验证/风险；`md/flow/flow.md` 和 `md/flow/flowchart.md` 记录核心链路变化；README 和 `md/plan/plan.md` 在产品定位或路线变化时同步；阶段 prompt/record 记录本轮目标、非目标、检查和遗留事项；`md/test/test.md` 只在检查制度变化时更新。
 
 ---
 
@@ -939,3 +952,5 @@ rg -n "<<<<<<<|=======|>>>>>>>" WWIIHexV0 MapEditor md README.md update_log.md
 - AI 军议、战报和 directive 结果可解释。
 - 轻量检查有具体命令和结果。
 - 未跑重测试有明确原因。
+
+每轮实现验收还必须满足：未绕过 `Command` / `ZoneDirective -> WarCommandExecutor` / `CommandValidator` / `RuleEngine`；未污染 `hexToTheater`、`hexToFrontZone`、`regionToTheater` 权威边界；默认唐宋主路径不回退阿登或二战可见文案；legacy 路径未被无关删除；改动文件与目标一致；文档同步；本机禁止项未执行；CI artifact 已由 Agent C 核对或明确说明权限阻塞。

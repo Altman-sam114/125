@@ -52,6 +52,7 @@
   -> v5.8t 起 accessibility label/value/hint 与 MapEditor 画布可读文案继续硬化
   -> v5.8u 起军令、府库、亲征观战和目标锚点控件状态提示继续硬化
   -> v5.8v 起 MapEditor raw 错误、示例输入和编辑框读屏上下文继续硬化
+  -> v5.8w 起主棋盘 VoiceOver 自定义动作继续硬化，读屏动作仍复用 handleBoardTap 与规则链路
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -98,6 +99,7 @@ flowchart TD
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
     TURNREPORT["战报读法与每回合摘要<br/>EventLogView + TangSongEventLogMessage<br/>只读汇总并显示 eventLog / AI 军议 / 方面军令<br/>唐宋兜底不直出 raw 英文"]:::ui
+    BOARDVO["主棋盘读屏动作<br/>RootGameView + BoardSceneView accessibility actions<br/>攻击/行军动作复用 handleBoardTap，仍经命令与规则链路"]:::ui
     MAPEDITORUI["地图编辑器读法硬化<br/>MapEditorView + MapEditorExporter + MapEditorGameResourceBridge<br/>默认唐宋资源、中文错误、中文导出说明和军队短标"]:::ui
     SESSIONHUD["指挥身份 / 重开剧本<br/>HUDView + NewGameButton<br/>只读显示模式，确认后 resetGame"]:::ui
     PLAYER["玩家输入<br/>点击地图、移动、攻击、招抚、结束回合"]:::input
@@ -156,6 +158,7 @@ flowchart TD
     GS --> INSPECT --> UI
     GS --> GENPANELS --> UI
     GS --> TOOLTIP --> UI
+    GS --> BOARDVO --> PLAYER
     GS --> SESSIONHUD --> UI
     VICTEXT --> GOAL --> FOCUS --> UI
     VICTEXT --> SPOTLIGHT --> UI

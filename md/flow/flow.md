@@ -597,6 +597,13 @@ v5.8v 当前已落地：
 - `MapEditorView` 的新建州府、新建方面、新建军队、选中地块州府/方面编辑框补充上下文 accessibility label/hint；错误区显示和读屏都带“错误：”前缀。
 - 该切片只改 MapEditor 显示、输入默认值和 SwiftUI 可读语义，不改变导出 JSON schema、默认资源路径、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId`、主游戏规则、AI 决策或 Codable raw 值；完整 VoiceOver 实机、截图、横竖屏布局和发布级 UI 验收仍未完成。
 
+v5.8w 当前已落地：
+
+- `RootGameView` 的 `BoardSceneView` SwiftUI 包装层新增 VoiceOver custom actions：攻击下一处红色目标、行军到下一处高亮地块、打开信息面板。
+- 棋盘 accessibility value 在唐宋场景下补充选中地块中文列/行、州府名、控制政权、当前已选军队、红色攻击目标数量和高亮行军格数量。
+- 攻击/行军读屏动作只调用既有 `AppContainer.handleBoardTap(_:)`，随后继续走玩家点击同一链路；若形成移动或攻击命令，仍由 `CommandValidator` / `RuleEngine` 决定合法性和状态修改。
+- 该切片不改变 `BoardScene`、`HexNode`、`UnitNode`、SpriteKit 命中测试、地图渲染、`Command`、`RuleEngine`、JSON schema 或 legacy `Faction` 桥；逐 hex / 逐军队 focus tree、VoiceOver 实机、截图和布局验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

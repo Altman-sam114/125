@@ -11,6 +11,40 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8w - 主棋盘 VoiceOver 自定义动作硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- `RootGameView` 的 `BoardSceneView` 包装层新增 VoiceOver custom actions：攻击下一处红色目标、行军到下一处高亮地块、打开信息面板。
+- 棋盘 accessibility value 在唐宋场景下补充选中地块、州府、控制政权、当前已选军队、红色攻击目标数量和高亮行军格数量。
+- 攻击/行军 custom action 复用既有 `AppContainer.handleBoardTap(_:)`，不会绕过点击链路；形成命令后仍由 `CommandValidator` / `RuleEngine` 判定。
+- 补强 v5.0 总提示词的当前入口文档优先、并发边界、v5.8 小切片、main push、GitHub Actions artifact、Agent C manifest 核对、文档同步和每轮验收口径。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8w 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/RootGameView.swift`
+- `md/prompt/v5.0-唐宋迁移/codex-v5.0-唐宋aiagent历史策略迁移总提示词.md`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8w_board_accessibility_actions_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改主棋盘 SwiftUI 包装层的读屏动作和文档口径，不改变 SpriteKit 渲染、逐 hex focus tree、命令、规则、JSON schema、legacy `Faction` 桥或 MapEditor。
+- 完整逐地块/逐军队 VoiceOver focus order、实机读屏验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
+- 并发子 Agent 只读审查确认后续大风险仍在真实多政权 `PowerId` 数据/schema、`Faction.opponent` / `GamePhase` legacy 桥、MapEditor 导出二元阵营和 AI/兵种/经济二战 raw 兼容名；这些不应混入本轮小切片。
+
 ## v5.8f - README / plan / flow 产品定位收口
 
 完成日期：2026-07-06

@@ -160,6 +160,15 @@ struct RootGameView: View {
         .accessibilityLabel(boardAccessibilityLabel)
         .accessibilityValue(boardAccessibilityValue)
         .accessibilityHint(boardAccessibilityHint)
+        .accessibilityAction(named: Text(boardAttackAccessibilityActionName)) {
+            activateNextBoardAccessibilityTarget(from: sortedAttackAccessibilityTargets)
+        }
+        .accessibilityAction(named: Text(boardMoveAccessibilityActionName)) {
+            activateNextBoardAccessibilityTarget(from: sortedMoveAccessibilityTargets)
+        }
+        .accessibilityAction(named: Text(boardInfoAccessibilityActionName)) {
+            isInfoExpanded = true
+        }
     }
 
     private var nextActionHint: String? {
@@ -431,26 +440,120 @@ struct RootGameView: View {
 
     private var boardAccessibilityValue: String {
         guard let selectedHex = container.selectedHex else {
-            return container.gameState.isTangSongScenario ? "尚未选中地块" : "No hex selected"
+            if container.gameState.isTangSongScenario {
+                return boardActionSummaryText(prefix: "尚未选中地块")
+            }
+            return boardActionSummaryText(prefix: "No hex selected")
         }
 
         if container.gameState.isTangSongScenario {
             let coordText = "第 \(selectedHex.q) 列，第 \(selectedHex.r) 行"
             let regionName = container.selectedRegionId.flatMap { container.gameState.map.regions[$0]?.name }
+            let controllerName = container.gameState.map.tile(at: selectedHex)?.controller
+                .map { container.gameState.displayName(for: $0) }
+            var parts = ["已选中\(coordText)"]
             if let regionName {
-                return "已选中\(coordText)，\(regionName)"
+                parts.append(regionName)
             }
-            return "已选中\(coordText)"
+            if let controllerName {
+                parts.append("控制：\(controllerName)")
+            }
+            return boardActionSummaryText(prefix: parts.joined(separator: "，"))
         }
 
-        return "Selected hex \(selectedHex.q), \(selectedHex.r)"
+        return boardActionSummaryText(prefix: "Selected hex \(selectedHex.q), \(selectedHex.r)")
     }
 
     private var boardAccessibilityHint: String {
         if container.gameState.isTangSongScenario {
-            return "点按地图选择地块、军队或可行军目标；打开信息面板查看当前州府与军令。"
+            return "点按地图选择地块、军队或可行军目标；读屏自定义动作可攻击下一处红色目标、行军到下一处高亮地块，或打开信息面板。"
         }
-        return "Tap the board to select hexes, units, or available targets."
+        return "Tap the board to select hexes, units, or available targets. VoiceOver actions can activate the next highlighted attack or move target."
+    }
+
+    private var sortedAttackAccessibilityTargets: [HexCoord] {
+        sortedHexes(container.attackHighlights)
+    }
+
+    private var sortedMoveAccessibilityTargets: [HexCoord] {
+        sortedHexes(container.movementHighlights)
+    }
+
+    private var boardAttackAccessibilityActionName: String {
+        let count = sortedAttackAccessibilityTargets.count
+        if container.gameState.isTangSongScenario {
+            return count == 0 ? "当前无红色攻击目标" : "攻击下一处红色目标，共 \(count) 处"
+        }
+        return count == 0 ? "No highlighted attack target" : "Attack next highlighted target, \(count) available"
+    }
+
+    private var boardMoveAccessibilityActionName: String {
+        let count = sortedMoveAccessibilityTargets.count
+        if container.gameState.isTangSongScenario {
+            return count == 0 ? "当前无高亮行军格" : "行军到下一处高亮地块，共 \(count) 处"
+        }
+        return count == 0 ? "No highlighted move target" : "Move to next highlighted hex, \(count) available"
+    }
+
+    private var boardInfoAccessibilityActionName: String {
+        container.gameState.isTangSongScenario ? "打开信息面板" : "Open info panel"
+    }
+
+    private func boardActionSummaryText(prefix: String) -> String {
+        let attackCount = container.attackHighlights.count
+        let moveCount = container.movementHighlights.count
+        if container.gameState.isTangSongScenario {
+            var parts = [prefix]
+            if let selectedDivision = container.selectedDivision {
+                parts.append("当前军队：\(selectedDivision.name)")
+            }
+            if attackCount > 0 {
+                parts.append("红色攻击目标 \(attackCount) 处")
+            }
+            if moveCount > 0 {
+                parts.append("高亮行军格 \(moveCount) 处")
+            }
+            return parts.joined(separator: "，")
+        }
+
+        var parts = [prefix]
+        if let selectedDivision = container.selectedDivision {
+            parts.append("selected unit \(selectedDivision.name)")
+        }
+        if attackCount > 0 {
+            parts.append("\(attackCount) attack targets")
+        }
+        if moveCount > 0 {
+            parts.append("\(moveCount) move targets")
+        }
+        return parts.joined(separator: ", ")
+    }
+
+    private func activateNextBoardAccessibilityTarget(from targets: [HexCoord]) {
+        guard let target = nextBoardAccessibilityTarget(in: targets) else {
+            return
+        }
+        container.handleBoardTap(target)
+    }
+
+    private func nextBoardAccessibilityTarget(in targets: [HexCoord]) -> HexCoord? {
+        guard !targets.isEmpty else {
+            return nil
+        }
+        guard let selectedHex = container.selectedHex,
+              let selectedIndex = targets.firstIndex(of: selectedHex) else {
+            return targets.first
+        }
+        return targets[(selectedIndex + 1) % targets.count]
+    }
+
+    private func sortedHexes(_ hexes: Set<HexCoord>) -> [HexCoord] {
+        hexes.sorted {
+            if $0.q == $1.q {
+                return $0.r < $1.r
+            }
+            return $0.q < $1.q
+        }
     }
 }
 
