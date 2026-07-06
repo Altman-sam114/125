@@ -292,6 +292,38 @@
 - 本轮未处理 `AgentPanelView` 的 `mandateIntent/courtPolicy/summary/diagnostics/rawJSON` 原文风险，建议下一轮单独收口 AI 面板玩家态 raw 文本。
 - 外交面板仍只做显示层清洗，不改变底层国家/集团 id、关系记录、归附记录或外交规则。
 
+## v5.8n - AI 面板原始文本兜底硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 `AgentPanelView` 的重点防区、军议解释字段、战况摘要、diagnostics、errors、raw JSON、方面军令摘要和未知命令标题仍可能在唐宋路径外露 Latin、JSON、schema key、raw id 或 ASCII 分隔符。
+- `AgentPanelView` 唐宋路径对 `summary`、`strategicIntent`、`mandateIntent`、`courtPolicy`、`contextSummary` 和未知命令标题增加原始文本风险判断；遇到 Latin、JSON 痕迹、schema key 或旧英文 fallback 时显示中文摘要。
+- 唐宋路径不再展开显示 `WarDirectiveRecord.diagnostics`、`AgentDecisionRecord.errors` 和 `rawJSON` 原文，改为显示计数或“军议原文已记录”提示，原始记录仍保留在既有数据结构中供调试追溯。
+- 重点防区统一走运行态防区显示桥；方面军令摘要和州府列表使用“·”“、”等中文连接符，减少 ASCII 分隔符残留。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8n 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/AgentPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8n_ai_panel_raw_text_fallback_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 AI 面板只读显示桥，不改变 `AgentDecisionRecord`、`WarDirectiveRecord`、`TheaterDirectiveEnvelope`、raw JSON 存储、AI 决策、编译器、执行器、规则或 Codable schema。
+- 完整真 LLM 输出本地化、结构化 event payload、截图/布局/VoiceOver 和发布级 UI 验收仍未完成。
+
 ## v0 - 六角格测试板
 
 完成日期：2026-06-14 至 2026-06-15
