@@ -741,7 +741,7 @@ AppContainer.bootstrap()
   -> AppContainer(...)
 ```
 
-`DataLoader.loadInitialGameState()` v5.2 后默认优先走唐宋首发剧本 JSON：
+`DataLoader.loadInitialGameState()` v5.8g 后默认只走唐宋首发剧本 JSON：
 
 ```text
 loadGameState(
@@ -751,7 +751,7 @@ loadGameState(
 )
 ```
 
-如果唐宋资源加载失败，才 fallback 到 legacy 阿登 `ardennes_v0_scenario` + `ardennes_v02_regions`；如果阿登也失败，才退回老的 `GameState.initial()` + v0.2 region 叠加路径。当前唐宋底层仍用 `Faction.allies` 表示宋、`Faction.germany` 表示北方与割据 AI 桥；`TurnOrderState` 的 `PowerProfile` 负责默认显示名。
+如果唐宋资源缺失、JSON 解码失败、引用校验失败或单位模板缺失，默认启动会进入唐宋错误态并写入中文日志，不再静默回退 legacy 阿登。显式历史回归仍可调用 `loadLegacyArdennesGameState()`、`loadArdennesDataSet()` 或指定 `loadGameState(ardennes...)`。当前唐宋底层仍用 `Faction.allies` 表示宋、`Faction.germany` 表示北方与割据 AI 桥；`TurnOrderState` 的 `PowerProfile` 负责默认显示名。
 
 ### 2.2 loadGameState 的完整链条
 
@@ -964,7 +964,7 @@ WWIIHexV0/Data/tangsong_jianlong_960_scenario.json
 WWIIHexV0/Data/tangsong_jianlong_960_regions.json
 ```
 
-读取默认资源时，编辑器只读取唐宋 960 文件。若 `tangsong_jianlong_960_scenario.json` 或 `tangsong_jianlong_960_regions.json` 缺失，编辑器直接报错，不再静默回退到 legacy 阿登资源；阿登数据只保留为主游戏 legacy fallback 和历史回归参考。覆盖保存始终写回唐宋默认文件名，不覆盖 legacy 阿登数据。
+读取默认资源时，编辑器只读取唐宋 960 文件。若 `tangsong_jianlong_960_scenario.json` 或 `tangsong_jianlong_960_regions.json` 缺失，编辑器直接报错，不再静默回退到 legacy 阿登资源；阿登数据只保留为显式 legacy 入口和历史回归参考。覆盖保存始终写回唐宋默认文件名，不覆盖 legacy 阿登数据。
 
 流程：
 

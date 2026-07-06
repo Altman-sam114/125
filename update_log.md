@@ -39,8 +39,42 @@
 
 遗留事项：
 
-- 仍需完整 v5.8 RC 玩家可见残留清单、全局 accessibility、截图/布局/VoiceOver 验收计划和主游戏 `DataLoader` fallback 策略评估。
+- 仍需完整 v5.8 RC 玩家可见残留清单、全局 accessibility、截图/布局/VoiceOver 验收计划；主游戏 `DataLoader` 默认 fallback 策略已由 v5.8g 收口。
 - v0.x 历史段落仍保留在文档中作为技术地基；后续只应在必要处继续压缩，不应删除影响回归理解的历史事实。
+
+## v5.8g - 主游戏默认启动 fallback 硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- `DataLoader.loadInitialGameState()` 默认只加载唐宋 960 三件套：`tangsong_jianlong_960_scenario`、`tangsong_jianlong_960_regions`、`tangsong_unit_templates`。
+- 唐宋资源缺失、JSON 解码失败、引用校验失败或单位模板缺失时，默认启动进入唐宋错误态并写入中文日志，不再静默回退 `ardennes_v0_scenario`、`ardennes_v02_regions` 或 hardcoded `GameState.initial()`。
+- 新增显式 `loadLegacyArdennesGameState()` 保留历史阿登入口；`loadArdennesDataSet()` 和指定 `loadGameState(ardennes...)` 仍可用于 legacy 回归参考。
+- `makeDivisions` 不再把任意未知 `templateId` 静默降级成 infantry；只有已知 legacy 模板 id 允许 fallback，唐宋模板错名会抛校验错误。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8e/v5.8f/v5.8g 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/Data/DataLoader.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8e_mapeditor_default_path_hardening_record.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8f_docs_product_positioning_record.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8g_main_game_default_loader_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 唐宋默认资源失败时目前是空地图错误态，后续可设计专门的发布态错误 UI。
+- UI/accessibility 子 Agent 仍发现 legacy `generals.json`、命令面板 raw validation、inspector raw id、EventLog relatedRecordId 和部分 VoiceOver 文案残留，建议作为后续 v5.8/v5.9 小切片。
 
 ## v0 - 六角格测试板
 

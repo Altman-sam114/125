@@ -26,14 +26,88 @@ struct DataLoader {
     }
 
     func loadInitialGameState() -> GameState {
-        if let state = try? loadGameState(
-            scenarioName: ScenarioResource.tangSongScenario,
-            regionName: ScenarioResource.tangSongRegions,
-            unitTemplateName: ScenarioResource.tangSongUnitTemplates
-        ) {
-            return state
+        do {
+            return try loadGameState(
+                scenarioName: ScenarioResource.tangSongScenario,
+                regionName: ScenarioResource.tangSongRegions,
+                unitTemplateName: ScenarioResource.tangSongUnitTemplates
+            )
+        } catch {
+            assertionFailure("Failed to load Tang Song default scenario: \(error)")
+            return makeTangSongUnavailableState(error: error)
         }
+    }
 
+    private func makeTangSongUnavailableState(error: Error) -> GameState {
+        let turn = 1
+        let phase = GamePhase.alliedPlayer
+        let activeFaction = Faction.allies
+        let turnOrderState = TurnOrderState(
+            powerOrder: [Faction.allies.powerId, Faction.germany.powerId],
+            activePowerId: activeFaction.powerId,
+            round: turn,
+            phase: phase,
+            profiles: [
+                PowerProfile(
+                    id: Faction.allies.powerId,
+                    displayName: "宋",
+                    shortName: "宋",
+                    controlMode: .human,
+                    legacyFactionBridge: .allies
+                ),
+                PowerProfile(
+                    id: Faction.germany.powerId,
+                    displayName: "北方与割据诸政权",
+                    shortName: "割据",
+                    controlMode: .ai,
+                    legacyFactionBridge: .germany
+                )
+            ],
+            playerControlledPowerIds: [Faction.allies.powerId],
+            relations: [
+                PowerRelation(
+                    firstPowerId: Faction.allies.powerId,
+                    secondPowerId: Faction.germany.powerId,
+                    status: .atWar,
+                    sinceTurn: turn
+                )
+            ]
+        )
+        return GameState(
+            scenarioId: ScenarioResource.tangSongJianlong,
+            turn: turn,
+            maxTurns: turn,
+            activeFaction: activeFaction,
+            phase: phase,
+            turnOrderState: turnOrderState,
+            map: MapState(width: 0, height: 0, tiles: [:], supplySources: [], objectives: []),
+            theaterState: .empty,
+            frontLineState: .empty,
+            warDeploymentState: .empty,
+            economyState: .empty,
+            diplomacyState: DiplomacyState.initial(for: Faction.allCases, turn: turn),
+            mandateState: MandateState(
+                legitimacyByFaction: [
+                    .allies: 62,
+                    .germany: 38
+                ],
+                lastUpdatedTurn: turn
+            ),
+            divisions: [],
+            victoryState: .ongoing,
+            selectedUnitSummary: nil,
+            eventLog: [
+                GameLogEntry(
+                    turn: turn,
+                    faction: activeFaction,
+                    phase: phase,
+                    message: "唐宋默认剧本资源加载失败：\(error.localizedDescription)。请检查 tangsong_jianlong_960_scenario、tangsong_jianlong_960_regions 与 tangsong_unit_templates。"
+                )
+            ]
+        )
+    }
+
+    func loadLegacyArdennesGameState() -> GameState {
         if let state = try? loadGameState(
             scenarioName: ScenarioResource.ardennesScenario,
             regionName: ScenarioResource.ardennesRegions
@@ -729,11 +803,13 @@ struct DataLoader {
                     guard let type = ComponentType(rawValue: component.type) else { return nil }
                     return DivisionComponent(type: type, weight: component.weight)
                 }
+                if components.isEmpty {
+                    errors.append(DataValidationError(message: "Unit \(definition.id) template \(definition.templateId) has no valid components."))
+                    return nil
+                }
+            } else if let legacyComponents = legacyFallbackComponents(for: definition.templateId) {
+                components = legacyComponents
             } else {
-                components = fallbackComponents(for: definition.templateId)
-            }
-
-            guard !components.isEmpty else {
                 errors.append(DataValidationError(message: "Unit \(definition.id) references unknown template \(definition.templateId)."))
                 return nil
             }
@@ -758,7 +834,7 @@ struct DataLoader {
         return divisions
     }
 
-    private func fallbackComponents(for templateId: String) -> [DivisionComponent] {
+    private func legacyFallbackComponents(for templateId: String) -> [DivisionComponent]? {
         switch templateId {
         case "tank_division", "panzer_division":
             return [DivisionComponent(type: .tank, weight: 0.7), DivisionComponent(type: .motorizedInfantry, weight: 0.3)]
@@ -766,8 +842,10 @@ struct DataLoader {
             return [DivisionComponent(type: .motorizedInfantry, weight: 1.0)]
         case "artillery_division":
             return [DivisionComponent(type: .artillery, weight: 1.0)]
-        default:
+        case "infantry_division":
             return [DivisionComponent(type: .infantry, weight: 1.0)]
+        default:
+            return nil
         }
     }
 

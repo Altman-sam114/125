@@ -36,6 +36,7 @@
   -> v5.8c 起外交面板默认主路径读法硬化
   -> v5.8d 起战报日志默认主路径读法硬化
   -> v5.8e 起 MapEditor 默认资源和可见读法硬化
+  -> v5.8g 起主游戏默认启动不再静默回退阿登
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -544,7 +545,7 @@ flowchart TD
     CONTAINER["输入解释<br/>AppContainer.handleBoardTap<br/>选中、移动、攻击意图判断"]:::rules
     COMMAND["统一命令<br/>Command / ZoneDirective<br/>玩家和 AI 共用入口"]:::command
     ENGINE["规则权威<br/>RuleEngine / WarCommandExecutor<br/>校验后修改 GameState"]:::rules
-    DATA["默认资源<br/>WWIIHexV0/Data JSON<br/>唐宋 960 优先，阿登 legacy fallback<br/>DEBUG 优先源码文件，bundle 作 fallback"]:::data
+    DATA["默认资源<br/>WWIIHexV0/Data JSON<br/>默认只加载唐宋 960<br/>缺失时报唐宋错误态；阿登仅显式 legacy 入口"]:::data
 
     TARGET --> APP --> BOOT --> ROOT --> BRIDGE --> SCENE --> TAP --> CONTAINER --> COMMAND --> ENGINE
     DATA --> BOOT
