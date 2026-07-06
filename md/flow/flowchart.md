@@ -26,6 +26,7 @@
   -> v5.7f 起 HUD 只读显示指挥身份/观战模式并确认重开剧本
   -> v5.7g 起下一步提示只读读取移动/攻击高亮数量
   -> v5.7h 起唐宋主界面可切换 legacy 亲征阵营与观战模式
+  -> v5.7i 起战报面板只读显示胜负后评分估算与短档位
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -61,7 +62,7 @@ flowchart TD
     TURN["回合与势力桥<br/>TurnOrderState / PowerProfile<br/>power order、active power、控制模式、关系表"]:::state
     RELCAND["战术敌我候选<br/>WarRelationRules.canTarget<br/>UI 高亮、AI 敌区、执行器候选先读关系表"]:::rules
     VICT["胜负规则<br/>VictoryRules.updateVictoryState<br/>唐宋优先读取 victoryConditions 与天命；缺失时 fallback；非唐宋沿用阿登条件"]:::rules
-    VICTEXT["胜负说明与目标进度<br/>VictoryState.reason + VictoryRules.objectiveProgress<br/>HUD/战报只读显示原因与门槛"]:::ui
+    VICTEXT["胜负说明、目标进度与评分估算<br/>VictoryState.reason + VictoryRules.objectiveProgress<br/>HUD/战报只读显示原因、门槛和估算评分"]:::ui
     HINT["下一步提示<br/>RootGameView.nextActionHint<br/>按局面只读派生选军、围城、招抚、解围、修城、移动/攻击高亮数量"]:::ui
     GOAL["统一目标锚点<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
@@ -556,7 +557,7 @@ flowchart TD
     SPOTLIGHT["地图目标 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读标出统一目标州府"]:::ui
     HINT["下一步提示<br/>RootGameView.nextActionHint -> HUDView<br/>只读提示选军、围城、招抚、解围、修城和高亮数量"]:::ui
     SESSIONHUD["亲征势力 / 观战 / 重开剧本<br/>RootGameView + HUDView + NewGameButton<br/>切换 legacy 亲征阵营，显示亲征/观战，确认后重置剧本"]:::ui
-    LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类与每回合摘要"]:::ui
+    LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类、每回合摘要和胜负后评分估算"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
     BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette，绘制粮道虚线"]:::ui
     UNIT["军队棋子<br/>UnitNode<br/>legacy NATO；唐宋军旗 + 禁/骑/弩/械/守/军字标"]:::ui

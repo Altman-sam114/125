@@ -16,11 +16,11 @@ flowchart TD
     TURN["TurnOrderState / PowerRelation<br/>回合 / 控制权 / 关系表"]:::state
     RELCAND["WarRelationRules.canTarget<br/>UI / AI / 执行器战术候选"]:::rules
     VICT["VictoryRules<br/>唐宋读取 victoryConditions + MandateState<br/>缺失时 fallback"]:::rules
-    VICTEXT["VictoryState.reason<br/>VictoryRules.objectiveProgress<br/>HUD / 战报只读胜负说明与目标进度"]:::ui
+    VICTEXT["VictoryState.reason<br/>VictoryRules.objectiveProgress<br/>HUD / 战报只读胜负说明、目标进度与评分估算"]:::ui
     GOAL["HUDView.objectiveGuideText<br/>统一目标锚点<br/>只读显示已据/待取关键州府"]:::ui
     FOCUS["AppContainer.focusObjective<br/>目标聚焦<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["MapDisplayAdapter.objectiveOverlays<br/>目标州府 spotlight<br/>只读绘制已据/待取目标"]:::ui
-    TURNREPORT["EventLogView.turnReportSummary<br/>每回合战报摘要<br/>只读汇总 eventLog / AI 军议 / 方面军令"]:::ui
+    TURNREPORT["EventLogView.turnReportSummary + settlementSummary<br/>每回合战报 / 胜负后评分估算<br/>只读汇总 eventLog / AI 军议 / 方面军令 / VictoryState"]:::ui
     SESSIONHUD["RootGameView player picker + HUDView commandIdentity + NewGameButton<br/>亲征势力 / 观战 / 重开剧本确认<br/>切换 UI 亲征阵营，确认后调用 resetGame"]:::ui
     HINT["RootGameView.nextActionHint<br/>HUD 下一步提示<br/>只读派生选军/围城/招抚/解围/修城/移动/攻击高亮数量"]:::ui
 

@@ -31,6 +31,34 @@ struct EventLogView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 6))
             }
 
+            if let settlementSummary {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("评分估算")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.green)
+
+                        Spacer()
+
+                        Text("\(settlementSummary.score) / 100")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.green)
+                    }
+
+                    Text(settlementSummary.grade)
+                        .font(.subheadline.weight(.semibold))
+
+                    Text(settlementSummary.detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(8)
+                .background(.green.opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+            }
+
             if let turnReportSummary {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack {
@@ -170,6 +198,84 @@ struct EventLogView: View {
             return "\(winnerName)胜利。"
         }
         return "\(winnerName) victory."
+    }
+
+    private var settlementSummary: SettlementSummary? {
+        guard isTangSongScenario,
+              let winner = victoryState.winner else {
+            return nil
+        }
+
+        let winnerName = displayName(for: winner)
+        let matchingProgress = objectiveProgress.first { $0.faction == winner && $0.isSatisfied } ??
+            objectiveProgress.first { $0.faction == winner }
+
+        let objectiveRatio: Double
+        let objectiveText: String
+        if let progress = matchingProgress {
+            objectiveRatio = Double(progress.controlledCount) / Double(max(1, progress.requiredCount))
+            objectiveText = "州府 \(progress.controlledCount)/\(progress.requiredCount)"
+        } else {
+            objectiveRatio = 1
+            objectiveText = "州府已判定"
+        }
+
+        let mandateRatio: Double
+        let mandateText: String
+        if let mandateScore = matchingProgress?.mandateScore,
+           let mandateThreshold = matchingProgress?.mandateThreshold {
+            mandateRatio = Double(mandateScore) / Double(max(1, mandateThreshold))
+            mandateText = "天命 \(mandateScore)/\(mandateThreshold)"
+        } else {
+            mandateRatio = 1
+            mandateText = "天命无额外门槛"
+        }
+
+        let turn = currentTurn ?? matchingProgress?.currentTurn ?? 1
+        let turnRequirement = matchingProgress?.turnRequirement ?? turn
+        let speedRatio: Double
+        if turnRequirement > 0 {
+            speedRatio = max(0, min(1, Double(turnRequirement - turn + 1) / Double(turnRequirement)))
+        } else {
+            speedRatio = 0
+        }
+
+        let baseScore = victoryState.reason == .tangSongSeparatistSurvival ? 45 : 50
+        let score = min(
+            100,
+            baseScore +
+                Int((min(1, objectiveRatio) * 30).rounded()) +
+                Int((min(1, mandateRatio) * 15).rounded()) +
+                Int((speedRatio * 5).rounded())
+        )
+
+        let grade: String
+        if victoryState.reason == .tangSongSeparatistSurvival {
+            switch score {
+            case 85...100:
+                grade = "\(winnerName)守成有余"
+            case 70...84:
+                grade = "\(winnerName)割据稳固"
+            case 55...69:
+                grade = "\(winnerName)勉强自保"
+            default:
+                grade = "\(winnerName)余势未稳"
+            }
+        } else {
+            switch score {
+            case 90...100:
+                grade = "\(winnerName)天命归一"
+            case 75...89:
+                grade = "\(winnerName)山河大定"
+            case 60...74:
+                grade = "\(winnerName)功业初成"
+            default:
+                grade = "\(winnerName)局势未稳"
+            }
+        }
+
+        let detail = "依据当前胜负、\(objectiveText)、\(mandateText)与回合 \(turn) 展示层只读估算；不写入存档，也不改变胜利判定。"
+        return SettlementSummary(score: score, grade: grade, detail: detail)
     }
 
     private var completedText: String {
@@ -340,6 +446,12 @@ private struct TurnReportSummary {
     let turnText: String
     let summaryText: String
     let highlights: [TurnReportHighlight]
+}
+
+private struct SettlementSummary {
+    let score: Int
+    let grade: String
+    let detail: String
 }
 
 private struct TurnReportHighlight: Identifiable {

@@ -479,6 +479,13 @@ v5.7h 当前已落地：
 - `RootGameView.nextActionHint` 的唐宋文案读取当前亲征势力名称，不再把所有可行动提示硬写为宋军。
 - 该切片不新增 `Faction` case，不新增真实吴越/南唐/后蜀等多政权选择，不写新的 `GameState` schema，不新增存档槽，不改变 `Command`、`RuleEngine`、`TurnManager` 或 `WarCommandExecutor` 的执行边界。
 
+v5.7i 当前已落地：
+
+- `EventLogView` 在唐宋场景且 `VictoryState.winner` 已存在时，在胜负摘要下方显示“评分估算”只读摘要。
+- 摘要从 `VictoryState.winner/reason`、传入战报面板且匹配胜者自己的 `VictoryRules.objectiveProgress(in:)` 快照、当前回合、州府进度和天命门槛估算 0-100 分，并给出“天命归一 / 山河大定 / 功业初成”或“守成有余 / 割据稳固 / 勉强自保”等短档位。
+- 该摘要不调用 `VictoryRules.updateVictoryState`，不写 `VictoryState`、`GameState.eventLog`、hex / region / theater / front / deploy 或 diplomacy，不新增权威结算事件，也不替代正式胜负规则。
+- 该切片不是完整胜利面板、治理评分、单国胜负、外交纳土结算、自动破城或正式评分系统；它只是战报面板的展示层复盘提示。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1441,6 +1448,10 @@ EventLogView.turnReportSummary
   -> 额外读取最近 AgentDecisionRecord / WarDirectiveRecord
   -> 战报面板显示本回合或最近回合摘要
   -> 不写 GameState.eventLog，不改变规则或 AI 记录生成
+EventLogView.settlementSummary
+  -> 只读读取 VictoryState / VictoryRules.objectiveProgress / currentTurn
+  -> 胜负后显示评分估算和短档位
+  -> 不写 VictoryState，不写 eventLog，不改变 VictoryRules 判定
 HUDView commandIdentity
   -> 只读读取 playerFaction / observerModeEnabled / activeFaction / phase
   -> 显示宋可下令、宋待命、观战各方、玩家亲征或只读观战
