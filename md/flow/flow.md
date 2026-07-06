@@ -529,6 +529,12 @@ v5.8b 当前已落地：
 - 运行态州府/防区名称缺失时，AI 面板唐宋路径显示“未命名州府 / 未命名方面”，不直接暴露 raw id。
 - 该切片只改 UI 展示和调试折叠，不改变 `WarDirectiveRecord.diagnostics`、`AgentDecisionRecord.errors/rawJSON` 的记录职责，也不改变 decoder、compiler、executor、`RuleEngine`、命令、AI 算法或 Codable raw schema。
 
+v5.8c 当前已落地：
+
+- `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
+- `RootGameView` 向外交面板传入运行态州府与方面防区名称查找，归附记录和君主重点防区优先显示州府/防区名；缺失时唐宋路径显示“未命名州府 / 未命名方面 / 未命名集团 / 未知政权”，不直接把 raw id 当作默认玩家文案。
+- 该切片只改外交面板只读展示，不改变 `DiplomacyState`、`MandateState`、`Command.proposeSubmission`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、`TurnOrderState.relations`、`WarRelationRules.canTarget`、JSON/Codable schema 或 hex/region/theater/front/deploy 控制权。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -540,6 +546,8 @@ CommandPanelView
   -> DiplomacyState + MandateState
   -> DiplomacyPanelView read-only
 ```
+
+`DiplomacyPanelView` 保持只读展示端。v5.8c 只在 `DiplomacyState + MandateState -> DiplomacyPanelView` 这段补唐宋读法和 fallback 名称，不让面板写状态，也不绕过 `CommandValidator` / `RuleEngine`。
 
 v5.6c 的 AI 招抚辅助链路：
 

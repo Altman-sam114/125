@@ -371,7 +371,13 @@ struct RootGameView: View {
                         activeFaction: container.gameState.activeFaction,
                         mandateState: container.gameState.mandateState,
                         isTangSongScenario: container.gameState.isTangSongScenario,
-                        factionDisplayName: { container.gameState.displayName(for: $0) }
+                        factionDisplayName: { container.gameState.displayName(for: $0) },
+                        regionDisplayName: { regionId in
+                            container.gameState.map.regions[regionId]?.name ?? regionId.rawValue
+                        },
+                        zoneDisplayName: { zoneId in
+                            container.gameState.warDeploymentState.frontZones[zoneId]?.name ?? zoneId.rawValue
+                        }
                     )
                 case .agent:
                     AgentPanelView(
