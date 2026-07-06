@@ -100,6 +100,9 @@ struct RootGameView: View {
                         .lineLimit(1)
                 }
                 .buttonStyle(.bordered)
+                .accessibilityLabel(isTangSongScenario ? "信息面板" : "Info panel")
+                .accessibilityValue(isInfoExpanded ? (isTangSongScenario ? "已展开" : "Expanded") : (isTangSongScenario ? "已收起" : "Collapsed"))
+                .accessibilityHint(isTangSongScenario ? "切换军队、州府、将领、战报、府库、外交和军议面板。" : "Toggles the compact info panel.")
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                 .padding(10)
 
@@ -149,6 +152,8 @@ struct RootGameView: View {
             onHexTapped: container.handleBoardTap
         )
         .accessibilityLabel(boardAccessibilityLabel)
+        .accessibilityValue(boardAccessibilityValue)
+        .accessibilityHint(boardAccessibilityHint)
     }
 
     private var nextActionHint: String? {
@@ -416,6 +421,30 @@ struct RootGameView: View {
             return "\(container.gameState.scenarioDisplayName) 六角地图"
         }
         return "\(container.gameState.scenarioDisplayName) hex board"
+    }
+
+    private var boardAccessibilityValue: String {
+        guard let selectedHex = container.selectedHex else {
+            return container.gameState.isTangSongScenario ? "尚未选中地块" : "No hex selected"
+        }
+
+        if container.gameState.isTangSongScenario {
+            let coordText = "第 \(selectedHex.q) 列，第 \(selectedHex.r) 行"
+            let regionName = container.selectedRegionId.flatMap { container.gameState.map.regions[$0]?.name }
+            if let regionName {
+                return "已选中\(coordText)，\(regionName)"
+            }
+            return "已选中\(coordText)"
+        }
+
+        return "Selected hex \(selectedHex.q), \(selectedHex.r)"
+    }
+
+    private var boardAccessibilityHint: String {
+        if container.gameState.isTangSongScenario {
+            return "点按地图选择地块、军队或可行军目标；打开信息面板查看当前州府与军令。"
+        }
+        return "Tap the board to select hexes, units, or available targets."
     }
 }
 

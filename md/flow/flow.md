@@ -573,6 +573,15 @@ v5.8s 当前已落地：
 - 自动州城名、粮仓 fallback、默认州府/方面名继续收口为中文读法。
 - 该切片只改 MapEditor 玩家/编辑器可见显示桥和错误包装，不改变导出的 JSON schema、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId`、主游戏 `DataLoader`、规则系统、AI 决策或 Codable raw 值。
 
+v5.8t 当前已落地：
+
+- `RootGameView` 的信息面板按钮补充 accessibility label/value/hint，唐宋路径会朗读“信息面板”、展开/收起状态和面板用途。
+- 主棋盘 `BoardSceneView` 的 accessibility value 会从 `AppContainer.selectedHex` / `selectedRegionId` 只读派生当前选中地块与州府名称；未选中时朗读“尚未选中地块”。
+- `InfoPanelToggle` 的通用“详情”按钮补充展开/收起状态和展开/收起提示，避免读屏只听到静态按钮名。
+- `GeneralProfileView` 的头像占位改为装饰性元素，不再把“头像占位 / portrait placeholder”作为玩家可读内容重复朗读。
+- MapEditor 底图偏移输入框使用“底图横向偏移 / 底图纵向偏移”可访问标签，地图编辑画布补“地图编辑画布”名称和编辑提示。
+- 该切片只改 SwiftUI 可读语义和文案，不改变 SpriteKit 地图交互、逐 hex focus、focus order、hit target、布局、规则、导出 JSON schema 或 Codable raw 值；完整 VoiceOver 实机、截图、横竖屏布局和发布级 UI 验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

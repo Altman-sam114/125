@@ -49,6 +49,7 @@
   -> v5.8q 起 AppContainer 常见交互反馈写入端继续中文化
   -> v5.8r 起胜利、粮道与军议摘要显示继续硬化
   -> v5.8s 起 MapEditor raw 文件名、坐标、JSON 技术词与导出错误继续硬化
+  -> v5.8t 起 accessibility label/value/hint 与 MapEditor 画布可读文案继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI

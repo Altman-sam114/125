@@ -229,8 +229,10 @@ struct MapEditorView: View {
                 .foregroundStyle(.secondary)
             Stepper("缩放 \(viewModel.backgroundScale, format: .number.precision(.fractionLength(2)))", value: $viewModel.backgroundScale, in: 0.05...20, step: 0.05)
             HStack {
-                TextField("X", value: $viewModel.backgroundOffsetX, format: .number)
-                TextField("Y", value: $viewModel.backgroundOffsetY, format: .number)
+                TextField("横向偏移 X", value: $viewModel.backgroundOffsetX, format: .number)
+                    .accessibilityLabel("底图横向偏移")
+                TextField("纵向偏移 Y", value: $viewModel.backgroundOffsetY, format: .number)
+                    .accessibilityLabel("底图纵向偏移")
             }
             .textFieldStyle(.roundedBorder)
             Button("应用底图参数", systemImage: "checkmark.circle", action: viewModel.updateBackgroundImageSettings)
@@ -337,23 +339,28 @@ private struct MapEditorSpriteView: View {
     @State private var scene = MapEditorCanvasScene(size: CGSize(width: 900, height: 700))
 
     var body: some View {
+        Group {
         #if os(macOS)
-        MapEditorSKViewRepresentable(scene: scene, viewModel: viewModel)
-            .onAppear {
-                scene.configure(viewModel: viewModel)
-            }
-            .onChange(of: viewModel.redrawToken) { _, _ in
-                scene.redraw()
-            }
+            MapEditorSKViewRepresentable(scene: scene, viewModel: viewModel)
+                .onAppear {
+                    scene.configure(viewModel: viewModel)
+                }
+                .onChange(of: viewModel.redrawToken) { _, _ in
+                    scene.redraw()
+                }
         #else
-        SpriteView(scene: scene)
-            .onAppear {
-                scene.configure(viewModel: viewModel)
-            }
-            .onChange(of: viewModel.redrawToken) { _, _ in
-                scene.redraw()
-            }
+            SpriteView(scene: scene)
+                .onAppear {
+                    scene.configure(viewModel: viewModel)
+                }
+                .onChange(of: viewModel.redrawToken) { _, _ in
+                    scene.redraw()
+                }
         #endif
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("地图编辑画布")
+        .accessibilityHint("使用鼠标或触控编辑地块；左侧面板提供模式、州府、方面、单位和底图参数。")
     }
 }
 

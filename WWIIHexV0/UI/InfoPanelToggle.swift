@@ -17,6 +17,8 @@ struct InfoPanelToggle<Summary: View, Content: View>: View {
                 }
                 .buttonStyle(.bordered)
                 .accessibilityLabel("详情")
+                .accessibilityValue(isExpanded ? "已展开" : "已收起")
+                .accessibilityHint(isExpanded ? "收起详情，只保留摘要。" : "展开详情，查看完整信息。")
 
                 Spacer(minLength: 8)
             }

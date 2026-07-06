@@ -39,7 +39,7 @@
 
 遗留事项：
 
-- 仍需完整 v5.8 RC 玩家可见残留清单、全局 accessibility、截图/布局/VoiceOver 验收计划；主游戏 `DataLoader` 默认 fallback 策略已由 v5.8g 收口。
+- 仍需完整 v5.8 RC 玩家可见残留清单、剩余全局 accessibility、主棋盘逐地块可访问操作路径、截图/布局/完整 VoiceOver 实机验收计划；主游戏 `DataLoader` 默认 fallback 策略已由 v5.8g 收口，accessibility / VoiceOver 可读文案已由 v5.8t 做首轮收口。
 - v0.x 历史段落仍保留在文档中作为技术地基；后续只应在必要处继续压缩，不应删除影响回归理解的历史事实。
 
 ## v5.8g - 主游戏默认启动 fallback 硬化
@@ -394,6 +394,42 @@
 - 本轮只改 MapEditor 玩家/编辑器可见显示桥和错误包装，不改变导出的 JSON schema、`Faction.allies/germany`、`GamePhase.alliedPlayer`、`RegionId`、`TheaterId`、主游戏 `DataLoader`、规则系统、AI 决策或 Codable raw 值。
 - MapEditor 仍保留底层 `.json` 输出、legacy faction/phase raw 值、`region_#` / `theater_#` 内部 id 和测试夹具历史命名；这些属于后续 schema / 数据驱动迁移范围。
 - 这不是结构化 event payload、真 LLM 输出本地化、完整 VoiceOver 实机、截图、横竖屏布局或 v5.9 发布验收。
+
+## v5.8t - accessibility / VoiceOver 可读文案硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出主游戏信息面板切换、通用详情按钮、将领头像占位、MapEditor 底图偏移输入框和编辑画布仍有可读语义不足；主棋盘逐 hex 可访问操作路径仍是较大后续项。
+- `RootGameView` 信息面板按钮补 accessibility label/value/hint，棋盘 accessibility value 从当前 `selectedHex` / `selectedRegionId` 派生“已选中第 q 列，第 r 行 / 州府名”。
+- `InfoPanelToggle` 通用“详情”按钮补“已展开 / 已收起”和展开/收起提示。
+- `GeneralProfileView` 头像占位改为装饰性元素，不再朗读“头像占位 / portrait placeholder”。
+- MapEditor 底图偏移输入框补“底图横向偏移 / 底图纵向偏移”可访问标签，地图编辑画布补中文 accessibility label/hint。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8t 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/RootGameView.swift`
+- `WWIIHexV0/UI/InfoPanelToggle.swift`
+- `WWIIHexV0/UI/GeneralProfileView.swift`
+- `MapEditor/MapEditorView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8t_accessibility_voiceover_text_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 SwiftUI 可读语义和文案，不改变 SpriteKit 地图交互、逐 hex focus、focus order、hit target、布局、规则、导出 JSON schema 或 Codable raw 值。
+- 主棋盘每个地块/军队/可攻击目标的 VoiceOver 可聚焦与可操作路径仍未实现；完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
 
 ## v5.8r - 胜利、粮道与军议摘要显示硬化
 

@@ -47,7 +47,7 @@ struct GeneralProfileView: View {
                 .frame(width: 112, height: 144)
                 .background(PlatformStyles.selectionTint)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .accessibilityLabel(isTangSongScenario ? "\(general.localizedName)头像占位" : "\(general.localizedName) portrait placeholder")
+                .accessibilityHidden(true)
 
             Text(general.localizedName)
                 .font(.title3.weight(.semibold))
