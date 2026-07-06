@@ -221,6 +221,44 @@
 - 本轮只处理玩家可见 UI 兜底，不改事件写入端；`SupplyRules`、`CommandExecutor`、`StrategicStateSynchronizer`、`TurnManager` 等源头仍可能写入英文日志，后续可逐步源头唐宋化或改结构化 event payload。
 - AI 面板 diagnostics/raw JSON、GeneralCommandPanelView 已拟军令 raw id、DiplomacyPanelView 数据名 Latin guard、macOS 菜单和 SpriteKit 空地图提示仍建议作为后续 v5.8/v5.9 小切片。
 
+## v5.8l - 将领计划摘要与固定英文 UI 硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出将领“已拟军令”仍可展示 planned operation raw id，SpriteKit 空棋盘、macOS 菜单和通用信息按钮仍有固定英文。
+- `GeneralCommandPanelView` 新增 `regionDisplayName` / `zoneDisplayName` 只读查找闭包；`RootGameView` 传入运行态州府和方面名称。
+- `GeneralCommandPanelView.operationSummary` 在唐宋路径优先显示目标州府、来源州府或方面名称，缺名时显示“未命名州府 / 未命名方面”，不再默认展示 `targetRegionId/sourceRegionId/zoneId.rawValue`。
+- `BoardScene` 空棋盘标题由 `Hex Board` 改为“舆图加载中”。
+- macOS 菜单由 `Game / End Turn / New Game` 改为“军务 / 结束回合 / 重新开局”。
+- `InfoPanelToggle` 固定 `[ INFO ]` 改为“详情”，并补中文 accessibility label。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8l 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/GeneralCommandPanelView.swift`
+- `WWIIHexV0/UI/RootGameView.swift`
+- `WWIIHexV0/SpriteKit/BoardScene.swift`
+- `WWIIHexV0/App/WWIIHexV0MacApp.swift`
+- `WWIIHexV0/UI/InfoPanelToggle.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8l_general_plan_fixed_english_ui_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮未处理 AI 面板 `mandateIntent/courtPolicy/summary/diagnostics/rawJSON` 原文风险，未处理外交面板国家/集团名 Latin guard 与 ASCII 连接符，建议作为后续 v5.8/v5.9 小切片。
+- 将领面板仍直接显示 `zone.name`、`division.name`、`targetRegion.name`；当前唐宋默认数据为中文名，若未来混入英文数据，仍需要更完整的名称清洗或本地化 fallback。
+
 ## v0 - 六角格测试板
 
 完成日期：2026-06-14 至 2026-06-15

@@ -13,11 +13,11 @@ struct WWIIHexV0MacApp: App {
         .windowStyle(.titleBar)
         .defaultSize(width: 1440, height: 900)
         .commands {
-            CommandMenu("Game") {
-                Button("End Turn", action: container.advanceOrRunAI)
+            CommandMenu("军务") {
+                Button("结束回合", action: container.advanceOrRunAI)
                     .keyboardShortcut(.return, modifiers: [.command])
 
-                Button("New Game", action: container.resetGame)
+                Button("重新开局", action: container.resetGame)
                     .keyboardShortcut("n", modifiers: [.command, .shift])
             }
         }

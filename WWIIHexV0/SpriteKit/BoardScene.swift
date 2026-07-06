@@ -887,7 +887,7 @@ final class BoardScene: SKScene {
         field.position = CGPoint(x: size.width / 2, y: size.height / 2)
         addChild(field)
 
-        let title = SKLabelNode(text: "Hex Board")
+        let title = SKLabelNode(text: "舆图加载中")
         title.fontName = "AvenirNext-DemiBold"
         title.fontSize = 24
         title.fontColor = .white

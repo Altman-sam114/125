@@ -11,11 +11,12 @@ struct InfoPanelToggle<Summary: View, Content: View>: View {
                 Button {
                     isExpanded.toggle()
                 } label: {
-                    Text("[ INFO ]")
+                    Text("详情")
                         .font(.caption.weight(.semibold))
                         .lineLimit(1)
                 }
                 .buttonStyle(.bordered)
+                .accessibilityLabel("详情")
 
                 Spacer(minLength: 8)
             }

@@ -10,6 +10,8 @@ struct GeneralCommandPanelView: View {
     let hqUnderAttack: Bool
     let plannedOperations: [PlayerPlannedOperation]
     let isTangSongScenario: Bool
+    var regionDisplayName: ((RegionId) -> String)?
+    var zoneDisplayName: ((FrontZoneId) -> String)?
     let canHoldLine: Bool
     let canAttackRegion: Bool
     let onShowProfile: () -> Void
@@ -237,11 +239,22 @@ struct GeneralCommandPanelView: View {
     }
 
     private func operationSummary(_ operation: PlayerPlannedOperation) -> String {
-        let target = operation.targetRegionId?.rawValue ?? operation.sourceRegionId?.rawValue ?? operation.zoneId.rawValue
         if isTangSongScenario {
+            let target = operationTargetName(operation)
             return "\(directiveLabel(operation.directiveType)) / \(target)"
         }
+        let target = operation.targetRegionId?.rawValue ?? operation.sourceRegionId?.rawValue ?? operation.zoneId.rawValue
         return "\(operation.directiveType.rawValue) / \(target)"
+    }
+
+    private func operationTargetName(_ operation: PlayerPlannedOperation) -> String {
+        if let targetRegionId = operation.targetRegionId {
+            return regionDisplayName?(targetRegionId) ?? "未命名州府"
+        }
+        if let sourceRegionId = operation.sourceRegionId {
+            return regionDisplayName?(sourceRegionId) ?? "未命名州府"
+        }
+        return zoneDisplayName?(operation.zoneId) ?? "未命名方面"
     }
 
     private func directiveLabel(_ type: DirectiveType) -> String {

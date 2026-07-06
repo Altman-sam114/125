@@ -547,6 +547,12 @@ v5.8k 当前已落地：
 - `EventLogView` 对退却路线、被围损耗、玩家方面军令诊断、州府归属变化、动态方面变更等常见英文事件补中文映射；显示桥处理后若仍含拉丁字母，唐宋路径降级为“战报已更新；原始记录留在调试日志中。”，不把 raw 英文、内部 key 或 legacy 术语直接展示给玩家。
 - `RootGameView.nextActionHint` 的已行动提示改为“各方军议推进”，不再在唐宋 HUD 提示中显示 `AI`。该切片只改 UI 兜底，不改变 `GameLogEntry.message`、事件写入端、命令执行、AI 决策、规则判定或 Codable schema。
 
+v5.8l 当前已落地：
+
+- `GeneralCommandPanelView` 新增运行态州府/方面显示名查找，唐宋“已拟军令”优先显示目标州府、来源州府或方面名称；缺名时显示“未命名州府 / 未命名方面”，不再默认展示 `targetRegionId`、`sourceRegionId` 或 `zoneId.rawValue`。
+- `BoardScene` 空棋盘占位标题改为“舆图加载中”；macOS app 菜单改为“军务 / 结束回合 / 重新开局”；`InfoPanelToggle` 固定 `[ INFO ]` 改为“详情”并补中文 accessibility label。
+- 该切片只改玩家可见 UI 文案和显示桥，不改变 `PlayerPlannedOperation` schema、将领命令执行、地图渲染状态、macOS app 生命周期、规则或存档。
+
 v5.6b 的 UI 到规则链路：
 
 ```text

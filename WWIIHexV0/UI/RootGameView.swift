@@ -317,6 +317,12 @@ struct RootGameView: View {
                         hqUnderAttack: container.selectedGeneralHQUnderAttack,
                         plannedOperations: container.selectedGeneralPlannedOperations,
                         isTangSongScenario: container.gameState.isTangSongScenario,
+                        regionDisplayName: { regionId in
+                            container.gameState.map.regions[regionId]?.name ?? "未命名州府"
+                        },
+                        zoneDisplayName: { zoneId in
+                            container.gameState.warDeploymentState.frontZones[zoneId]?.name ?? "未命名方面"
+                        },
                         canHoldLine: container.canOrderSelectedGeneralHoldLine,
                         canAttackRegion: container.canOrderSelectedGeneralAttackRegion,
                         onShowProfile: { isGeneralProfilePresented = true },
@@ -340,6 +346,12 @@ struct RootGameView: View {
                         hqUnderAttack: container.selectedGeneralHQUnderAttack,
                         plannedOperations: container.selectedGeneralPlannedOperations,
                         isTangSongScenario: container.gameState.isTangSongScenario,
+                        regionDisplayName: { regionId in
+                            container.gameState.map.regions[regionId]?.name ?? "未命名州府"
+                        },
+                        zoneDisplayName: { zoneId in
+                            container.gameState.warDeploymentState.frontZones[zoneId]?.name ?? "未命名方面"
+                        },
                         canHoldLine: container.canOrderSelectedGeneralHoldLine,
                         canAttackRegion: container.canOrderSelectedGeneralAttackRegion,
                         onShowProfile: { isGeneralProfilePresented = true },
