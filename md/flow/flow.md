@@ -1195,6 +1195,8 @@ RuleEngine.execute(command, in: state)
 
 v5.8i 起，唐宋场景下 `CommandValidationError.displayName(isTangSongScenario:)` 会把 `wrongPhase`、`wrongFaction`、`regionNotFound`、`submissionNotReady` 等 raw validation key 显示为中文拒绝原因；`RuleEngine` 仍保留原始 enum case 和 Codable raw 值，不改变校验语义。`AppContainer` 的 AI 回合完成、玩家方面军令反馈、选中州府日志和 `CommandPanelView.lastCommandMessage` 也优先显示唐宋文案；`EventLogView` 唐宋 metadata 不再展示内部 `relatedRecordId`，legacy 阿登路径保持旧 metadata。
 
+v5.8j 起，唐宋军队/州府检查面板不再默认把 `RegionId`、`TheaterId`、`FrontZoneId`、`FrontLineId`、补给源 id 或 `MapDisplayAdapter` 生成的英文 `None/controlled` 作为玩家文案。`MapDisplayAdapter` 仍保存 raw id 供逻辑和 legacy 显示使用，同时为 inspector state 补运行态州府、动态方面、防区和粮源名称；`UnitInspectorView` / `RegionInspectorView` 在唐宋路径优先显示这些名称，缺失时使用“未知州府 / 未命名方面 / 未命名防区 / 无目标”等兜底。该变化只影响 UI 派生显示，不改变任何 id schema、目标控制、补给判定或命令执行。
+
 ### 5.2 校验规则
 
 `CommandValidator` 的关键校验：
@@ -1535,8 +1537,8 @@ AppContainer.selectedValidatedCommandHint
   -> HUD 下一步提示显示规则确认可执行项
   -> 不提交 Command，不调用 RuleEngine.execute，不写状态
 UnitInspectorView / RegionInspectorView
-  -> 唐宋场景读取 isTangSongScenario 与 GameState.displayName(for:)
-  -> 军队/州府检查面板显示唐宋字段、资源、兵种和围城摘要
+  -> 唐宋场景读取 isTangSongScenario、GameState.displayName(for:) 和 MapDisplayAdapter 派生显示名
+  -> 军队/州府检查面板显示唐宋字段、资源、兵种、围城摘要、运行态方面/防区名称和中文目标状态
   -> 不改底层 schema，不写 GameState，不参与命令执行
 GeneralCommandPanelView / GeneralProfileView
   -> 唐宋场景读取 isTangSongScenario 与 GameState.displayName(for:)
@@ -2000,18 +2002,24 @@ touchesEnded
 - 唐宋粮道 overlay state 派生：只显示普通玩家己方可见军队，observer/revealAll 才显示全阵营；粮源坐标也必须对 viewer 可见。
 - Region inspector state。
 - Unit inspector strategic state。
+- Tang Song inspector display names：州府、动态方面、防区、粮源和目标状态的玩家可读名称。
 
 Inspector 中关键字段：
 
 ```text
 selectedHexController
 selectedHexDynamicTheaterId
+selectedHexDynamicTheaterName
 selectedHexFrontZoneId
+selectedHexFrontZoneName
 theaterId = dominantDynamicTheaterId(region)
+theaterName
 frontZoneId = dominantDynamicFrontZoneId(region)
+frontZoneName
 frontPressure
 friendlyDivisions
 visibleEnemyDivisions
+objectiveStatus = 唐宋“无目标 / 某政权控制”或 legacy 英文状态
 ```
 
 单位 strategic state：
@@ -2019,10 +2027,14 @@ visibleEnemyDivisions
 ```text
 coord
 regionId
+regionName
 dynamicTheaterId
+dynamicTheaterName
 frontLineIds
 frontZoneId
+frontZoneName
 deploymentRole
+supplySourceName
 ```
 
 ### 7.3 MapDisplayLayer

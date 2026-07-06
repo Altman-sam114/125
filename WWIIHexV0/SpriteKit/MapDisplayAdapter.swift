@@ -93,9 +93,13 @@ struct RegionInspectorState: Equatable {
     let selectedHex: HexCoord?
     let selectedHexController: Faction?
     let selectedHexDynamicTheaterId: TheaterId?
+    let selectedHexDynamicTheaterName: String?
     let selectedHexFrontZoneId: FrontZoneId?
+    let selectedHexFrontZoneName: String?
     let theaterId: TheaterId?
+    let theaterName: String?
     let frontZoneId: FrontZoneId?
+    let frontZoneName: String?
     let frontPressure: Double
     let friendlyDivisions: [Division]
     let visibleEnemyDivisions: [Division]
@@ -109,11 +113,15 @@ struct RegionInspectorState: Equatable {
 struct UnitInspectorStrategicState: Equatable {
     let coord: HexCoord
     let regionId: RegionId?
+    let regionName: String?
     let dynamicTheaterId: TheaterId?
+    let dynamicTheaterName: String?
     let frontLineIds: [FrontLineId]
     let frontZoneId: FrontZoneId?
+    let frontZoneName: String?
     let deploymentRole: UnitDeploymentRole
     let supplyRouteSummary: SupplyRouteSummary
+    let supplySourceName: String?
     let isTangSongScenario: Bool
 }
 
@@ -346,21 +354,27 @@ struct MapDisplayAdapter {
                 region.displayHexes.contains(objective.coord)
             }
             .map(\.name)
-        let objectiveStatus = objectiveNames.isEmpty
-            ? "None"
-            : "\(region.controller.displayName) controlled"
+        let objectiveStatus = objectiveStatusText(for: region, hasObjectives: !objectiveNames.isEmpty)
 
         let cityLevel = EconomyRules().cityLevel(for: region, map: state.map)
         let economicOutput = regionalEconomicOutput(for: region, cityLevel: cityLevel)
+        let selectedHexTheaterId = selectedHex.flatMap { state.theaterState.dynamicTheaterId(for: $0, map: state.map) }
+        let selectedHexFrontZoneId = selectedHex.flatMap { state.warDeploymentState.zoneId(for: $0, map: state.map) }
+        let theaterId = state.theaterState.dominantDynamicTheaterId(for: regionId, map: state.map)
+        let frontZoneId = dominantDynamicFrontZoneId(for: regionId)
 
         return RegionInspectorState(
             region: region,
             selectedHex: selectedHex,
             selectedHexController: selectedHex.flatMap { state.map.tile(at: $0)?.controller },
-            selectedHexDynamicTheaterId: selectedHex.flatMap { state.theaterState.dynamicTheaterId(for: $0, map: state.map) },
-            selectedHexFrontZoneId: selectedHex.flatMap { state.warDeploymentState.zoneId(for: $0, map: state.map) },
-            theaterId: state.theaterState.dominantDynamicTheaterId(for: regionId, map: state.map),
-            frontZoneId: dominantDynamicFrontZoneId(for: regionId),
+            selectedHexDynamicTheaterId: selectedHexTheaterId,
+            selectedHexDynamicTheaterName: theaterDisplayName(for: selectedHexTheaterId),
+            selectedHexFrontZoneId: selectedHexFrontZoneId,
+            selectedHexFrontZoneName: frontZoneDisplayName(for: selectedHexFrontZoneId),
+            theaterId: theaterId,
+            theaterName: theaterDisplayName(for: theaterId),
+            frontZoneId: frontZoneId,
+            frontZoneName: frontZoneDisplayName(for: frontZoneId),
             frontPressure: state.frontLineState.regionStates[regionId]?.frontLines
                 .flatMap(\.segments)
                 .map(\.pressureLevel)
@@ -379,20 +393,72 @@ struct MapDisplayAdapter {
         let regionId = division.location(in: state.map)
         let frontLineIds = regionId
             .flatMap { state.frontLineState.regionStates[$0]?.frontLines.map(\.id) } ?? []
+        let dynamicTheaterId = state.theaterState.dynamicTheaterId(for: division.coord, map: state.map)
+        let frontZoneId = state.warDeploymentState.zoneId(for: division.coord, map: state.map)
+        let supplyRouteSummary = SupplyRules().supplyRouteSummary(for: division, in: state)
         return UnitInspectorStrategicState(
             coord: division.coord,
             regionId: regionId,
-            dynamicTheaterId: state.theaterState.dynamicTheaterId(for: division.coord, map: state.map),
+            regionName: regionDisplayName(for: regionId),
+            dynamicTheaterId: dynamicTheaterId,
+            dynamicTheaterName: theaterDisplayName(for: dynamicTheaterId),
             frontLineIds: frontLineIds.sorted { $0.rawValue < $1.rawValue },
-            frontZoneId: state.warDeploymentState.zoneId(for: division.coord, map: state.map),
+            frontZoneId: frontZoneId,
+            frontZoneName: frontZoneDisplayName(for: frontZoneId),
             deploymentRole: WarDeploymentManager().deploymentRole(
                 for: division,
                 in: state.map,
                 state: state.warDeploymentState
             ),
-            supplyRouteSummary: SupplyRules().supplyRouteSummary(for: division, in: state),
+            supplyRouteSummary: supplyRouteSummary,
+            supplySourceName: regionDisplayName(for: supplyRouteSummary.nearestSourceRegionId),
             isTangSongScenario: state.isTangSongScenario
         )
+    }
+
+    private func objectiveStatusText(for region: RegionNode, hasObjectives: Bool) -> String {
+        guard hasObjectives else {
+            return state.isTangSongScenario ? "无目标" : "None"
+        }
+
+        let controllerName = state.displayName(for: region.controller)
+        return state.isTangSongScenario ? "\(controllerName)控制" : "\(controllerName) controlled"
+    }
+
+    private func regionDisplayName(for regionId: RegionId?) -> String? {
+        guard let regionId else {
+            return nil
+        }
+
+        if let region = state.map.region(id: regionId) {
+            return region.name
+        }
+
+        return state.isTangSongScenario ? "未知州府" : regionId.rawValue
+    }
+
+    private func theaterDisplayName(for theaterId: TheaterId?) -> String? {
+        guard let theaterId else {
+            return nil
+        }
+
+        if let theater = state.theaterState.theaters[theaterId] {
+            return theater.name
+        }
+
+        return state.isTangSongScenario ? "未命名方面" : theaterId.rawValue
+    }
+
+    private func frontZoneDisplayName(for zoneId: FrontZoneId?) -> String? {
+        guard let zoneId else {
+            return nil
+        }
+
+        if let zone = state.warDeploymentState.frontZones[zoneId] {
+            return zone.name
+        }
+
+        return state.isTangSongScenario ? "未命名防区" : zoneId.rawValue
     }
 
     private func dominantDynamicFrontZoneId(for regionId: RegionId) -> FrontZoneId? {

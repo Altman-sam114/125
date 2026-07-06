@@ -151,6 +151,41 @@
 - Unit/Region inspector 仍有 region/theater/frontZone raw id 与英文 objectiveStatus 残留，已由并发子 Agent 定位，建议下一轮 v5.8j 小切片处理。
 - 部分交互日志写入端仍可能传入英文 fallback；本轮只处理命令反馈、AI/方面军令和选中州府高频路径。
 
+## v5.8j - 检查面板 raw id 与目标状态硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- `MapDisplayAdapter` 为 `RegionInspectorState` 补 selected hex / region 的动态方面和防区显示名，为 `UnitInspectorStrategicState` 补州府、动态方面、防区和粮源显示名。
+- `MapDisplayAdapter.inspectorState` 的目标状态改为场景感知：唐宋路径显示“无目标”或“某政权控制”，不再把英文 `None` / `controlled` 直接传给州府详情。
+- `UnitInspectorView` 在唐宋路径优先显示运行态州府、动态方面、防区名称；缺名时显示“未知州府 / 未命名方面 / 未命名防区”，不把 raw id 当默认玩家文案。
+- `UnitInspectorView.frontLineSummary` 在唐宋路径显示“相关战线 N 条”，粮道摘要使用州府名或“补给源”兜底，不直接展示 `FrontLineId` 或 supply source id。
+- `RegionInspectorView` 在唐宋路径优先显示 selected hex 和州府的动态方面 / 防区名称；缺名时使用中文 fallback。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8j 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/SpriteKit/MapDisplayAdapter.swift`
+- `WWIIHexV0/UI/UnitInspectorView.swift`
+- `WWIIHexV0/UI/RegionInspectorView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8j_inspector_raw_id_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只处理军队/州府检查面板的 raw id 与目标状态显示；完整 accessibility、截图/布局验收和其他默认主路径英文/raw id 残留仍待后续 v5.8/v5.9 小切片。
+- raw id 字段仍保留在 inspector state 和底层 schema 中，供 legacy 显示、排序、调试和规则使用；唐宋路径仅改变玩家可见显示桥。
+
 ## v0 - 六角格测试板
 
 完成日期：2026-06-14 至 2026-06-15

@@ -39,6 +39,7 @@
   -> v5.8g 起主游戏默认启动不再静默回退阿登
   -> v5.8h 起唐宋将领注册表默认读取 tangsong_characters
   -> v5.8i 起命令反馈与战报元数据隐藏 raw validation / record id
+  -> v5.8j 起军队/州府检查面板隐藏 raw id 与英文目标状态
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -76,7 +77,7 @@ flowchart TD
     VICT["胜负规则<br/>VictoryRules.updateVictoryState<br/>唐宋优先读取 victoryConditions 与天命；缺失时 fallback；非唐宋沿用阿登条件"]:::rules
     VICTEXT["胜负说明、目标进度与评分估算<br/>VictoryState.reason + VictoryRules.objectiveProgress<br/>HUD/战报只读显示原因、门槛和估算评分"]:::ui
     HINT["下一步提示<br/>RootGameView.nextActionHint + AppContainer.selectedValidatedCommandHint<br/>只读派生选军、候选命令、移动/攻击数量与有限合法性预校验"]:::ui
-    INSPECT["检查面板读法<br/>UnitInspectorView + RegionInspectorView<br/>唐宋场景显示军队、州府、政权、粮道、编成、产出与围城摘要"]:::ui
+    INSPECT["检查面板读法<br/>MapDisplayAdapter + UnitInspectorView + RegionInspectorView<br/>唐宋场景显示军队、州府、政权、粮道、编成、产出、围城摘要和运行态方面/防区名称"]:::ui
     GENPANELS["将领面板读法<br/>GeneralCommandPanelView + GeneralProfileView<br/>唐宋场景显示将领军令、档案、用兵、所属政权和辖下军队"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示兵种、兵力、补给、退却和本回合"]:::ui
     AIPANEL["AI 面板玩家态/开发态分层<br/>AgentPanelView + AgentDecisionRecord + WarDirectiveRecord<br/>玩家态显示军议摘要、方面军令和失败摘要<br/>开发态折叠 diagnostics / errors / raw JSON"]:::ui
@@ -579,7 +580,7 @@ flowchart TD
     FOCUS["目标按钮<br/>AppContainer.focusObjective<br/>选中目标 hex / region"]:::ui
     SPOTLIGHT["地图目标 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读标出统一目标州府"]:::ui
     HINT["下一步提示<br/>RootGameView.nextActionHint -> HUDView<br/>只读提示选军、围城、招抚、解围、修城、高亮数量和有限合法性预校验"]:::ui
-    INSPECT["检查面板<br/>UnitInspectorView / RegionInspectorView<br/>唐宋场景显示军队详情、州府详情、编成、产出和围城摘要"]:::ui
+    INSPECT["检查面板<br/>MapDisplayAdapter / UnitInspectorView / RegionInspectorView<br/>唐宋场景显示军队详情、州府详情、运行态方面/防区名称、编成、产出和围城摘要"]:::ui
     GENPANELS["将领面板<br/>GeneralCommandPanelView / GeneralProfileView<br/>唐宋场景显示将领军令、将领档案、用兵和辖下军队"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示选中军队摘要读法"]:::ui
     SESSIONHUD["亲征势力 / 观战 / 重开剧本<br/>RootGameView + HUDView + NewGameButton<br/>切换 legacy 亲征阵营，显示亲征/观战，确认后重置剧本"]:::ui

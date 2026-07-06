@@ -44,15 +44,15 @@ struct UnitInspectorView: View {
                 }
 
                 LabeledContent(isTangSongScenario ? "州府" : "Region") {
-                    Text(strategicState.regionId?.rawValue ?? noneText)
+                    Text(regionText(for: strategicState))
                 }
 
                 LabeledContent(isTangSongScenario ? "动态方面" : "Dynamic Theater") {
-                    Text(strategicState.dynamicTheaterId?.rawValue ?? noneText)
+                    Text(theaterText(for: strategicState))
                 }
 
                 LabeledContent(isTangSongScenario ? "防区" : "FrontZone") {
-                    Text(strategicState.frontZoneId?.rawValue ?? noneText)
+                    Text(frontZoneText(for: strategicState))
                 }
 
                 LabeledContent(isTangSongScenario ? "部署" : "Deploy") {
@@ -65,7 +65,13 @@ struct UnitInspectorView: View {
                 }
 
                 LabeledContent(strategicState.isTangSongScenario ? "粮道" : "Supply Line") {
-                    Text(supplyRouteSummary(strategicState.supplyRouteSummary, isTangSongScenario: strategicState.isTangSongScenario))
+                    Text(
+                        supplyRouteSummary(
+                            strategicState.supplyRouteSummary,
+                            sourceName: strategicState.supplySourceName,
+                            isTangSongScenario: strategicState.isTangSongScenario
+                        )
+                    )
                         .multilineTextAlignment(.trailing)
                 }
             }
@@ -104,11 +110,41 @@ struct UnitInspectorView: View {
     }
 
     private func frontLineSummary(_ ids: [FrontLineId]) -> String {
+        if isTangSongScenario {
+            return ids.isEmpty ? noneText : "相关战线 \(ids.count) 条"
+        }
         ids.isEmpty ? noneText : ids.map(\.rawValue).joined(separator: ", ")
     }
 
-    private func supplyRouteSummary(_ summary: SupplyRouteSummary, isTangSongScenario: Bool) -> String {
-        let sourceName = summary.nearestSourceRegionId?.rawValue ?? summary.nearestSourceId ?? noneText
+    private func regionText(for state: UnitInspectorStrategicState) -> String {
+        if isTangSongScenario {
+            return state.regionName ?? (state.regionId == nil ? noneText : "未知州府")
+        }
+        return state.regionName ?? state.regionId?.rawValue ?? noneText
+    }
+
+    private func theaterText(for state: UnitInspectorStrategicState) -> String {
+        if isTangSongScenario {
+            return state.dynamicTheaterName ?? (state.dynamicTheaterId == nil ? noneText : "未命名方面")
+        }
+        return state.dynamicTheaterName ?? state.dynamicTheaterId?.rawValue ?? noneText
+    }
+
+    private func frontZoneText(for state: UnitInspectorStrategicState) -> String {
+        if isTangSongScenario {
+            return state.frontZoneName ?? (state.frontZoneId == nil ? noneText : "未命名防区")
+        }
+        return state.frontZoneName ?? state.frontZoneId?.rawValue ?? noneText
+    }
+
+    private func supplyRouteSummary(
+        _ summary: SupplyRouteSummary,
+        sourceName: String?,
+        isTangSongScenario: Bool
+    ) -> String {
+        let sourceName = sourceName
+            ?? summary.nearestSourceId.map { isTangSongScenario ? "补给源" : $0 }
+            ?? noneText
         let sourceCoord = summary.nearestSourceCoord.map { "(\($0.q),\($0.r))" } ?? ""
 
         if isTangSongScenario {

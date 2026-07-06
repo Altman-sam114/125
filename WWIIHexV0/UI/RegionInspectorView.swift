@@ -38,11 +38,11 @@ struct RegionInspectorView: View {
                 }
 
                 LabeledContent(isTangSongScenario ? "动态方面" : "Hex Dynamic Theater") {
-                    Text(state.selectedHexDynamicTheaterId?.rawValue ?? noneText)
+                    Text(selectedHexTheaterText(for: state))
                 }
 
                 LabeledContent(isTangSongScenario ? "防区" : "Hex FrontZone") {
-                    Text(state.selectedHexFrontZoneId?.rawValue ?? noneText)
+                    Text(selectedHexFrontZoneText(for: state))
                 }
             }
 
@@ -85,11 +85,11 @@ struct RegionInspectorView: View {
             }
 
             LabeledContent(isTangSongScenario ? "方面" : "Theater") {
-                Text(state.theaterId?.rawValue ?? noneText)
+                Text(theaterText(for: state))
             }
 
             LabeledContent(isTangSongScenario ? "防区" : "FrontZone") {
-                Text(state.frontZoneId?.rawValue ?? noneText)
+                Text(frontZoneText(for: state))
             }
 
             LabeledContent(isTangSongScenario ? "前线压力" : "Front Pressure") {
@@ -126,6 +126,36 @@ struct RegionInspectorView: View {
             return noneText
         }
         return divisions.map(\.name).joined(separator: ", ")
+    }
+
+    private func selectedHexTheaterText(for state: RegionInspectorState) -> String {
+        if isTangSongScenario {
+            return state.selectedHexDynamicTheaterName
+                ?? (state.selectedHexDynamicTheaterId == nil ? noneText : "未命名方面")
+        }
+        return state.selectedHexDynamicTheaterName ?? state.selectedHexDynamicTheaterId?.rawValue ?? noneText
+    }
+
+    private func selectedHexFrontZoneText(for state: RegionInspectorState) -> String {
+        if isTangSongScenario {
+            return state.selectedHexFrontZoneName
+                ?? (state.selectedHexFrontZoneId == nil ? noneText : "未命名防区")
+        }
+        return state.selectedHexFrontZoneName ?? state.selectedHexFrontZoneId?.rawValue ?? noneText
+    }
+
+    private func theaterText(for state: RegionInspectorState) -> String {
+        if isTangSongScenario {
+            return state.theaterName ?? (state.theaterId == nil ? noneText : "未命名方面")
+        }
+        return state.theaterName ?? state.theaterId?.rawValue ?? noneText
+    }
+
+    private func frontZoneText(for state: RegionInspectorState) -> String {
+        if isTangSongScenario {
+            return state.frontZoneName ?? (state.frontZoneId == nil ? noneText : "未命名防区")
+        }
+        return state.frontZoneName ?? state.frontZoneId?.rawValue ?? noneText
     }
 
     private func siegeSummary(_ record: SiegeRecord?) -> String {
