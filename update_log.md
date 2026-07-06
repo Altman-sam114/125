@@ -259,6 +259,39 @@
 - 本轮未处理 AI 面板 `mandateIntent/courtPolicy/summary/diagnostics/rawJSON` 原文风险，未处理外交面板国家/集团名 Latin guard 与 ASCII 连接符，建议作为后续 v5.8/v5.9 小切片。
 - 将领面板仍直接显示 `zone.name`、`division.name`、`targetRegion.name`；当前唐宋默认数据为中文名，若未来混入英文数据，仍需要更完整的名称清洗或本地化 fallback。
 
+## v5.8m - 外交 Latin 名称与 ASCII 连接符硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 `DiplomacyPanelView` 的国家名、集团名、关系连接符、归附连接符和列表标点仍可在唐宋路径外露 Latin/ASCII 读法。
+- `DiplomacyPanelView` 新增国家显示 helper：唐宋路径先按 `CountryId` 映射宋、北汉、辽边境压力、南唐、吴越、后蜀等名称；遇到 legacy `germany/united_states/united_kingdom/belgium` 时给中文 fallback；其他含 Latin 或等于 raw id 的名称按 faction 显示为宋或割据政权。
+- `DiplomacyPanelView` 新增集团显示 helper：唐宋路径按 `DiplomaticBlocId` 映射宋朝廷、抗宋同盟、南方割据诸国；legacy `axis/allied_coalition` 也给中文 fallback。
+- 关系行从 `甲 - 乙` 改为“甲 与 乙”，归附记录从 `甲 -> 乙` 改为“甲 招抚 乙”。
+- 国家副标题分隔从 ASCII `/` 改为“·”；归附州府列表和君主目标列表从 `, ` 改为“、”。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8m 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/DiplomacyPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8m_diplomacy_latin_ascii_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮未处理 `AgentPanelView` 的 `mandateIntent/courtPolicy/summary/diagnostics/rawJSON` 原文风险，建议下一轮单独收口 AI 面板玩家态 raw 文本。
+- 外交面板仍只做显示层清洗，不改变底层国家/集团 id、关系记录、归附记录或外交规则。
+
 ## v0 - 六角格测试板
 
 完成日期：2026-06-14 至 2026-06-15

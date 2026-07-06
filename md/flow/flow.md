@@ -553,6 +553,12 @@ v5.8l 当前已落地：
 - `BoardScene` 空棋盘占位标题改为“舆图加载中”；macOS app 菜单改为“军务 / 结束回合 / 重新开局”；`InfoPanelToggle` 固定 `[ INFO ]` 改为“详情”并补中文 accessibility label。
 - 该切片只改玩家可见 UI 文案和显示桥，不改变 `PlayerPlannedOperation` schema、将领命令执行、地图渲染状态、macOS app 生命周期、规则或存档。
 
+v5.8m 当前已落地：
+
+- `DiplomacyPanelView` 在唐宋路径对国家名和集团名增加 `CountryId` / `DiplomaticBlocId` 显示映射与 Latin guard，旧存档或 fallback 数据里的 `German Reich`、`United States`、`Axis`、`Allied Coalition` 等不再默认直出。
+- 外交关系行改为“甲 与 乙”，归附记录改为“甲 招抚 乙”，国家副标题使用“·”，归附州府和君主目标列表使用“、”。
+- 该切片只改外交面板只读显示桥，不改变 `DiplomacyState`、`PacificationRecord`、外交关系投影、命令、规则或 Codable schema。
+
 v5.6b 的 UI 到规则链路：
 
 ```text

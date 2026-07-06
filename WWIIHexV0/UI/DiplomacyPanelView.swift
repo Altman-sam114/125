@@ -76,7 +76,7 @@ struct DiplomacyPanelView: View {
             ForEach(diplomacyState.countries) { country in
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(country.name)
+                        Text(countryDisplayName(country))
                             .font(.caption.weight(.semibold))
                         Text(countrySubtitle(country))
                             .font(.caption)
@@ -97,7 +97,7 @@ struct DiplomacyPanelView: View {
                 .font(.subheadline.weight(.semibold))
 
             ForEach(diplomacyState.blocs) { bloc in
-                LabeledContent(bloc.name) {
+                LabeledContent(blocDisplayName(bloc)) {
                     Text(isTangSongScenario ? "\(bloc.memberCountryIds.count) 国" : "\(bloc.memberCountryIds.count) member(s)")
                         .foregroundStyle(bloc.faction == activeFaction ? .primary : .secondary)
                 }
@@ -118,7 +118,7 @@ struct DiplomacyPanelView: View {
             } else {
                 ForEach(diplomacyState.relations) { relation in
                     HStack {
-                        Text("\(countryName(relation.firstCountryId)) - \(countryName(relation.secondCountryId))")
+                        Text(relationTitle(relation))
                             .font(.caption)
                             .lineLimit(1)
                         Spacer()
@@ -144,7 +144,7 @@ struct DiplomacyPanelView: View {
                 ForEach(recentPacificationRecords) { record in
                     VStack(alignment: .leading, spacing: 2) {
                         HStack {
-                            Text("\(countryName(record.actorCountryId)) -> \(countryName(record.targetCountryId))")
+                            Text(pacificationTitle(record))
                                 .font(.caption.weight(.semibold))
                                 .lineLimit(1)
                             Spacer()
@@ -194,13 +194,15 @@ struct DiplomacyPanelView: View {
     }
 
     private func countryName(_ countryId: CountryId) -> String {
-        diplomacyState.country(id: countryId)?.name ?? (isTangSongScenario ? "未知政权" : countryId.rawValue)
+        guard let country = diplomacyState.country(id: countryId) else {
+            return isTangSongScenario ? "未知政权" : countryId.rawValue
+        }
+        return countryDisplayName(country)
     }
 
     private func countrySubtitle(_ country: CountryProfile) -> String {
-        let blocName = diplomacyState.blocs.first { $0.id == country.blocId }?.name
-            ?? (isTangSongScenario ? "未命名集团" : country.blocId.rawValue)
-        let separator = isTangSongScenario ? " / " : " | "
+        let blocName = blocDisplayName(country.blocId, faction: country.faction)
+        let separator = isTangSongScenario ? " · " : " | "
         return "\(displayName(for: country.faction))\(separator)\(blocName)"
     }
 
@@ -209,11 +211,67 @@ struct DiplomacyPanelView: View {
     }
 
     private func pacificationDetail(_ record: PacificationRecord) -> String {
-        let regions = record.targetRegionIds.map { displayName(for: $0) }.joined(separator: ", ")
+        let regions = record.targetRegionIds
+            .map { displayName(for: $0) }
+            .joined(separator: isTangSongScenario ? "、" : ", ")
         if isTangSongScenario {
             return "回合 \(record.turn)；天命 \(record.mandateDelta >= 0 ? "+" : "")\(record.mandateDelta)；州府 \(regions)"
         }
         return "Turn \(record.turn); mandate \(record.mandateDelta >= 0 ? "+" : "")\(record.mandateDelta); regions \(regions)"
+    }
+
+    private func relationTitle(_ relation: DiplomaticRelation) -> String {
+        if isTangSongScenario {
+            return "\(countryName(relation.firstCountryId)) 与 \(countryName(relation.secondCountryId))"
+        }
+        return "\(countryName(relation.firstCountryId)) - \(countryName(relation.secondCountryId))"
+    }
+
+    private func pacificationTitle(_ record: PacificationRecord) -> String {
+        if isTangSongScenario {
+            return "\(countryName(record.actorCountryId)) 招抚 \(countryName(record.targetCountryId))"
+        }
+        return "\(countryName(record.actorCountryId)) -> \(countryName(record.targetCountryId))"
+    }
+
+    private func countryDisplayName(_ country: CountryProfile) -> String {
+        guard isTangSongScenario else {
+            return country.name
+        }
+
+        if let mapped = tangSongCountryName(for: country.id) {
+            return mapped
+        }
+        if containsLatinLetters(country.name) || country.name == country.id.rawValue {
+            return country.faction == .allies ? "宋" : "割据政权"
+        }
+        return country.name
+    }
+
+    private func blocDisplayName(_ bloc: DiplomaticBloc) -> String {
+        blocDisplayName(bloc.id, fallbackName: bloc.name, faction: bloc.faction)
+    }
+
+    private func blocDisplayName(_ blocId: DiplomaticBlocId, faction: Faction) -> String {
+        let bloc = diplomacyState.blocs.first { $0.id == blocId }
+        return blocDisplayName(blocId, fallbackName: bloc?.name, faction: bloc?.faction ?? faction)
+    }
+
+    private func blocDisplayName(
+        _ blocId: DiplomaticBlocId,
+        fallbackName: String?,
+        faction: Faction
+    ) -> String {
+        guard isTangSongScenario else {
+            return fallbackName ?? blocId.rawValue
+        }
+        if let mapped = tangSongBlocName(for: blocId) {
+            return mapped
+        }
+        if let fallbackName, !containsLatinLetters(fallbackName), fallbackName != blocId.rawValue {
+            return fallbackName
+        }
+        return faction == .allies ? "宋朝廷" : "割据集团"
     }
 
     private func displayName(for regionId: RegionId) -> String {
@@ -268,13 +326,57 @@ struct DiplomacyPanelView: View {
 
         let posture = record.posture.displayName(isTangSongScenario: true)
         if !record.targetRegionIds.isEmpty {
-            let targets = record.targetRegionIds.map { displayName(for: $0) }.joined(separator: ", ")
+            let targets = record.targetRegionIds.map { displayName(for: $0) }.joined(separator: "、")
             return "朝议：\(posture)，目标 \(targets)。"
         }
         if let zoneId = record.preferredFrontZoneId {
             return "朝议：\(posture)，重点 \(displayName(for: zoneId))。"
         }
         return "朝议：\(posture)，审时度势。"
+    }
+
+    private func tangSongCountryName(for countryId: CountryId) -> String? {
+        switch countryId.rawValue {
+        case "power_song", "united_states":
+            return "宋"
+        case "power_northern_han":
+            return "北汉"
+        case "power_liao_edge":
+            return "辽边境压力"
+        case "power_southern_tang":
+            return "南唐"
+        case "power_wuyue":
+            return "吴越"
+        case "power_later_shu":
+            return "后蜀"
+        case "germany":
+            return "割据诸国"
+        case "united_kingdom":
+            return "宋盟国"
+        case "belgium":
+            return "边地盟国"
+        default:
+            return nil
+        }
+    }
+
+    private func tangSongBlocName(for blocId: DiplomaticBlocId) -> String? {
+        switch blocId.rawValue {
+        case "bloc_song_court", "allied_coalition":
+            return "宋朝廷"
+        case "bloc_anti_song", "axis":
+            return "抗宋同盟"
+        case "bloc_southern_realms":
+            return "南方割据诸国"
+        default:
+            return nil
+        }
+    }
+
+    private func containsLatinLetters(_ text: String) -> Bool {
+        text.unicodeScalars.contains { scalar in
+            (65...90).contains(Int(scalar.value)) || (97...122).contains(Int(scalar.value))
+        }
     }
 }
 

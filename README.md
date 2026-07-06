@@ -66,7 +66,9 @@
 
 > **v5.8k 小切片：** 唐宋命令面板与战报 raw 英文兜底继续硬化：`CommandPanelView` 的唐宋命令反馈复用 `TangSongEventLogMessage` 显示桥，`EventLogView` 补退却路线、被围损耗、玩家方面军令诊断、州府归属和动态方面变更等常见英文事件映射；若唐宋显示桥处理后仍含拉丁字母，默认降级为中文“战报已更新”提示，不再把 raw 英文/内部 key 直接展示给玩家；HUD 已行动提示中的 `AI` 改为“各方军议”。该切片只改玩家可见 UI 兜底，不改变 `GameLogEntry.message`、事件写入端、命令执行、AI 决策、规则判定或 Codable schema。
 
-> **v5.8l 最新小切片：** 唐宋将领计划摘要与固定英文 UI 继续硬化：`GeneralCommandPanelView` 的“已拟军令”在唐宋路径通过运行态州府/方面名称显示目标，缺名时显示“未命名州府 / 未命名方面”，不再默认展示 `targetRegionId/sourceRegionId/zoneId.rawValue`；`BoardScene` 空棋盘标题改为“舆图加载中”，macOS 菜单改为“军务 / 结束回合 / 重新开局”，`InfoPanelToggle` 固定 `[ INFO ]` 改为“详情”并补中文 accessibility label。该切片只改玩家可见 UI 文案和显示桥，不改变 `PlayerPlannedOperation`、将领命令、地图渲染状态、macOS app 生命周期、规则或存档 schema。
+> **v5.8l 小切片：** 唐宋将领计划摘要与固定英文 UI 继续硬化：`GeneralCommandPanelView` 的“已拟军令”在唐宋路径通过运行态州府/方面名称显示目标，缺名时显示“未命名州府 / 未命名方面”，不再默认展示 `targetRegionId/sourceRegionId/zoneId.rawValue`；`BoardScene` 空棋盘标题改为“舆图加载中”，macOS 菜单改为“军务 / 结束回合 / 重新开局”，`InfoPanelToggle` 固定 `[ INFO ]` 改为“详情”并补中文 accessibility label。该切片只改玩家可见 UI 文案和显示桥，不改变 `PlayerPlannedOperation`、将领命令、地图渲染状态、macOS app 生命周期、规则或存档 schema。
+
+> **v5.8m 最新小切片：** 唐宋外交面板 Latin 名称与 ASCII 连接符继续硬化：`DiplomacyPanelView` 在唐宋路径对国家名和集团名增加 `CountryId` / `DiplomaticBlocId` 显示映射与 Latin guard，旧存档或 fallback 数据中的 `German Reich`、`United States`、`Axis`、`Allied Coalition` 等不再默认直出；外交关系行改为“甲 与 乙”，归附记录改为“甲 招抚 乙”，国家副标题使用“·”，归附州府和君主目标列表使用“、”。该切片只改外交面板只读显示桥，不改变 `DiplomacyState`、`PacificationRecord`、外交关系投影、命令、规则或 Codable schema。
 
 ---
 
@@ -218,7 +220,7 @@ WWIIHexV0/
 | v5.5 | 已完成首轮 | HUD、图层、面板、战报、地图视觉 token、军旗棋子和只读粮道 overlay 已改为唐宋场景读法。 |
 | v5.6 | 已完成多轮首轮闭环 | 外交归附、天命、玩家招抚、AI 招抚辅助桥、关系投影、战术候选关系感知、数据驱动胜利条件、胜负原因和目标进度只读显示已接入。 |
 | v5.7 | 已完成多轮可玩性首轮 | 下一步提示、统一目标锚点/定位/spotlight、每回合战报摘要、新局确认、亲征/观战入口、结算预览、合法性提示、检查面板、将领面板和 tooltip 唐宋读法已接入。 |
-| v5.8a-v5.8l | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要和固定英文 UI 已做默认主路径硬化首轮。完整 RC 审计仍未完成。 |
+| v5.8a-v5.8m | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI 和外交 Latin/ASCII 显示已做默认主路径硬化首轮。完整 RC 审计仍未完成。 |
 | v5.9 | 未开始 | 可发布验收、完整 artifact 审计、README/flow/update_log 统一发布口径仍待后续。 |
 
 ### 当前仍未完成
@@ -272,7 +274,7 @@ md/
     ├── README.md
     │   Agent A/B/C 召唤、阶段 prompt 写法、main 直推和 CI artifact 要求
     ├── v5.0-唐宋迁移/
-    │   唐宋 v5.0-v5.9 总提示词、v5.0 审计合同、v5.7a 下一步提示、v5.7b 目标锚点、v5.7c 目标定位、v5.7d 地图目标高亮、v5.7e 战报摘要、v5.7f 新局身份包装、v5.7g 高亮数量提示、v5.7h 亲征/观战入口、v5.7i 结算预览/评分估算、v5.7j 合法性提示、v5.7k 检查面板读法、v5.7l 将领面板读法、v5.7m 常驻 tooltip 读法、v5.8a AI 面板默认主路径硬化、v5.8b AI 面板玩家态/开发态分层、v5.8c 外交面板读法硬化、v5.8d 战报读法硬化、v5.8e MapEditor 默认路径硬化、v5.8f 文档定位收口、v5.8j 检查面板 raw id 硬化、v5.8k 命令/战报 raw 英文兜底硬化、v5.8l 将领计划和固定英文 UI 硬化等阶段记录
+    │   唐宋 v5.0-v5.9 总提示词、v5.0 审计合同、v5.7a 下一步提示、v5.7b 目标锚点、v5.7c 目标定位、v5.7d 地图目标高亮、v5.7e 战报摘要、v5.7f 新局身份包装、v5.7g 高亮数量提示、v5.7h 亲征/观战入口、v5.7i 结算预览/评分估算、v5.7j 合法性提示、v5.7k 检查面板读法、v5.7l 将领面板读法、v5.7m 常驻 tooltip 读法、v5.8a AI 面板默认主路径硬化、v5.8b AI 面板玩家态/开发态分层、v5.8c 外交面板读法硬化、v5.8d 战报读法硬化、v5.8e MapEditor 默认路径硬化、v5.8f 文档定位收口、v5.8j 检查面板 raw id 硬化、v5.8k 命令/战报 raw 英文兜底硬化、v5.8l 将领计划和固定英文 UI 硬化、v5.8m 外交 Latin/ASCII 显示硬化等阶段记录
     ├── v2.0-三国迁移/
     ├── v3.0-拿战迁移/
     ├── v3.0-隋唐迁移/

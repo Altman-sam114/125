@@ -42,6 +42,7 @@
   -> v5.8j 起军队/州府检查面板隐藏 raw id 与英文目标状态
   -> v5.8k 起命令面板和战报 raw 英文兜底不直出玩家
   -> v5.8l 起将领计划摘要和固定英文 UI 继续硬化
+  -> v5.8m 起外交面板 Latin 名称与 ASCII 连接符继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -83,7 +84,7 @@ flowchart TD
     GENPANELS["将领面板读法<br/>GeneralCommandPanelView + GeneralProfileView<br/>唐宋场景显示将领军令、档案、用兵、所属政权、辖下军队和 planned operation 目标名称"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示兵种、兵力、补给、退却和本回合"]:::ui
     AIPANEL["AI 面板玩家态/开发态分层<br/>AgentPanelView + AgentDecisionRecord + WarDirectiveRecord<br/>玩家态显示军议摘要、方面军令和失败摘要<br/>开发态折叠 diagnostics / errors / raw JSON"]:::ui
-    DIPPANEL["外交面板读法硬化<br/>DiplomacyPanelView + DiplomacyState + MandateState<br/>唐宋默认路径显示天命、诸国、关系和归附读法"]:::ui
+    DIPPANEL["外交面板读法硬化<br/>DiplomacyPanelView + DiplomacyState + MandateState<br/>唐宋默认路径显示天命、诸国、关系和归附读法<br/>Latin 国家/集团名与 ASCII 连接符有中文兜底"]:::ui
     GOAL["统一目标锚点<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
