@@ -465,6 +465,12 @@ v5.7f 当前已落地：
 - `NewGameButton` 在唐宋场景显示“重开剧本”；`RootGameView` 在调用 `AppContainer.resetGame()` 前弹出确认，避免误清空当前剧本进度。
 - 该切片只包装 UI 入口和当前身份读法，不改变 `AppContainer.playerFaction`，不实现真实多势力选择，不写 `GameState` schema，不改变 `resetGame()`、`RuleEngine`、`TurnManager`、命令合法性或存档。
 
+v5.7g 当前已落地：
+
+- `RootGameView.nextActionHint` 在选中可行动宋军且无围城/招抚/解围/修城等更高优先级目标时，读取 `AppContainer.attackHighlights.count` 与 `movementHighlights.count`。
+- 提示会说明当前可攻击目标数量和可行军格数量，帮助玩家把“下一步”与地图红色目标/高亮格对应起来。
+- 这些数量来自既有 UI 高亮派生结果：行军高亮由 `MovementRules.movementRange` 生成，攻击高亮由敌对关系和射程筛出；提示不新增命令、不调用 `RuleEngine`、不写 `GameState` 或 `eventLog`，也不替代真实按钮提交后的 `CommandValidator` / `RuleEngine` 校验。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1431,6 +1437,10 @@ HUDView commandIdentity
   -> 只读读取 playerFaction / observerModeEnabled / activeFaction / phase
   -> 显示宋可下令、宋待命、观战各方、玩家亲征或只读观战
   -> 不改变 playerFaction，不实现真实势力选择
+RootGameView.nextActionHint
+  -> 只读读取 movementHighlights.count / attackHighlights.count
+  -> 提示当前可行军格和可攻击目标数量
+  -> 不新增 CommandValidator dry-run，不替代真实规则校验
 NewGameButton
   -> RootGameView confirmationDialog
   -> 用户确认后调用 AppContainer.resetGame()

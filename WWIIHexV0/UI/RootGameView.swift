@@ -177,7 +177,18 @@ struct RootGameView: View {
             return "可在\(targetName)修城，提升城防后再安排其他军队反击或整补。"
         }
 
-        return "该军可行动；点击相邻敌军或敌控州府寻找进攻目标，或先固守、整补稳定粮道。"
+        let attackCount = container.attackHighlights.count
+        let movementCount = container.movementHighlights.count
+        if attackCount > 0 && movementCount > 0 {
+            return "该军可行动；当前有 \(attackCount) 个可攻击目标、\(movementCount) 处可行军格，优先处理红色目标或沿高亮格推进。"
+        }
+        if attackCount > 0 {
+            return "该军可行动；当前有 \(attackCount) 个可攻击目标，可先打击红色目标，也可固守等待战线变化。"
+        }
+        if movementCount > 0 {
+            return "该军可行动；当前有 \(movementCount) 处可行军格，可沿高亮格靠近待取州府、粮道或围城目标。"
+        }
+        return "该军暂无可攻击目标或可行军格；可先固守、整补，或改选其他未行动宋军。"
     }
 
     private func infoOverlay(isLandscape: Bool, size: CGSize) -> some View {
