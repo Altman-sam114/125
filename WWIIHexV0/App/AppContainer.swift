@@ -537,6 +537,51 @@ final class AppContainer: ObservableObject {
         return target.country.name
     }
 
+    var selectedValidatedCommandHint: String? {
+        guard gameState.isTangSongScenario,
+              let division = selectedActionDivision else {
+            return nil
+        }
+
+        if let target = selectedDemandSurrenderTarget {
+            return "规则确认可招降 \(siegeTargetName(target))。"
+        }
+
+        if let target = selectedBesiegeTarget {
+            return "规则确认可围城 \(siegeTargetName(target))。"
+        }
+
+        if let target = selectedSubmissionTarget {
+            return "规则确认可招抚 \(target.country.name)。"
+        }
+
+        if let target = selectedRelieveSiegeTarget {
+            return "规则确认可解围 \(siegeTargetName(target))。"
+        }
+
+        if let target = selectedRepairFortificationTarget {
+            return "规则确认可修城 \(siegeTargetName(target))。"
+        }
+
+        let attackCount = validAttackCount(for: division)
+        let movementCount = validMovementCount(for: division)
+        if attackCount > 0 && movementCount > 0 {
+            return "规则确认该军有 \(attackCount) 个可攻击目标、\(movementCount) 处可行军格。"
+        }
+        if attackCount > 0 {
+            return "规则确认该军有 \(attackCount) 个可攻击目标。"
+        }
+        if movementCount > 0 {
+            return "规则确认该军有 \(movementCount) 处可行军格。"
+        }
+
+        if isValid(.hold(divisionId: division.id)) {
+            return "规则确认该军可固守；若粮道紧张，也可考虑整补。"
+        }
+
+        return nil
+    }
+
     private var selectedActionDivision: Division? {
         guard !observerModeEnabled else {
             return nil
@@ -697,7 +742,7 @@ final class AppContainer: ObservableObject {
             targetCountryId: country.id,
             targetRegionIds: [region.id]
         )
-        guard CommandValidator().validate(command, in: gameState).isValid else {
+        guard isValid(command) else {
             return nil
         }
 
@@ -720,72 +765,19 @@ final class AppContainer: ObservableObject {
     }
 
     private func canBesiege(division: Division, targetRegion region: RegionNode) -> Bool {
-        guard region.isPassable,
-              isSiegeTarget(region),
-              warRelationRules.canTarget(attacker: division.faction, target: region.controller, in: gameState) else {
-            return false
-        }
-
-        return siegeDistance(from: division, to: region) <= max(1, division.range)
+        isValid(.besiege(attackerId: division.id, targetRegionId: region.id))
     }
 
     private func canRepairFortification(division: Division, targetRegion region: RegionNode) -> Bool {
-        guard region.isPassable,
-              isSiegeTarget(region),
-              region.controller == division.faction,
-              division.location(in: gameState.map) == region.id,
-              let record = gameState.siegeState.record(for: region.id),
-              record.defenderFaction == division.faction else {
-            return false
-        }
-
-        return record.fortification < record.maxFortification
+        isValid(.repairFortification(defenderId: division.id, targetRegionId: region.id))
     }
 
     private func canRelieveSiege(division: Division, targetRegion region: RegionNode) -> Bool {
-        guard region.controller == division.faction,
-              let record = gameState.siegeState.record(for: region.id),
-              record.defenderFaction == division.faction else {
-            return false
-        }
-
-        if division.location(in: gameState.map) == region.id {
-            return true
-        }
-
-        return siegeDistance(from: division, to: region) <= max(1, division.range)
+        isValid(.relieveSiege(relieverId: division.id, targetRegionId: region.id))
     }
 
     private func canDemandSurrender(division: Division, targetRegion region: RegionNode) -> Bool {
-        guard let record = gameState.siegeState.record(for: region.id),
-              record.attackerFaction == division.faction,
-              region.controller == record.defenderFaction,
-              record.pressure >= 10,
-              record.fortification == 0,
-              warRelationRules.canTarget(attacker: division.faction, target: record.defenderFaction, in: gameState),
-              siegeDistance(from: division, to: region) <= max(1, division.range),
-              hasCapitulatingHexes(region, defenderFaction: record.defenderFaction),
-              defendersAreReadyToSurrender(record: record, in: region) else {
-            return false
-        }
-
-        return true
-    }
-
-    private func isSiegeTarget(_ region: RegionNode) -> Bool {
-        if region.city != nil || region.terrain == .fortress || region.supplyValue >= 4 {
-            return true
-        }
-
-        return region.displayHexes.contains { coord in
-            guard let tile = gameState.map.tile(at: coord) else {
-                return false
-            }
-            return tile.baseTerrain == .city ||
-                tile.baseTerrain == .fortress ||
-                tile.cityName != nil ||
-                tile.fortressName != nil
-        }
+        isValid(.demandSurrender(negotiatorId: division.id, targetRegionId: region.id))
     }
 
     private func siegeDistance(from division: Division, to region: RegionNode) -> Int {
@@ -794,29 +786,25 @@ final class AppContainer: ObservableObject {
             .min() ?? Int.max
     }
 
-    private func hasCapitulatingHexes(_ region: RegionNode, defenderFaction: Faction) -> Bool {
-        let candidates = region.displayHexes.isEmpty ? [region.representativeHex] : region.displayHexes
-        return candidates.contains { coord in
-            guard let tile = gameState.map.tile(at: coord),
-                  tile.isCapturable else {
-                return false
-            }
-            return tile.controller == defenderFaction || tile.controller == nil
-        }
-    }
-
-    private func defendersAreReadyToSurrender(record: SiegeRecord, in region: RegionNode) -> Bool {
-        gameState.divisions
-            .filter {
-                $0.faction == record.defenderFaction &&
-                    $0.location(in: gameState.map) == region.id &&
-                    !$0.isDestroyed
-            }
-            .allSatisfy { $0.supplyState != .supplied }
-    }
-
     private func siegeTargetName(_ region: RegionNode) -> String {
         region.city?.name ?? region.name
+    }
+
+    private func validAttackCount(for division: Division) -> Int {
+        gameState.divisions.filter { target in
+            attackHighlights.contains(target.coord) &&
+            isValid(.attack(attackerId: division.id, targetId: target.id))
+        }.count
+    }
+
+    private func validMovementCount(for division: Division) -> Int {
+        movementHighlights.filter { destination in
+            isValid(.move(divisionId: division.id, destination: destination))
+        }.count
+    }
+
+    private func isValid(_ command: Command) -> Bool {
+        CommandValidator().validate(command, in: gameState).isValid
     }
 
     private var mapDisplayAdapter: MapDisplayAdapter {

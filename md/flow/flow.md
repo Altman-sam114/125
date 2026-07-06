@@ -486,6 +486,13 @@ v5.7i 当前已落地：
 - 该摘要不调用 `VictoryRules.updateVictoryState`，不写 `VictoryState`、`GameState.eventLog`、hex / region / theater / front / deploy 或 diplomacy，不新增权威结算事件，也不替代正式胜负规则。
 - 该切片不是完整胜利面板、治理评分、单国胜负、外交纳土结算、自动破城或正式评分系统；它只是战报面板的展示层复盘提示。
 
+v5.7j 当前已落地：
+
+- `AppContainer.selectedValidatedCommandHint` 在唐宋场景下只读构造当前 UI 候选命令，并用 `CommandValidator.validate` 有限预校验围城、招抚、解围、修城、招降、攻击和行军候选。
+- `RootGameView.nextActionHint` 优先显示“规则确认可执行”的地图或军令入口，减少仅靠高亮数量或目标名导致的宽泛提示。
+- `AppContainer` 的围城、修城、解围和招降候选过滤也收口到同一 `CommandValidator` 入口，减少 UI 层复制规则条件。
+- 该切片不提交 `Command`，不调用 `RuleEngine.execute`，不写 `GameState`、`eventLog`、hex / region / theater / front / deploy 或 diplomacy，不改变 `CommandValidator` 语义；它不是通用 dry-run 系统、完整逐命令教程或规则模拟器。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1468,6 +1475,11 @@ RootGameView.nextActionHint
   -> 只读读取 movementHighlights.count / attackHighlights.count
   -> 提示当前可行军格和可攻击目标数量
   -> 不新增 CommandValidator dry-run，不替代真实规则校验
+AppContainer.selectedValidatedCommandHint
+  -> 对当前 UI 候选构造 Command
+  -> 调用 CommandValidator.validate 做有限预校验
+  -> HUD 下一步提示显示规则确认可执行项
+  -> 不提交 Command，不调用 RuleEngine.execute，不写状态
 NewGameButton
   -> RootGameView confirmationDialog
   -> 用户确认后调用 AppContainer.resetGame()

@@ -22,7 +22,7 @@ flowchart TD
     SPOTLIGHT["MapDisplayAdapter.objectiveOverlays<br/>目标州府 spotlight<br/>只读绘制已据/待取目标"]:::ui
     TURNREPORT["EventLogView.turnReportSummary + settlementSummary<br/>每回合战报 / 胜负后评分估算<br/>只读汇总 eventLog / AI 军议 / 方面军令 / VictoryState"]:::ui
     SESSIONHUD["RootGameView player picker + HUDView commandIdentity + NewGameButton<br/>亲征势力 / 观战 / 重开剧本确认<br/>切换 UI 亲征阵营，确认后调用 resetGame"]:::ui
-    HINT["RootGameView.nextActionHint<br/>HUD 下一步提示<br/>只读派生选军/围城/招抚/解围/修城/移动/攻击高亮数量"]:::ui
+    HINT["RootGameView.nextActionHint + AppContainer.selectedValidatedCommandHint<br/>HUD 下一步提示<br/>只读派生选军/候选命令/移动攻击数量/有限合法性预校验"]:::ui
 
     PLAYER["玩家操作<br/>tap / move / attack / proposeSubmission / endTurn"]:::input
     AI["AI 元帅/将领<br/>MarshalAgent / TheaterCommanderPool<br/>ZoneCommanderAgent"]:::input

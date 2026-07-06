@@ -183,6 +183,10 @@ struct RootGameView: View {
             return "该军本回合已行动；继续选择其他未行动宋军，或结束回合让 AI 推进。"
         }
 
+        if let validatedHint = container.selectedValidatedCommandHint {
+            return "\(validatedHint) 可通过地图或军令入口执行；提示只读校验，不会提前下令。"
+        }
+
         if let targetName = container.selectedDemandSurrenderTargetName {
             return "可对\(targetName)招降，优先把已破城防且断粮的围城结果落地。"
         }
