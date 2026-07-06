@@ -542,6 +542,14 @@ v5.8o 当前已落地：
 - `RegionInspectorView` 在唐宋场景下把地块坐标从 `q,r` 改为中文列/行读法，把目标和军队列表分隔符改为“、”，把围城城防从 ASCII `/` 改为“／”。
 - 该切片只改将领面板和州府详情面板的只读显示桥，不改变 `PlayerPlannedOperation`、`RegionInspectorState`、`SiegeRecord`、命令、围城规则、AI 决策、事件写入职责、VoiceOver 实机结果或 Codable schema。
 
+v5.8p 当前已落地：
+
+- `EconomyPanelView` 在唐宋场景下把军备成本行从 ASCII `|` 改为中文逗号读法。
+- `HUDView` 和 `EventLogView` 在唐宋场景下把回合进度、结算评分、战报 metadata 和方面军议 highlight 中的 ASCII `/`、` - ` 或 ` / ` 改为“／”、中文分号或“：”。
+- `UnitInspectorView`、`UnitTooltipView`、`GeneralProfileView` 和 `UnitNode` 在唐宋场景下把兵力 `strength/maxStrength` 显示从 ASCII `/` 改为“／”，军队详情地块坐标改为中文列/行读法，粮道成本、编成列表和多状态列表也改用“／”或“、”。
+- `MapDisplayAdapter` 在唐宋地图 overlay 上把围城城防和粮道成本标签中的 ASCII `/` 改为“／”。
+- 该切片只改玩家可见 UI 与地图标签的只读显示桥，不改变 `Division`、`SupplyRouteSummary`、`SiegeOverlayState`、生产、补给、围城、命令、AI 决策、事件写入职责或 Codable schema。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

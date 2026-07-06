@@ -40,7 +40,7 @@ struct UnitInspectorView: View {
 
             if let strategicState {
                 LabeledContent(isTangSongScenario ? "地块" : "Hex") {
-                    Text("\(strategicState.coord.q),\(strategicState.coord.r)")
+                    Text(hexCoordText(strategicState.coord))
                 }
 
                 LabeledContent(isTangSongScenario ? "州府" : "Region") {
@@ -77,7 +77,7 @@ struct UnitInspectorView: View {
             }
 
             LabeledContent(isTangSongScenario ? "兵力" : "Strength") {
-                Text(division.inspectorStrengthText)
+                Text(division.inspectorStrengthText(isTangSongScenario: isTangSongScenario))
             }
 
             LabeledContent(isTangSongScenario ? "退却口径" : "Retreat Mode") {
@@ -106,7 +106,7 @@ struct UnitInspectorView: View {
     private func componentSummary(for division: Division) -> String {
         division.components
             .map { "\($0.type.displayCode(isTangSongScenario: isTangSongScenario)) \(Int(($0.weight * 100).rounded()))%" }
-            .joined(separator: " / ")
+            .joined(separator: isTangSongScenario ? "、" : " / ")
     }
 
     private func frontLineSummary(_ ids: [FrontLineId]) -> String {
@@ -149,7 +149,7 @@ struct UnitInspectorView: View {
 
         if isTangSongScenario {
             if let pathCost = summary.pathCost {
-                return "通 \(pathCost)/\(summary.maxPathCost) 至 \(sourceName) \(sourceCoord)"
+                return "通 \(pathCost)／\(summary.maxPathCost) 至 \(sourceName) \(sourceCoord)"
             }
             return "断；近源 \(sourceName) \(sourceCoord)，退路 \(summary.safeRetreatExitCount)"
         }
@@ -167,6 +167,10 @@ struct UnitInspectorView: View {
         return division.faction == playerFaction ? "Player" : "Read-only"
     }
 
+    private func hexCoordText(_ coord: HexCoord) -> String {
+        isTangSongScenario ? "第 \(coord.q) 列，第 \(coord.r) 行" : "\(coord.q),\(coord.r)"
+    }
+
     private var noneText: String {
         isTangSongScenario ? "无" : "None"
     }
@@ -181,8 +185,8 @@ struct UnitInspectorView: View {
 }
 
 private extension Division {
-    var inspectorStrengthText: String {
-        "\(strength) / \(maxStrength)"
+    func inspectorStrengthText(isTangSongScenario: Bool) -> String {
+        isTangSongScenario ? "\(strength)／\(maxStrength)" : "\(strength) / \(maxStrength)"
     }
 
     func inspectorStatusText(isTangSongScenario: Bool) -> String {
@@ -196,7 +200,8 @@ private extension Division {
             statuses.append(isTangSongScenario ? "溃散" : "Destroyed")
         }
 
-        return statuses.isEmpty ? (isTangSongScenario ? "可行动" : "Ready") : statuses.joined(separator: ", ")
+        let separator = isTangSongScenario ? "、" : ", "
+        return statuses.isEmpty ? (isTangSongScenario ? "可行动" : "Ready") : statuses.joined(separator: separator)
     }
 }
 

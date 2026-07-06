@@ -287,7 +287,7 @@ private func tangSongMarkerText(for division: Division) -> String {
 
 private func markerReadinessText(for division: Division, isTangSongScenario: Bool) -> String {
     if isTangSongScenario {
-        return "\(division.strength)/\(division.maxStrength) \(division.retreatMode.tangSongMarkerCode)"
+        return "\(division.strength)／\(division.maxStrength) \(division.retreatMode.tangSongMarkerCode)"
     }
     return "\(division.strength)/\(division.maxStrength) \(division.retreatMode.markerCode)"
 }

@@ -137,7 +137,7 @@ struct GeneralProfileView: View {
             } else {
                 ForEach(assignedDivisions, id: \.id) { division in
                     LabeledContent(division.name) {
-                        Text("\(division.strength)/\(division.maxStrength)")
+                        Text(strengthText(for: division))
                     }
                     .font(.caption)
                 }
@@ -228,5 +228,11 @@ struct GeneralProfileView: View {
 
     private func containsLatinLetters(_ text: String) -> Bool {
         text.range(of: #"[A-Za-z]"#, options: .regularExpression) != nil
+    }
+
+    private func strengthText(for division: Division) -> String {
+        isTangSongScenario
+            ? "\(division.strength)／\(division.maxStrength)"
+            : "\(division.strength)/\(division.maxStrength)"
     }
 }

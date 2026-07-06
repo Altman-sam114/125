@@ -50,7 +50,7 @@ struct HUDView: View {
 
             Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 8) {
                 GridRow {
-                    metric(turnLabel, "\(gameState.turn) / \(gameState.maxTurns)")
+                    metric(turnLabel, turnProgressText)
                     metric(powerLabel, gameState.displayName(for: gameState.activeFaction))
                 }
 
@@ -283,6 +283,12 @@ struct HUDView: View {
 
     private var turnLabel: String {
         gameState.isTangSongScenario ? "回合" : "Turn"
+    }
+
+    private var turnProgressText: String {
+        gameState.isTangSongScenario
+            ? "\(gameState.turn)／\(gameState.maxTurns)"
+            : "\(gameState.turn) / \(gameState.maxTurns)"
     }
 
     private var powerLabel: String {

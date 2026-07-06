@@ -39,7 +39,7 @@ struct SiegeOverlayState: Equatable {
     let besiegerCount: Int
 
     var labelText: String {
-        "围\(pressure) 城\(fortification)/\(maxFortification)"
+        "围\(pressure) 城\(fortification)／\(maxFortification)"
     }
 
     var fortificationRatio: Double {
@@ -58,7 +58,7 @@ struct SupplyRouteOverlayState: Equatable {
 
     var labelText: String {
         if let pathCost {
-            return "粮\(pathCost)/\(maxPathCost)"
+            return "粮\(pathCost)／\(maxPathCost)"
         }
         return "断粮"
     }

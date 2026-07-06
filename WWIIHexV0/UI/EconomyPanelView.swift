@@ -126,7 +126,7 @@ struct EconomyPanelView: View {
 
     private func productionCostLine(for kind: ProductionKind) -> String {
         if gameState.isTangSongScenario {
-            return "耗 \(resourceSummary(kind.cost)) | \(kind.buildTurns) 回合"
+            return "耗 \(resourceSummary(kind.cost))，需 \(kind.buildTurns) 回合"
         }
 
         return "Cost \(resourceSummary(kind.cost)) | \(kind.buildTurns) turn(s)"

@@ -40,7 +40,7 @@ struct EventLogView: View {
 
                         Spacer()
 
-                        Text("\(settlementSummary.score) / 100")
+                        Text(settlementScoreText(settlementSummary.score))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(.green)
                     }
@@ -297,12 +297,16 @@ struct EventLogView: View {
             (isTangSongScenario ? "开局" : "Setup")
         let turnLabel = isTangSongScenario ? "回合" : "Turn"
         if isTangSongScenario {
-            return "\(turnLabel) \(entry.turn) - \(faction) - \(phase)"
+            return "\(turnLabel) \(entry.turn)；\(faction)；\(phase)"
         }
         if let relatedRecordId = entry.relatedRecordId {
             return "\(turnLabel) \(entry.turn) - \(faction) - \(phase) - \(relatedRecordId)"
         }
         return "\(turnLabel) \(entry.turn) - \(faction) - \(phase)"
+    }
+
+    private func settlementScoreText(_ score: Int) -> String {
+        isTangSongScenario ? "\(score)／100" : "\(score) / 100"
     }
 
     private func displayMessage(for entry: GameLogEntry) -> String {
@@ -435,7 +439,7 @@ struct EventLogView: View {
         for record in directiveRecords.suffix(2).reversed() {
             let directiveName = record.directiveType?.displayName(isTangSongScenario: true) ?? "方面军令"
             let tacticName = record.tactic?.displayName(isTangSongScenario: true)
-            let detail = tacticName.map { "\(directiveName) / \($0)" } ?? directiveName
+            let detail = tacticName.map { "\(directiveName)：\($0)" } ?? directiveName
             highlights.append(TurnReportHighlight(text: "• 方面：\(detail)"))
         }
         return highlights

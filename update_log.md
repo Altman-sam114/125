@@ -356,6 +356,47 @@
 - 本轮只改将领面板与州府详情面板的玩家可见显示桥，不改变 `PlayerPlannedOperation`、`RegionInspectorState`、`SiegeRecord`、命令、围城规则、AI 决策、事件写入或 Codable schema。
 - 这不是完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收或 v5.9 发布验收；全局 accessibility 和其他玩家可见残留仍需后续切片继续收口。
 
+## v5.8p - 兵力、粮道与数值标记 ASCII UI 硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 与主线程只读扫描指出唐宋路径仍有兵力、粮道、城防、回合、评分、战报 metadata 和军备成本中的 ASCII `/`、`|`、` - `、` / `、`q,r` 残留。
+- `EconomyPanelView` 唐宋军备成本行从 `耗 ... | N 回合` 改为中文逗号读法。
+- `HUDView` 唐宋回合进度改用“／”；`EventLogView` 唐宋胜负评分改用“／”，战报 metadata 改用中文分号，方面军议摘要改用“：”。
+- `UnitInspectorView` 唐宋军队详情地块坐标改为“第 q 列，第 r 行”，兵力与粮道成本从 ASCII `/` 改为“／”，编成和多状态列表改用“、”。
+- `UnitTooltipView`、`GeneralProfileView` 和 `UnitNode` 唐宋路径的兵力显示改用“／”，tooltip accessibility label 同步使用同一读法。
+- `MapDisplayAdapter` 唐宋地图围城城防与粮道 overlay 标签改用“／”。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8p 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/EconomyPanelView.swift`
+- `WWIIHexV0/UI/HUDView.swift`
+- `WWIIHexV0/UI/EventLogView.swift`
+- `WWIIHexV0/UI/UnitInspectorView.swift`
+- `WWIIHexV0/UI/UnitTooltipView.swift`
+- `WWIIHexV0/UI/GeneralProfileView.swift`
+- `WWIIHexV0/SpriteKit/UnitNode.swift`
+- `WWIIHexV0/SpriteKit/MapDisplayAdapter.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8p_numeric_marker_ascii_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 UI 与地图标签的玩家可见显示桥，不改变 `Division`、`SupplyRouteSummary`、`SiegeOverlayState`、生产、补给、围城、命令、AI 决策、事件写入或 Codable schema。
+- 这不是完整 accessibility、VoiceOver 实机、截图、横竖屏布局、资源授权或 v5.9 发布验收；全局玩家可见残留仍需继续扫描。
+
 ## v0 - 六角格测试板
 
 完成日期：2026-06-14 至 2026-06-15

@@ -18,7 +18,7 @@ struct UnitTooltipView: View {
                     }
                     GridRow {
                         label(isTangSongScenario ? "兵力" : "Strength")
-                        value("\(division.strength)/\(division.maxStrength)")
+                        value(strengthText(for: division))
                     }
                     GridRow {
                         label(isTangSongScenario ? "补给" : "Supply")
@@ -67,9 +67,15 @@ struct UnitTooltipView: View {
         return division.hasActed ? "Yes" : "No"
     }
 
+    private func strengthText(for division: Division) -> String {
+        isTangSongScenario
+            ? "\(division.strength)／\(division.maxStrength)"
+            : "\(division.strength)/\(division.maxStrength)"
+    }
+
     private func accessibilityLabel(for division: Division) -> String {
         if isTangSongScenario {
-            return "\(division.name)，\(division.tooltipTypeCode(isTangSongScenario: true))，兵力 \(division.strength)/\(division.maxStrength)"
+            return "\(division.name)，\(division.tooltipTypeCode(isTangSongScenario: true))，兵力 \(strengthText(for: division))"
         }
         return "\(division.name), \(division.tooltipTypeCode(isTangSongScenario: false)), strength \(division.strength) of \(division.maxStrength)"
     }
