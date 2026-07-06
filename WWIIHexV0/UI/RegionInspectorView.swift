@@ -30,7 +30,7 @@ struct RegionInspectorView: View {
 
             if let selectedHex = state.selectedHex {
                 LabeledContent(isTangSongScenario ? "地块" : "Hex") {
-                    Text("\(selectedHex.q),\(selectedHex.r)")
+                    Text(hexCoordText(selectedHex))
                 }
 
                 LabeledContent(isTangSongScenario ? "地块控制" : "Hex Controller") {
@@ -101,7 +101,7 @@ struct RegionInspectorView: View {
             }
 
             LabeledContent(isTangSongScenario ? "目标" : "Objectives") {
-                Text(state.objectiveNames.isEmpty ? noneText : state.objectiveNames.joined(separator: ", "))
+                Text(state.objectiveNames.isEmpty ? noneText : state.objectiveNames.joined(separator: listSeparator))
                     .multilineTextAlignment(.trailing)
             }
 
@@ -125,7 +125,11 @@ struct RegionInspectorView: View {
         guard !divisions.isEmpty else {
             return noneText
         }
-        return divisions.map(\.name).joined(separator: ", ")
+        return divisions.map(\.name).joined(separator: listSeparator)
+    }
+
+    private func hexCoordText(_ coord: HexCoord) -> String {
+        isTangSongScenario ? "第 \(coord.q) 列，第 \(coord.r) 行" : "\(coord.q),\(coord.r)"
     }
 
     private func selectedHexTheaterText(for state: RegionInspectorState) -> String {
@@ -164,7 +168,7 @@ struct RegionInspectorView: View {
         }
 
         if isTangSongScenario {
-            return "压力 \(record.pressure)，城防 \(record.fortification)/\(record.maxFortification)，\(factionDisplayName(record.attackerFaction))围\(factionDisplayName(record.defenderFaction))，\(record.besiegingDivisionIds.count) 支军队"
+            return "压力 \(record.pressure)，城防 \(record.fortification)／\(record.maxFortification)，\(factionDisplayName(record.attackerFaction))围\(factionDisplayName(record.defenderFaction))，\(record.besiegingDivisionIds.count) 支军队"
         }
 
         return "Pressure \(record.pressure), fortification \(record.fortification)/\(record.maxFortification), \(factionDisplayName(record.attackerFaction)) -> \(factionDisplayName(record.defenderFaction)), \(record.besiegingDivisionIds.count) unit(s)"
@@ -225,5 +229,9 @@ struct RegionInspectorView: View {
 
     private var noText: String {
         isTangSongScenario ? "否" : "No"
+    }
+
+    private var listSeparator: String {
+        isTangSongScenario ? "、" : ", "
     }
 }

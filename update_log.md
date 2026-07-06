@@ -324,6 +324,38 @@
 - 本轮只改 AI 面板只读显示桥，不改变 `AgentDecisionRecord`、`WarDirectiveRecord`、`TheaterDirectiveEnvelope`、raw JSON 存储、AI 决策、编译器、执行器、规则或 Codable schema。
 - 完整真 LLM 输出本地化、结构化 event payload、截图/布局/VoiceOver 和发布级 UI 验收仍未完成。
 
+## v5.8o - 固定英文与 ASCII UI 硬化
+
+完成日期：2026-07-06
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 `GeneralCommandPanelView` 和 `RegionInspectorView` 仍有唐宋玩家态 ASCII 分隔符残留。
+- `GeneralCommandPanelView` 唐宋路径的将领副标题从 `rank / style` 改为“rank · style”，已拟军令摘要从“动作 / 目标”改为“动作：目标”。
+- `RegionInspectorView` 唐宋路径的地块坐标从 `q,r` 改为“第 q 列，第 r 行”，目标列表和军队列表改用“、”，围城城防改用“／”。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8o 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/GeneralCommandPanelView.swift`
+- `WWIIHexV0/UI/RegionInspectorView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8o_accessibility_fixed_english_ui_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按用户要求，本机不运行测试、build、Swift parse、Markdown 检查或 `git diff --check`。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改将领面板与州府详情面板的玩家可见显示桥，不改变 `PlayerPlannedOperation`、`RegionInspectorState`、`SiegeRecord`、命令、围城规则、AI 决策、事件写入或 Codable schema。
+- 这不是完整 VoiceOver 实机验收、截图验收、iPhone/iPad 横竖屏布局验收或 v5.9 发布验收；全局 accessibility 和其他玩家可见残留仍需后续切片继续收口。
+
 ## v0 - 六角格测试板
 
 完成日期：2026-06-14 至 2026-06-15

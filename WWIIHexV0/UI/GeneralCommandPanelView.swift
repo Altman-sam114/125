@@ -45,7 +45,7 @@ struct GeneralCommandPanelView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(general.localizedName)
                                 .font(.subheadline.weight(.semibold))
-                            Text("\(rankLabel(for: general)) / \(styleLabel(general.commandStyle))")
+                            Text(generalSubtitle(for: general))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -190,6 +190,12 @@ struct GeneralCommandPanelView: View {
         return general.faction == .allies ? "禁军都部署" : "方面都部署"
     }
 
+    private func generalSubtitle(for general: GeneralData) -> String {
+        let rank = rankLabel(for: general)
+        let style = styleLabel(general.commandStyle)
+        return isTangSongScenario ? "\(rank) · \(style)" : "\(rank) / \(style)"
+    }
+
     private func biographyText(for general: GeneralData) -> String {
         guard isTangSongScenario else {
             return general.biography
@@ -241,7 +247,7 @@ struct GeneralCommandPanelView: View {
     private func operationSummary(_ operation: PlayerPlannedOperation) -> String {
         if isTangSongScenario {
             let target = operationTargetName(operation)
-            return "\(directiveLabel(operation.directiveType)) / \(target)"
+            return "\(directiveLabel(operation.directiveType))：\(target)"
         }
         let target = operation.targetRegionId?.rawValue ?? operation.sourceRegionId?.rawValue ?? operation.zoneId.rawValue
         return "\(operation.directiveType.rawValue) / \(target)"

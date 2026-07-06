@@ -536,6 +536,12 @@ v5.8n 当前已落地：
 - diagnostics、errors 和 raw JSON 在唐宋路径显示为计数或“原文已记录”提示，原始数据仍留在 `AgentDecisionRecord` / `WarDirectiveRecord` 中供调试追溯。
 - 该切片只改 AI 面板只读显示桥，不改变 `AgentDecisionRecord`、`WarDirectiveRecord`、`TheaterDirectiveEnvelope`、raw JSON 存储、decoder、compiler、executor、`RuleEngine`、命令、AI 算法或 Codable raw schema。
 
+v5.8o 当前已落地：
+
+- `GeneralCommandPanelView` 在唐宋场景下把将领副标题从 ASCII `/` 改为“·”，把已拟军令摘要从“动作 / 目标”改为“动作：目标”。
+- `RegionInspectorView` 在唐宋场景下把地块坐标从 `q,r` 改为中文列/行读法，把目标和军队列表分隔符改为“、”，把围城城防从 ASCII `/` 改为“／”。
+- 该切片只改将领面板和州府详情面板的只读显示桥，不改变 `PlayerPlannedOperation`、`RegionInspectorState`、`SiegeRecord`、命令、围城规则、AI 决策、事件写入职责、VoiceOver 实机结果或 Codable schema。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
