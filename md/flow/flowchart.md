@@ -18,6 +18,7 @@
   -> v5.6g 起唐宋胜利评价优先读取场景 JSON victoryConditions
   -> v5.6h 起 HUD/战报只读显示 VictoryState.reason
   -> v5.6i 起 HUD/战报只读显示 VictoryRules.objectiveProgress
+  -> v5.7a 起 HUD 只读显示 RootGameView.nextActionHint
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -54,6 +55,7 @@ flowchart TD
     RELCAND["战术敌我候选<br/>WarRelationRules.canTarget<br/>UI 高亮、AI 敌区、执行器候选先读关系表"]:::rules
     VICT["胜负规则<br/>VictoryRules.updateVictoryState<br/>唐宋优先读取 victoryConditions 与天命；缺失时 fallback；非唐宋沿用阿登条件"]:::rules
     VICTEXT["胜负说明与目标进度<br/>VictoryState.reason + VictoryRules.objectiveProgress<br/>HUD/战报只读显示原因与门槛"]:::ui
+    HINT["下一步提示<br/>RootGameView.nextActionHint<br/>按局面只读派生选军/围城/招抚/解围/修城/结束回合建议"]:::ui
     PLAYER["玩家输入<br/>点击地图、移动、攻击、招抚、结束回合"]:::input
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
     DEC["元帅 JSON 解码<br/>TheaterDirectiveDecoder<br/>提取 fenced JSON、校验 id 与 schema"]:::command
@@ -106,6 +108,7 @@ flowchart TD
     SYNC --> DEPLOY
 
     GS --> UI
+    GS --> HINT --> UI
     HEX --> UI
     REGION --> UI
     INIT --> UI
@@ -532,6 +535,7 @@ flowchart TD
     STATE["运行时状态<br/>GameState + EventLog + WarDirectiveRecord"]:::state
     ROOT["主界面<br/>RootGameView<br/>唐宋场景显示图层、观战、面板与 compact tabs"]:::ui
     HUD["顶部 HUD<br/>HUDView + GameState.phaseDisplayName<br/>显示回合、政权、阶段、胜负、资源、队列"]:::ui
+    HINT["下一步提示<br/>RootGameView.nextActionHint -> HUDView<br/>只读提示选军、围城、招抚、解围、修城或结束回合"]:::ui
     LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报、战斗、围城、粮道等分类"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
     BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette，绘制粮道虚线"]:::ui
@@ -544,6 +548,7 @@ flowchart TD
 
     STATE --> ROOT
     ROOT --> HUD
+    ROOT --> HINT
     ROOT --> LOG
     ROOT --> AIUI
     ROOT --> BOARD

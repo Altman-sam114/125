@@ -1,6 +1,6 @@
 # WWIIHexV0 — 唐宋迁移中的 iOS / macOS AI 战略战棋
 
-> **当前状态：v5.6 唐宋外交、归附、天命规则/UI、战术候选关系感知、数据驱动胜利条件、胜负原因显示与胜利目标进度只读显示首轮已接入；此前 v5.3 唐宋生产/府库显示桥、古代兵种战斗修正、粮道供给/读法、围城城防、修城、解围、招降、地图围城 overlay 与 AI 围城/招降指令首轮，v5.4 AI 军议显示桥、模拟元帅 JSON 文案唐宋化和可选解释字段首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源；生产、府库和经济规则日志在唐宋路径下显示为军备、丁口、钱帛、粮草、禁军/厢军/骑军/攻城器械营；唐宋场景下骑军、弓弩守军、攻城器械营和守军已有最小战斗差异；受控高补给州府/粮仓、道路、山林和跨河成本已影响补给判定，单位详情可显示粮道通断、路径成本/上限、最近粮源和安全退路，地图可从同一摘要只读绘制友方可见军队到最近可见粮源的抽象粮道虚线；玩家可通过统一 `Command.besiege -> RuleEngine` 对敌方城池/关隘/粮仓州府登记围城压力并损耗城防，守方可通过 `Command.repairFortification -> RuleEngine` 消耗军队行动修城，也可通过 `Command.relieveSiege -> RuleEngine` 让州府内或近旁友军削减围城压力直至解围；围城压力达标、城防归零且守军不再 supplied 后，围城方可通过 `Command.demandSurrender -> RuleEngine` 招降目标州府，规则层会移除纳降守军、交割目标州府可占 hex，并刷新 region/theater/front/deploy；`ZoneDirective.attack -> WarCommandExecutor` 会在目标州府满足纳降条件时优先生成底层 `Command.demandSurrender`，否则在目标州府可围且无可攻击单位时生成底层 `Command.besiege`；地图从 `SiegeState` 只读绘制围城圈、压力和城防标签；唐宋场景下 AI 面板显示为“军议/方面军令”，战术名显示为进军、骑军突进、合围、弓弩压制、死守城关等，模拟元帅 raw JSON 的默认主事、strategicIntent、summary 和 rationale 也改用宋枢密院/割据行营与州府粮道口径；`TheaterDirectiveEnvelope` 新增可选 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 解释字段，唐宋 simulated marshal 会从首都、围城、粮道和外交候选摘要填充这些字段，`AgentDecisionRecord` 会保存只读军议解释摘要，`AgentPanelView` 在唐宋场景下结构化显示诏令、朝议、招抚、转运与摘要；`GameAgent.defaultCommander` 在唐宋场景下使用宋枢密院/割据行营作为默认 AI issuer，不再把默认唐宋主路径记录成 Guderian 或 Allied Mock Commander；`Command.proposeSubmission -> RuleEngine` 已能记录招抚、更新国家关系投影和天命分数，玩家命令面板已提供“招抚”入口，外交面板只读显示天命与归附记录；UI 攻击候选、攻击高亮、AI 敌强/敌区估算、`WarCommandExecutor` 敌军/敌控 region 和战术移动候选已改为读取 `WarRelationRules.canTarget`；唐宋 `VictoryRules` 优先读取场景 JSON 的 `victoryConditions`，按 objective id、count、turn 和 `mandateThreshold` 判定宋统一或割据生存，缺失数据时保留 v5.6d 硬编码 fallback；HUD 与战报面板会从 `VictoryState.reason` 只读显示“关键州府与天命达标”等胜负原因，并从同一胜利条件只读派生州府/天命/回合进度。底层 `TacticName` raw case 和执行权限保持兼容；除 v5.6c 的 `pacificationTargets -> TurnManager -> Command.proposeSubmission` 辅助桥外，新增解释字段不直接改规则结果。阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，AI 招抚辅助桥也只生成底层 `Command` 后交给 `RuleEngine`；Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
+> **当前状态：v5.7 可玩闭环的首屏“下一步”只读提示首轮已接入；此前 v5.6 唐宋外交、归附、天命规则/UI、战术候选关系感知、数据驱动胜利条件、胜负原因显示与胜利目标进度只读显示首轮已接入；此前 v5.3 唐宋生产/府库显示桥、古代兵种战斗修正、粮道供给/读法、围城城防、修城、解围、招降、地图围城 overlay 与 AI 围城/招降指令首轮，v5.4 AI 军议显示桥、模拟元帅 JSON 文案唐宋化和可选解释字段首轮。默认启动优先加载 `jianlong_960_unification`（建隆元年：陈桥兵变与山河一统）唐宋 JSON；MapEditor 默认读取/覆盖唐宋 960 资源；生产、府库和经济规则日志在唐宋路径下显示为军备、丁口、钱帛、粮草、禁军/厢军/骑军/攻城器械营；唐宋场景下骑军、弓弩守军、攻城器械营和守军已有最小战斗差异；受控高补给州府/粮仓、道路、山林和跨河成本已影响补给判定，单位详情可显示粮道通断、路径成本/上限、最近粮源和安全退路，地图可从同一摘要只读绘制友方可见军队到最近可见粮源的抽象粮道虚线；玩家可通过统一 `Command.besiege -> RuleEngine` 对敌方城池/关隘/粮仓州府登记围城压力并损耗城防，守方可通过 `Command.repairFortification -> RuleEngine` 消耗军队行动修城，也可通过 `Command.relieveSiege -> RuleEngine` 让州府内或近旁友军削减围城压力直至解围；围城压力达标、城防归零且守军不再 supplied 后，围城方可通过 `Command.demandSurrender -> RuleEngine` 招降目标州府，规则层会移除纳降守军、交割目标州府可占 hex，并刷新 region/theater/front/deploy；`ZoneDirective.attack -> WarCommandExecutor` 会在目标州府满足纳降条件时优先生成底层 `Command.demandSurrender`，否则在目标州府可围且无可攻击单位时生成底层 `Command.besiege`；地图从 `SiegeState` 只读绘制围城圈、压力和城防标签；唐宋场景下 AI 面板显示为“军议/方面军令”，战术名显示为进军、骑军突进、合围、弓弩压制、死守城关等，模拟元帅 raw JSON 的默认主事、strategicIntent、summary 和 rationale 也改用宋枢密院/割据行营与州府粮道口径；`TheaterDirectiveEnvelope` 新增可选 `mandateIntent`、`courtPolicy`、`pacificationTargets`、`supplyPriorities` 解释字段，唐宋 simulated marshal 会从首都、围城、粮道和外交候选摘要填充这些字段，`AgentDecisionRecord` 会保存只读军议解释摘要，`AgentPanelView` 在唐宋场景下结构化显示诏令、朝议、招抚、转运与摘要；`GameAgent.defaultCommander` 在唐宋场景下使用宋枢密院/割据行营作为默认 AI issuer，不再把默认唐宋主路径记录成 Guderian 或 Allied Mock Commander；`Command.proposeSubmission -> RuleEngine` 已能记录招抚、更新国家关系投影和天命分数，玩家命令面板已提供“招抚”入口，外交面板只读显示天命与归附记录；UI 攻击候选、攻击高亮、AI 敌强/敌区估算、`WarCommandExecutor` 敌军/敌控 region 和战术移动候选已改为读取 `WarRelationRules.canTarget`；唐宋 `VictoryRules` 优先读取场景 JSON 的 `victoryConditions`，按 objective id、count、turn 和 `mandateThreshold` 判定宋统一或割据生存，缺失数据时保留 v5.6d 硬编码 fallback；HUD 与战报面板会从 `VictoryState.reason` 只读显示“关键州府与天命达标”等胜负原因，并从同一胜利条件只读派生州府/天命/回合进度；HUD 会按当前回合、选中军队、围城/招抚/解围/修城候选和胜负状态只读显示“下一步”提示。底层 `TacticName` raw case 和执行权限保持兼容；除 v5.6c 的 `pacificationTargets -> TurnManager -> Command.proposeSubmission` 辅助桥外，新增解释字段不直接改规则结果。阿登数据保留为 legacy fallback。战争 AI 仍收口到 `ZoneDirective -> WarCommandExecutor -> RuleEngine`，AI 招抚辅助桥也只生成底层 `Command` 后交给 `RuleEngine`；Hex / Region / Theater / Front / Deploy 的权威边界不变。历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0；当前工作流默认不跑 Xcode / XCTest / 模拟器测试，只按 `md/test/test.md` 做轻量检查并由 GitHub Actions 云端重验证。**
 
 > **v5.6c 状态补充：** AI 元帅 `pacificationTargets` 现在可由 `TurnManager` 在 `.endTurn` 前尝试生成辅助 `Command.proposeSubmission`，仍通过 `RuleEngine -> CommandValidator -> CommandExecutor` 决定成败，并把成功、规则拒绝或跳过写入 `AgentDecisionRecord.commandResults`。该桥不改 `TheaterDirectiveCompiler` 或 `WarCommandExecutor`，不交割控制权、不转换部队、不改全局战争关系。
 
@@ -16,6 +16,8 @@
 
 > **v5.6i 状态补充：** `VictoryRules.objectiveProgress(in:)` 新增纯只读胜利目标进度快照，HUD 显示统一州府与天命进度，战报面板显示主要胜利条件的州府、天命和回合门槛。该展示只读取 `GameState.victoryConditions`、objective 所在 hex controller 和 `MandateState`，不调用会写状态的胜负更新逻辑，不写 `eventLog`。
 
+> **v5.7a 状态补充：** HUD 顶部新增唐宋场景“下一步”只读提示，按当前胜负、观战、回合权限、选中军队和围城/招抚/解围/修城候选给出一句行动建议。该提示不调用 `RuleEngine`，不写 `GameState`，只帮助玩家发现既有命令入口。
+
 > **v5.5 前序小切片：** 默认唐宋主界面的 HUD、图层、观战、面板 tabs、军令按钮和战报分类已加入唐宋场景显示桥，显示为回合、政权、阶段、胜负、地块、州府、方面、军队、将领、战报、府库、军议、固守、整补、围城和粮道等读法；SpriteKit 地图新增唐宋视觉 token，唐宋场景使用墨绿底、绢帛/青绿/石青/铜/朱印色系、赭石道路、石青河流、朱印/青绿势力色，棋子从 NATO 符号切为内置军旗轮廓和禁/骑/弩/械/守/军兵种字标，并从 `SupplyRules.supplyRouteSummary` 只读绘制友方可见军队到最近可见粮源的抽象粮道虚线。该切片只改玩家可见术语与视觉读法，不改变底层 raw case、命令、日志结构、补给判定或规则执行；完整截图、布局验收、外部美术资产和授权清单仍待后续。
 
 > **v5.6a 前序小切片：** 新增外交归附与天命规则合同首轮。`DiplomacyState` 支持 `tributary`、`submitting`、`negotiating` 并保存 `PacificationRecord`；`GameState` 新增向后兼容的 `MandateState`；唐宋默认剧本初始化宋/割据天命分数；`Command.proposeSubmission -> CommandValidator -> CommandExecutor -> RuleEngine` 可在满足国家关系、天命、目标州府、低 warSupport 或围城压力条件后，把目标国家关系写为 `submitting`、记录招抚并增加天命。该切片不交割 hex/region 控制权，不转换部队，不改变 `.allies/.germany` 全局战争关系，也不把 AI `pacificationTargets` 自动执行为归附命令。
@@ -26,7 +28,7 @@
 
 > **v5.6d 前序小切片：** `VictoryRules.updateVictoryState` 在唐宋场景先走唐宋专用判定，不再套用 Bastogne / St. Vith legacy 条件；宋统一胜利同时要求关键州府控制与天命阈值，割据生存胜利同时要求核心都城保有与割据天命阈值。该切片不新增治理政策、不改变 `MandateState` 调整来源、不改 UI 胜利面板结构，也不做归附后的控制权或部队交割。
 
-> **v5.6i 最新小切片：** v5.6g 的数据驱动胜利条件现在有只读进度显示：HUD 展示统一进度/天命进度，战报面板列出宋统一和割据守成等条件的当前达成度。该切片不新增胜利条件、不写权威战报事件、不改变胜负判定、不做完整胜利面板。
+> **v5.7a 最新小切片：** 首屏 HUD 现在会根据当前局面显示“下一步”提示，例如先选宋军、可围城、可招降、可招抚、可解围或该结束回合。该切片不新增命令、不改变规则判定、不做完整教程系统。
 
 ---
 
@@ -332,7 +334,7 @@ md/
     ├── README.md
     │   Agent A/B/C 召唤、阶段 prompt 写法、main 直推和 CI artifact 要求
     ├── v5.0-唐宋迁移/
-    │   唐宋 v5.0-v5.9 总提示词、v5.0 审计合同和后续阶段记录
+    │   唐宋 v5.0-v5.9 总提示词、v5.0 审计合同、v5.7a 下一步提示等阶段记录
     ├── v2.0-三国迁移/
     ├── v3.0-拿战迁移/
     ├── v3.0-隋唐迁移/

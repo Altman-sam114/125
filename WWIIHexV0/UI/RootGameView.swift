@@ -18,6 +18,7 @@ struct RootGameView: View {
                 VStack {
                     HUDView(
                         gameState: container.gameState,
+                        nextActionHint: nextActionHint,
                         onEndTurn: container.advanceOrRunAI,
                         onNewGame: container.resetGame
                     )
@@ -97,6 +98,64 @@ struct RootGameView: View {
             onHexTapped: container.handleBoardTap
         )
         .accessibilityLabel(boardAccessibilityLabel)
+    }
+
+    private var nextActionHint: String? {
+        guard container.gameState.isTangSongScenario else {
+            return nil
+        }
+
+        if container.gameState.victoryState.winner != nil {
+            return "打开战报查看胜负原因、目标进度和最近战事，再决定是否新开一局。"
+        }
+
+        if container.observerModeEnabled {
+            return "观战模式下不会下令；可切回指挥后选择宋军，或继续结束回合观察各方行动。"
+        }
+
+        let commandsAllowed = container.gameState.effectiveTurnOrderState.allowsCommands(
+            activeFaction: container.playerFaction,
+            phase: container.gameState.phase
+        )
+
+        guard commandsAllowed,
+              container.gameState.activeFaction == container.playerFaction else {
+            return "当前是\(container.gameState.phaseDisplayName)，可点结束回合推进到可下令阶段。"
+        }
+
+        guard let selectedDivision = container.selectedDivision else {
+            return "先点选一支宋军，再用军令面板行军、围城、整补或招抚；也可查看州府与统一进度。"
+        }
+
+        guard selectedDivision.faction == container.playerFaction else {
+            return "已选中敌军；改选宋军下令，或打开州府/战报面板判断下一处目标。"
+        }
+
+        if selectedDivision.hasActed {
+            return "该军本回合已行动；继续选择其他未行动宋军，或结束回合让 AI 推进。"
+        }
+
+        if let targetName = container.selectedDemandSurrenderTargetName {
+            return "可对\(targetName)招降，优先把已破城防且断粮的围城结果落地。"
+        }
+
+        if let targetName = container.selectedBesiegeTargetName {
+            return "可围城\(targetName)，持续压低城防与粮道，为后续招降或占领创造条件。"
+        }
+
+        if let targetName = container.selectedSubmissionTargetName {
+            return "可尝试招抚\(targetName)，以天命和外交推进统一，不必只靠攻城。"
+        }
+
+        if let targetName = container.selectedRelieveSiegeTargetName {
+            return "可驰援\(targetName)解围，先保住己方州府和粮道。"
+        }
+
+        if let targetName = container.selectedRepairFortificationTargetName {
+            return "可在\(targetName)修城，提升城防后再安排其他军队反击或整补。"
+        }
+
+        return "该军可行动；点击相邻敌军或敌控州府寻找进攻目标，或先固守、整补稳定粮道。"
     }
 
     private func infoOverlay(isLandscape: Bool, size: CGSize) -> some View {

@@ -424,6 +424,13 @@ v5.6i 当前已落地：
 - `HUDView` 只读显示主要统一条件的州府进度与天命进度；`EventLogView` 在战报中只读列出主要胜利目标、门槛与当前达成状态。
 - 该查询不调用 `updateVictoryState(in:)`，不写 `VictoryState`、`eventLog`、hex、region、theater 或 diplomacy。
 
+v5.7a 当前已落地：
+
+- `RootGameView.nextActionHint` 是唐宋场景专用的 UI 派生提示，不存入 `GameState`。
+- 它只读取当前 `GameState`、`observerModeEnabled`、`selectedDivision`、`selectedDemandSurrenderTargetName`、`selectedBesiegeTargetName`、`selectedSubmissionTargetName`、`selectedRelieveSiegeTargetName` 和 `selectedRepairFortificationTargetName`。
+- `HUDView` 接收 `nextActionHint` 后在首屏 HUD 中显示“下一步”提示，帮助玩家发现选军、行军、围城、招抚、解围、修城、结束回合和查看战报等既有入口。
+- 该提示不调用 `RuleEngine`，不提交 `Command`，不写 `eventLog`，不改变任何规则判定；真实执行仍必须由玩家点击命令后进入 `Command -> RuleEngine`。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1361,6 +1368,10 @@ VictoryRules.objectiveProgress
   -> 只读派生胜利目标进度
   -> HUD / 战报显示州府、天命、回合门槛当前达成度
   -> 不写 VictoryState 或 eventLog
+RootGameView.nextActionHint
+  -> 只读派生唐宋首屏下一步提示
+  -> HUD 显示选军、围城、招抚、解围、修城、结束回合等建议
+  -> 不提交 Command，不写 GameState 或 eventLog
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId

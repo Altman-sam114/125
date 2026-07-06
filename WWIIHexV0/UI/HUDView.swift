@@ -2,11 +2,18 @@ import SwiftUI
 
 struct HUDView: View {
     let gameState: GameState
+    let nextActionHint: String?
     let onEndTurn: () -> Void
     let onNewGame: (() -> Void)?
 
-    init(gameState: GameState, onEndTurn: @escaping () -> Void, onNewGame: (() -> Void)? = nil) {
+    init(
+        gameState: GameState,
+        nextActionHint: String? = nil,
+        onEndTurn: @escaping () -> Void,
+        onNewGame: (() -> Void)? = nil
+    ) {
         self.gameState = gameState
+        self.nextActionHint = nextActionHint
         self.onEndTurn = onEndTurn
         self.onNewGame = onNewGame
     }
@@ -59,6 +66,31 @@ struct HUDView: View {
                     metric(suppliesLabel, "\(activeLedger.stockpile.supplies)")
                     metric(queueLabel, "\(activeLedger.productionQueue.count)")
                 }
+            }
+
+            if let nextActionHint, gameState.isTangSongScenario {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "lightbulb")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.blue)
+                        .frame(width: 18)
+                        .accessibilityHidden(true)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("下一步")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.blue)
+                        Text(nextActionHint)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(8)
+                .background(.blue.opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
