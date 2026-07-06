@@ -267,7 +267,7 @@ struct EventLogView: View {
             .encirclement
         ]
         let grouped = Dictionary(grouping: entries, by: \.category)
-        var counts = preferredOrder.compactMap { category in
+        var counts: [TurnReportCategoryCount] = preferredOrder.compactMap { category -> TurnReportCategoryCount? in
             guard let count = grouped[category]?.count, count > 0 else {
                 return nil
             }
