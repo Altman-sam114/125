@@ -14,6 +14,7 @@ struct WarCommandExecutionResult: Equatable {
 struct WarCommandExecutor {
     let commandHandler: GameCommandHandling
     private let occupationRules = OccupationRules()
+    private let warRelationRules = WarRelationRules()
 
     private struct AttackTacticProfile {
         let includeDepthUnits: Bool
@@ -820,7 +821,7 @@ struct WarCommandExecutor {
     ) -> Int {
         state.divisions
             .filter { division in
-                guard division.faction != faction,
+                guard warRelationRules.canTarget(attacker: faction, target: division.faction, in: state),
                       !division.isDestroyed else {
                     return false
                 }
@@ -891,7 +892,7 @@ struct WarCommandExecutor {
     ) -> [RegionId] {
         var regionIds: [RegionId] = []
         for segment in segments.sorted(by: { $0.regionId.rawValue < $1.regionId.rawValue }) {
-            if state.map.regions[segment.regionId]?.controller != zone.faction ||
+            if isTargetableRegion(segment.regionId, zone: zone, state: state) ||
                 hasEnemyPresence(in: segment.regionId, zone: zone, state: state) {
                 regionIds.append(segment.regionId)
             }
@@ -902,7 +903,7 @@ struct WarCommandExecutor {
                     targetZoneId: targetZoneId,
                     state: state
                 ),
-                    (state.map.regions[neighborId]?.controller != zone.faction ||
+                    (isTargetableRegion(neighborId, zone: zone, state: state) ||
                      hasEnemyPresence(in: neighborId, zone: zone, state: state)) else {
                     return false
                 }
@@ -946,7 +947,7 @@ struct WarCommandExecutor {
         guard let region = state.map.region(id: targetRegionId),
               region.isPassable,
               isSiegeTarget(region, in: state),
-              WarRelationRules().canTarget(attacker: zone.faction, target: region.controller, in: state),
+              warRelationRules.canTarget(attacker: zone.faction, target: region.controller, in: state),
               division.faction == zone.faction,
               division.canAct,
               canInvest(division, targetRegion: region) else {
@@ -1003,7 +1004,7 @@ struct WarCommandExecutor {
         state: GameState
     ) -> Bool {
         state.divisions.contains { division in
-            guard division.faction != zone.faction,
+            guard warRelationRules.canTarget(attacker: zone.faction, target: division.faction, in: state),
                   !division.isDestroyed else {
                 return false
             }
@@ -1020,7 +1021,7 @@ struct WarCommandExecutor {
         let regionSet = Set(regionIds)
         return state.divisions
             .filter { target in
-                guard target.faction != zone.faction,
+                guard warRelationRules.canTarget(attacker: division.faction, target: target.faction, in: state),
                       !target.isDestroyed,
                       let targetRegion = target.location(in: state.map),
                       regionSet.contains(targetRegion) else {
@@ -1049,6 +1050,7 @@ struct WarCommandExecutor {
         let regionTargets = stableUnique([region.representativeHex] + region.displayHexes)
         let candidates = regionTargets
             .filter { state.map.tile(at: $0)?.isPassable == true }
+            .filter { canUseAsWarDestination($0, attacker: division.faction, state: state) }
             .filter { hex in
                 guard let occupying = state.division(at: hex) else {
                     return true
@@ -1061,8 +1063,8 @@ struct WarCommandExecutor {
                 if lhsIsCurrent != rhsIsCurrent {
                     return !lhsIsCurrent
                 }
-                let lhsEnemyControlled = state.map.tile(at: $0)?.controller == division.faction.opponent
-                let rhsEnemyControlled = state.map.tile(at: $1)?.controller == division.faction.opponent
+                let lhsEnemyControlled = isTargetableHexController($0, attacker: division.faction, state: state)
+                let rhsEnemyControlled = isTargetableHexController($1, attacker: division.faction, state: state)
                 if lhsEnemyControlled != rhsEnemyControlled {
                     return lhsEnemyControlled
                 }
@@ -1081,7 +1083,10 @@ struct WarCommandExecutor {
             return destination
         }
 
-        if let current = candidates.first(where: { $0 == division.coord && state.map.tile(at: $0)?.controller != division.faction }) {
+        if let current = candidates.first(where: {
+            $0 == division.coord &&
+                isTargetableHexController($0, attacker: division.faction, state: state)
+        }) {
             return current
         }
 
@@ -1097,12 +1102,13 @@ struct WarCommandExecutor {
         return movementRange
             .filter { $0 != division.coord }
             .filter { state.division(at: $0) == nil }
+            .filter { canUseAsWarDestination($0, attacker: division.faction, state: state) }
             .sorted {
                 let lhsDistance = nearestDistance(from: $0, to: targets)
                 let rhsDistance = nearestDistance(from: $1, to: targets)
                 if lhsDistance == rhsDistance {
-                    let lhsEnemyControlled = state.map.tile(at: $0)?.controller == division.faction.opponent
-                    let rhsEnemyControlled = state.map.tile(at: $1)?.controller == division.faction.opponent
+                    let lhsEnemyControlled = isTargetableHexController($0, attacker: division.faction, state: state)
+                    let rhsEnemyControlled = isTargetableHexController($1, attacker: division.faction, state: state)
                     if lhsEnemyControlled != rhsEnemyControlled {
                         return lhsEnemyControlled
                     }
@@ -1114,6 +1120,40 @@ struct WarCommandExecutor {
                 return lhsDistance < rhsDistance
             }
             .first
+    }
+
+    private func isTargetableRegion(
+        _ regionId: RegionId,
+        zone: FrontZone,
+        state: GameState
+    ) -> Bool {
+        guard let region = state.map.region(id: regionId) else {
+            return false
+        }
+        return warRelationRules.canTarget(attacker: zone.faction, target: region.controller, in: state)
+    }
+
+    private func isTargetableHexController(
+        _ hex: HexCoord,
+        attacker: Faction,
+        state: GameState
+    ) -> Bool {
+        guard let controller = state.map.tile(at: hex)?.controller else {
+            return false
+        }
+        return warRelationRules.canTarget(attacker: attacker, target: controller, in: state)
+    }
+
+    private func canUseAsWarDestination(
+        _ hex: HexCoord,
+        attacker: Faction,
+        state: GameState
+    ) -> Bool {
+        guard let controller = state.map.tile(at: hex)?.controller else {
+            return true
+        }
+        return controller == attacker ||
+            warRelationRules.canTarget(attacker: attacker, target: controller, in: state)
     }
 
     private func nearestDistance(from coord: HexCoord, to targets: [HexCoord]) -> Int {

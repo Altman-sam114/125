@@ -22,6 +22,7 @@ final class AppContainer: ObservableObject {
     let warPipelineMode: WarPipelineMode
     let turnManager: TurnManager?
     private var isRunningAI = false
+    private let warRelationRules = WarRelationRules()
 
     init(
         gameState: GameState,
@@ -153,7 +154,9 @@ final class AppContainer: ObservableObject {
 
         let displayedDivisions = mapDisplayAdapter.divisions(displayedAt: coord, viewerFaction: playerFaction)
         if let attacker = selectedActionDivision,
-           let enemy = displayedDivisions.first(where: { $0.faction != attacker.faction }) {
+           let enemy = displayedDivisions.first(where: {
+               warRelationRules.canTarget(attacker: attacker.faction, target: $0.faction, in: gameState)
+           }) {
             submit(.attack(attackerId: attacker.id, targetId: enemy.id))
             return
         }
@@ -660,7 +663,7 @@ final class AppContainer: ObservableObject {
         guard let selectedRegionId,
               let region = gameState.map.region(id: selectedRegionId),
               let targetZone = gameState.warDeploymentState.zone(for: selectedRegionId),
-              targetZone.faction != playerFaction else {
+              warRelationRules.canTarget(attacker: playerFaction, target: targetZone.faction, in: gameState) else {
             return nil
         }
         return (region, targetZone)
@@ -669,7 +672,7 @@ final class AppContainer: ObservableObject {
     private func canBesiege(division: Division, targetRegion region: RegionNode) -> Bool {
         guard region.isPassable,
               isSiegeTarget(region),
-              WarRelationRules().canTarget(attacker: division.faction, target: region.controller, in: gameState) else {
+              warRelationRules.canTarget(attacker: division.faction, target: region.controller, in: gameState) else {
             return false
         }
 
@@ -709,7 +712,7 @@ final class AppContainer: ObservableObject {
               region.controller == record.defenderFaction,
               record.pressure >= 10,
               record.fortification == 0,
-              WarRelationRules().canTarget(attacker: division.faction, target: record.defenderFaction, in: gameState),
+              warRelationRules.canTarget(attacker: division.faction, target: record.defenderFaction, in: gameState),
               siegeDistance(from: division, to: region) <= max(1, division.range),
               hasCapitulatingHexes(region, defenderFaction: record.defenderFaction),
               defendersAreReadyToSurrender(record: record, in: region) else {
@@ -845,7 +848,7 @@ final class AppContainer: ObservableObject {
         }
 
         guard let targetZone = selectedGeneralTargetZone,
-              targetZone.faction != playerFaction else {
+              warRelationRules.canTarget(attacker: playerFaction, target: targetZone.faction, in: gameState) else {
             return nil
         }
 
@@ -1104,11 +1107,15 @@ final class AppContainer: ObservableObject {
             return
         }
 
-        if let attacker = selectedActionDivision {
+        if let attacker = selectedActionDivision,
+           warRelationRules.canTarget(attacker: attacker.faction, target: division.faction, in: gameState) {
             submit(.attack(attackerId: attacker.id, targetId: division.id))
         } else {
             selectDivision(division)
-            appendInteractionEvent("Selected enemy unit: \(division.name).")
+            let relationLabel = warRelationRules.canTarget(attacker: playerFaction, target: division.faction, in: gameState)
+                ? "enemy"
+                : "non-hostile"
+            appendInteractionEvent("Selected \(relationLabel) unit: \(division.name).")
         }
     }
 
@@ -1142,7 +1149,10 @@ final class AppContainer: ObservableObject {
         movementHighlights = MovementRules().movementRange(for: division, in: gameState)
         attackHighlights = Set(
             gameState.divisions
-                .filter { $0.faction != division.faction && division.coord.distance(to: $0.coord) <= division.range }
+                .filter {
+                    warRelationRules.canTarget(attacker: division.faction, target: $0.faction, in: gameState) &&
+                        division.coord.distance(to: $0.coord) <= division.range
+                }
                 .map(\.coord)
         )
     }

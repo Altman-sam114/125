@@ -13,6 +13,8 @@ flowchart TD
     DEPLOY["WarDeploymentState<br/>hexToFrontZone 权威<br/>FRONT / DEPTH / GARRISON"]:::derived
     ECO["EconomyState / EconomyRules<br/>收入 / 生产 / 补员"]:::economy
     DIP["DiplomacyState + MandateState<br/>国家关系 / 归附记录 / 天命"]:::state
+    TURN["TurnOrderState / PowerRelation<br/>回合 / 控制权 / 关系表"]:::state
+    RELCAND["WarRelationRules.canTarget<br/>UI / AI / 执行器战术候选"]:::rules
 
     PLAYER["玩家操作<br/>tap / move / attack / proposeSubmission / endTurn"]:::input
     AI["AI 元帅/将领<br/>MarshalAgent / TheaterCommanderPool<br/>ZoneCommanderAgent"]:::input
@@ -38,8 +40,14 @@ flowchart TD
     H2T --> FRONT --> DEPLOY
     GS --> ECO
     GS --> DIP
+    GS --> TURN
+    DIP -->|v5.6e 投影| TURN
+    TURN -->|v5.6f 候选过滤| RELCAND
 
     PLAYER --> CMD
+    RELCAND --> PLAYER
+    RELCAND --> AI
+    RELCAND --> WCE
     AI --> ZD --> WCE --> CMD
     AI --> AIPAC --> CMD
     CMD --> RE --> HEX

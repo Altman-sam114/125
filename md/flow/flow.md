@@ -390,6 +390,13 @@ v5.6e 当前已落地：
 - `TurnOrderState.setRelationStatus` 提供排序稳定的关系 upsert。
 - `CommandExecutor.executeProposeSubmission` 成功写入国家关系后，会同步投影到 `TurnOrderState.relations`，供 `WarRelationRules.canTarget` 继续读取。
 
+v5.6f 当前已落地：
+
+- `AppContainer` 的点击攻击、攻击高亮、将领 attack target 和玩家 command zone 推断改为先读 `WarRelationRules.canTarget`，避免把非敌对单位或方面显示成可攻击候选。
+- `WarCommandExecutor` 的 `enemyStrength`、`enemyRegions`、`hasEnemyPresence`、`visibleEnemyDivision`、`siegeCommand` 和 `tacticalDestination` 改为按 `canTarget` 判断敌军、敌控州府和可优先占领 hex；战争移动目的地会排除非己方且非敌对 controller 的 hex，不再依赖简单 `faction !=` 或 `Faction.opponent`。
+- `ZoneCommanderAgent`、`MarshalBattlefieldSummarizer` 和 `MockAICommander` 的敌情估算、可见敌区和 `weightedRegions` 来源改为按 `canTarget` 判断战争目标。
+- 招抚/谈判候选仍保留外交语义，继续由 `CountryProfile`、`pacificationTargets` 和 `CommandValidator.validateProposeSubmission` 判断，不用 `WarRelationRules.canTarget` 过滤。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -416,7 +423,19 @@ TheaterDirectiveEnvelope.pacificationTargets
   -> v5.6e conservative projection to TurnOrderState.relations
 ```
 
-v5.6a/v5.6b/v5.6c/v5.6d/v5.6e 当前没有做：
+v5.6f 的战术候选关系感知链路：
+
+```text
+TurnOrderState.relations
+  -> WarRelationRules.canTarget
+  -> UI attack target / highlight
+  -> ZoneCommanderAgent / MarshalBattlefieldSummarizer visible enemy regions
+  -> WarCommandExecutor enemy regions / enemy divisions / tactical destination
+  -> Command
+  -> RuleEngine
+```
+
+v5.6a/v5.6b/v5.6c/v5.6d/v5.6e/v5.6f 当前没有做：
 
 - 不实现吴越、南唐、后蜀、北汉等单国 tactical neutral；v5.6e 只同步 legacy `.allies/.germany` power 级保守投影。
 - 不交割 hex / region controller，不转换或删除部队，不刷新 theater/front/deploy。
@@ -430,7 +449,7 @@ v5.6a/v5.6b/v5.6c/v5.6d/v5.6e 当前没有做：
 - 统治者不得直接修改 `HexTile.controller`、`Division.coord`、`regionToTheater`、`hexToTheater` 或 `hexToFrontZone`。
 - 若需要审计记录，必须单独设计数据 schema，并在 `md/flow/*`、`README.md`、`update_log.md` 中同步说明。
 
-当前唐宋地图、部队和战术敌我仍通过 legacy 二元 `Faction` 桥运行。`DiplomacyState` 是国家级投影，`TurnOrderState.relations` 是当前 `WarRelationRules` 读取的 power 级战争合法性来源。v5.6e 会把国家关系保守聚合回 power 关系，避免外交记录和战术敌我长期分叉；但吴越等国家虽然能在外交记录中进入 `submitting`，在完成更细粒度 `PowerId` / `CountryId` 归属迁移前，仍不能宣称其已经获得 tactical neutral 或独立战争关系。
+当前唐宋地图、部队和战术敌我仍通过 legacy 二元 `Faction` 桥运行。`DiplomacyState` 是国家级投影，`TurnOrderState.relations` 是当前 `WarRelationRules` 读取的 power 级战争合法性来源。v5.6e 会把国家关系保守聚合回 power 关系，v5.6f 再把该关系用于 UI/AI/WarCommandExecutor 的战术候选生成，避免外交记录、候选高亮和最终规则长期分叉；但吴越等国家虽然能在外交记录中进入 `submitting`，在完成更细粒度 `PowerId` / `CountryId` 归属迁移前，仍不能宣称其已经获得 tactical neutral 或独立战争关系。
 
 ### 1.8 EconomyState / EconomyRules
 
