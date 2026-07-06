@@ -23,6 +23,7 @@
   -> v5.7c 起 HUD 目标锚点可只读聚焦目标州府
   -> v5.7d 起地图只读绘制目标州府 spotlight
   -> v5.7e 起战报面板只读汇总每回合战报摘要
+  -> v5.7f 起 HUD 只读显示指挥身份/观战模式并确认重开剧本
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -64,6 +65,7 @@ flowchart TD
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
     TURNREPORT["每回合战报摘要<br/>EventLogView.turnReportSummary<br/>只读汇总 eventLog / AI 军议 / 方面军令"]:::ui
+    SESSIONHUD["指挥身份 / 重开剧本<br/>HUDView + NewGameButton<br/>只读显示模式，确认后 resetGame"]:::ui
     PLAYER["玩家输入<br/>点击地图、移动、攻击、招抚、结束回合"]:::input
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input
     DEC["元帅 JSON 解码<br/>TheaterDirectiveDecoder<br/>提取 fenced JSON、校验 id 与 schema"]:::command
@@ -117,6 +119,7 @@ flowchart TD
 
     GS --> UI
     GS --> HINT --> UI
+    GS --> SESSIONHUD --> UI
     VICTEXT --> GOAL --> FOCUS --> UI
     VICTEXT --> SPOTLIGHT --> UI
     LOG --> TURNREPORT --> UI
@@ -550,6 +553,7 @@ flowchart TD
     FOCUS["目标按钮<br/>AppContainer.focusObjective<br/>选中目标 hex / region"]:::ui
     SPOTLIGHT["地图目标 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读标出统一目标州府"]:::ui
     HINT["下一步提示<br/>RootGameView.nextActionHint -> HUDView<br/>只读提示选军、围城、招抚、解围、修城或结束回合"]:::ui
+    SESSIONHUD["指挥身份 / 重开剧本<br/>HUDView + NewGameButton<br/>显示亲征/观战，确认后重置剧本"]:::ui
     LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类与每回合摘要"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
     BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette，绘制粮道虚线"]:::ui
@@ -565,6 +569,7 @@ flowchart TD
     HUD --> GOAL --> FOCUS
     BOARD --> SPOTLIGHT
     ROOT --> HINT
+    ROOT --> SESSIONHUD
     ROOT --> LOG
     ROOT --> AIUI
     AIUI --> LOG

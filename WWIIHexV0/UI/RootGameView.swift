@@ -5,6 +5,7 @@ struct RootGameView: View {
     @State private var selectedCompactPanel: CompactInfoPanel = .unit
     @State private var isInfoExpanded = false
     @State private var isGeneralProfilePresented = false
+    @State private var isNewGameConfirmationPresented = false
 
     var body: some View {
         GeometryReader { proxy in
@@ -18,10 +19,18 @@ struct RootGameView: View {
                 VStack {
                     HUDView(
                         gameState: container.gameState,
+                        playerFaction: container.playerFaction,
+                        observerModeEnabled: container.observerModeEnabled,
                         nextActionHint: nextActionHint,
                         onFocusObjective: container.focusObjective(id:),
                         onEndTurn: container.advanceOrRunAI,
-                        onNewGame: container.resetGame
+                        onNewGame: {
+                            if isTangSongScenario {
+                                isNewGameConfirmationPresented = true
+                            } else {
+                                container.resetGame()
+                            }
+                        }
                     )
                     .padding(8)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
@@ -90,6 +99,18 @@ struct RootGameView: View {
                     .font(.headline)
                     .padding()
             }
+        }
+        .confirmationDialog(
+            "重开建隆剧本？",
+            isPresented: $isNewGameConfirmationPresented,
+            titleVisibility: .visible
+        ) {
+            Button("重开剧本", role: .destructive) {
+                container.resetGame()
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("将清空当前选中、交互战报和本局进度，重新载入建隆元年剧本。")
         }
     }
 

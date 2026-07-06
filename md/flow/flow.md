@@ -459,6 +459,12 @@ v5.7e 当前已落地：
 - 摘要额外读取最近 `AgentDecisionRecord` 和 `GameState.warDirectiveRecords`，把 AI 军议与方面军令作为“军议”计入展示。
 - 该摘要只读聚合战斗、州府、围城、粮道、外交、前线、方面、军议等已有记录，不写 `GameState.eventLog`，不新增事件源，不改变 `WarDirectiveRecord` / `AgentDecisionRecord` 生成职责，也不参与规则、胜负或 AI 决策。
 
+v5.7f 当前已落地：
+
+- `HUDView` 接收 `playerFaction` 与 `observerModeEnabled`，在唐宋场景显示“指挥 / 模式”短状态：宋可下令、宋待命、观战各方、玩家亲征或只读观战。
+- `NewGameButton` 在唐宋场景显示“重开剧本”；`RootGameView` 在调用 `AppContainer.resetGame()` 前弹出确认，避免误清空当前剧本进度。
+- 该切片只包装 UI 入口和当前身份读法，不改变 `AppContainer.playerFaction`，不实现真实多势力选择，不写 `GameState` schema，不改变 `resetGame()`、`RuleEngine`、`TurnManager`、命令合法性或存档。
+
 v5.6b 的 UI 到规则链路：
 
 ```text
@@ -1421,6 +1427,14 @@ EventLogView.turnReportSummary
   -> 额外读取最近 AgentDecisionRecord / WarDirectiveRecord
   -> 战报面板显示本回合或最近回合摘要
   -> 不写 GameState.eventLog，不改变规则或 AI 记录生成
+HUDView commandIdentity
+  -> 只读读取 playerFaction / observerModeEnabled / activeFaction / phase
+  -> 显示宋可下令、宋待命、观战各方、玩家亲征或只读观战
+  -> 不改变 playerFaction，不实现真实势力选择
+NewGameButton
+  -> RootGameView confirmationDialog
+  -> 用户确认后调用 AppContainer.resetGame()
+  -> resetGame 仍只重载初始剧本并清空 UI/交互态
 
 TurnOrderState.advancedAfterEndTurn
   -> 按 powerOrder 推进 activePowerId

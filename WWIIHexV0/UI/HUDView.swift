@@ -2,6 +2,8 @@ import SwiftUI
 
 struct HUDView: View {
     let gameState: GameState
+    let playerFaction: Faction
+    let observerModeEnabled: Bool
     let nextActionHint: String?
     let onFocusObjective: ((String) -> Void)?
     let onEndTurn: () -> Void
@@ -9,12 +11,16 @@ struct HUDView: View {
 
     init(
         gameState: GameState,
+        playerFaction: Faction = .allies,
+        observerModeEnabled: Bool = false,
         nextActionHint: String? = nil,
         onFocusObjective: ((String) -> Void)? = nil,
         onEndTurn: @escaping () -> Void,
         onNewGame: (() -> Void)? = nil
     ) {
         self.gameState = gameState
+        self.playerFaction = playerFaction
+        self.observerModeEnabled = observerModeEnabled
         self.nextActionHint = nextActionHint
         self.onFocusObjective = onFocusObjective
         self.onEndTurn = onEndTurn
@@ -51,6 +57,13 @@ struct HUDView: View {
                 GridRow {
                     metric(phaseLabel, gameState.phaseDisplayName)
                     metric(victoryLabel, victoryText)
+                }
+
+                if gameState.isTangSongScenario {
+                    GridRow {
+                        metric(commandIdentityLabel, commandIdentityText)
+                        metric(commandModeLabel, commandModeText)
+                    }
                 }
 
                 if let objectiveProgressText {
@@ -298,6 +311,32 @@ struct HUDView: View {
 
     private var queueLabel: String {
         gameState.isTangSongScenario ? "队列" : "Queue"
+    }
+
+    private var commandIdentityLabel: String {
+        gameState.isTangSongScenario ? "指挥" : "Command"
+    }
+
+    private var commandModeLabel: String {
+        gameState.isTangSongScenario ? "模式" : "Mode"
+    }
+
+    private var commandIdentityText: String {
+        if observerModeEnabled {
+            return "观战各方"
+        }
+
+        let playerName = gameState.displayName(for: playerFaction)
+        let canCommand = gameState.activeFaction == playerFaction &&
+            gameState.effectiveTurnOrderState.allowsCommands(
+                activeFaction: playerFaction,
+                phase: gameState.phase
+            )
+        return canCommand ? "\(playerName)可下令" : "\(playerName)待命"
+    }
+
+    private var commandModeText: String {
+        observerModeEnabled ? "只读观战" : "玩家亲征"
     }
 }
 

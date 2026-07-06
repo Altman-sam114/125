@@ -6,7 +6,7 @@ struct NewGameButton: View {
 
     var body: some View {
         Button(action: action) {
-            Label(isTangSongScenario ? "新局" : "NEW GAME", systemImage: "arrow.counterclockwise")
+            Label(isTangSongScenario ? "重开剧本" : "NEW GAME", systemImage: "arrow.counterclockwise")
                 .font(.caption.weight(.semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.65)
