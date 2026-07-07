@@ -74,13 +74,13 @@ struct HUDView: View {
                 }
 
                 GridRow {
-                    metric(manpowerLabel, "\(activeLedger.stockpile.manpower)")
-                    metric(industryLabel, "\(activeLedger.stockpile.industry)")
+                    metric(manpowerLabel, manpowerValueText)
+                    metric(industryLabel, industryValueText)
                 }
 
                 GridRow {
-                    metric(suppliesLabel, "\(activeLedger.stockpile.supplies)")
-                    metric(queueLabel, "\(activeLedger.productionQueue.count)")
+                    metric(suppliesLabel, suppliesValueText)
+                    metric(queueLabel, queueValueText)
                 }
             }
 
@@ -173,6 +173,17 @@ struct HUDView: View {
                 .minimumScaleFactor(0.75)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(label)
+        .accessibilityValue(metricAccessibilityValue(label: label, value: value))
+    }
+
+    private func metricAccessibilityValue(label: String, value: String) -> String {
+        let duplicatedPrefix = "\(label) "
+        if gameState.isTangSongScenario, value.hasPrefix(duplicatedPrefix) {
+            return String(value.dropFirst(duplicatedPrefix.count))
+        }
+        return value
     }
 
     private var victoryText: String {
@@ -268,6 +279,32 @@ struct HUDView: View {
 
     private var activeLedger: FactionEconomyLedger {
         gameState.economyState.ledger(for: gameState.activeFaction)
+    }
+
+    private var manpowerValueText: String {
+        gameState.isTangSongScenario
+            ? "丁口 \(activeLedger.stockpile.manpower)"
+            : "\(activeLedger.stockpile.manpower)"
+    }
+
+    private var industryValueText: String {
+        gameState.isTangSongScenario
+            ? "钱帛 \(activeLedger.stockpile.industry)"
+            : "\(activeLedger.stockpile.industry)"
+    }
+
+    private var suppliesValueText: String {
+        gameState.isTangSongScenario
+            ? "粮草 \(activeLedger.stockpile.supplies)"
+            : "\(activeLedger.stockpile.supplies)"
+    }
+
+    private var queueValueText: String {
+        let count = activeLedger.productionQueue.count
+        if gameState.isTangSongScenario {
+            return count == 0 ? "暂无军备" : "军备队列 \(count) 项"
+        }
+        return "\(count)"
     }
 
     private var manpowerLabel: String {

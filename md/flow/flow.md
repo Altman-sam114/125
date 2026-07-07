@@ -654,6 +654,13 @@ v5.8ad 当前已落地：
 - 军备按钮补充“下达军备令：军备名”读屏动作名，队列行补充“军备队列：军备名”和剩余回合 accessibility value。
 - 该切片只改府库面板显示和 SwiftUI accessibility 语义，不改变 `ProductionOrder`、`ProductionKind`、`EconomyRules`、`Command.queueProduction`、资源扣除、队列执行、日志结构或 Codable schema；完整 VoiceOver 实机、截图布局和发布级 UI 验收仍未完成。
 
+v5.8ae 当前已落地：
+
+- `HUDView` 在唐宋路径下把库存指标从裸数字改为“丁口 N / 钱帛 N / 粮草 N”，让首屏资源读法与府库面板一致。
+- HUD 军备队列指标从裸数字改为“暂无军备”或“军备队列 N 项”，减少首屏调试式数量残留。
+- HUD 指标行补充合并后的 accessibility label/value，读屏时按单个指标读出当前标签和值。
+- 该切片只改 HUD 显示和 SwiftUI accessibility 语义，不改变 `EconomyState`、生产队列、资源规则、胜利规则、命令执行、日志结构或 Codable schema；完整 VoiceOver 实机、截图布局和发布级 UI 验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

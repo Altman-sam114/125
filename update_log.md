@@ -11,6 +11,38 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ae - HUD 指标与队列读法硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 HUD 仍有高频首屏裸数字：丁口、钱帛、粮草和军备队列数量缺少唐宋读法与合并读屏语义。
+- `HUDView` 唐宋路径的库存指标改为“丁口 N / 钱帛 N / 粮草 N”。
+- HUD 军备队列指标改为“暂无军备”或“军备队列 N 项”。
+- HUD 指标行补充合并后的 accessibility label/value，减少读屏拆散标签和值。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8ae 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/HUDView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8ae_hud_metric_readability_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 HUD 显示和 SwiftUI 可读语义，不改变 `EconomyState`、生产队列、资源规则、命令、胜利规则、日志结构或 Codable schema。
+- 将领军令面板指标、战报行整行读屏、完整 VoiceOver 实机、截图布局、全项目玩家可见残留扫描和发布级 UI 验收仍未完成。
+
 ## v5.8ad - 府库军备队列可读性硬化
 
 完成日期：2026-07-07
@@ -35,8 +67,10 @@
 
 验证结果：
 
-- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
-- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+- 按当前规范和用户要求，本机未运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 已推送到 `origin/main`：commit `2a1f66d0145a79ae2099b7ab79e3d354d83cd09b`。
+- GitHub Actions `WWIIHexV0 CI Results` run `28842972271` attempt `1` 已完成并通过；artifact `wwiihexv0-ci-cloud-main-ci-v1-main-2a1f66d-run28842972271-attempt1` 已核对。
+- artifact manifest 匹配 `branch=main`、`commitSha=2a1f66d0145a79ae2099b7ab79e3d354d83cd09b`、`runId=28842972271`、`runAttempt=1`；`staticChecksOutcome=success`、`buildOutcome=success`、`testOutcome=skipped`，JUnit 2 tests / 0 failures / 0 errors，`xcodebuild.log` 显示 `BUILD SUCCEEDED`。
 
 遗留事项：
 
