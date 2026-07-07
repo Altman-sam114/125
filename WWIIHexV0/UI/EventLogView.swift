@@ -141,6 +141,9 @@ struct EventLogView: View {
                         .padding(8)
                         .background(.secondary.opacity(0.08))
                         .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(objectiveAccessibilityLabel(for: progress))
+                        .accessibilityValue(objectiveAccessibilityValue(for: progress))
                     }
                 }
             }
@@ -376,6 +379,27 @@ struct EventLogView: View {
             settlementScoreText(summary.score),
             summary.grade,
             summary.detail
+        ]
+        return parts.joined(separator: isTangSongScenario ? "。" : ". ")
+    }
+
+    private func objectiveAccessibilityLabel(for progress: VictoryObjectiveProgress) -> String {
+        let title = progress.title(
+            isTangSongScenario: isTangSongScenario,
+            factionDisplayName: displayName(for:)
+        )
+        if isTangSongScenario {
+            return "胜利目标：\(title)"
+        }
+        return "Victory objective: \(title)"
+    }
+
+    private func objectiveAccessibilityValue(for progress: VictoryObjectiveProgress) -> String {
+        let status = progress.isSatisfied ? completedText : pendingText
+        let parts = [
+            status,
+            progress.summary(isTangSongScenario: isTangSongScenario),
+            progress.detail(isTangSongScenario: isTangSongScenario)
         ]
         return parts.joined(separator: isTangSongScenario ? "。" : ". ")
     }
