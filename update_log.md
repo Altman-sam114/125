@@ -11,6 +11,39 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8al - AI 面板军令结果行读屏硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描确认 v5.8ak 后下一处低风险 AI 可解释性切片是 `AgentPanelView` 的“军令结果”列表行。
+- 军令结果行补充合并后的 accessibility label/value，唐宋路径读作“军令结果：命令标题”。
+- 军令结果行读屏 value 复用既有 `resultLine(_:)`，继续显示“已执行 / 规则拒绝 / 映射失败 / 未执行”等状态，不改变命令结果生成或可见文案。
+- 本轮只处理 `record.commandResults` 行，不扩大到方面军令卡片、诏令朝议摘要块、CommandPanel 状态反馈或 DiplomacyPanel 归附记录。
+- 同步 README、md 大纲、flow 文档、流程图、mermaid 源图和 v5.8al 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/AgentPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/flow/01_overall_core_flow.mermaid`
+- `md/prompt/v5.0-唐宋迁移/v5.8al_agent_command_result_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 待推送到 `origin/main` 后由 GitHub Actions `WWIIHexV0 CI Results` 执行云端重验证，并下载未加密 artifact 核对 manifest、JUnit、主构建日志和失败摘要。
+
+遗留事项：
+
+- 本轮只改 AI 面板 SwiftUI 可读语义，不改变 `AgentDecisionRecord`、`CommandResultSummary`、`WarDirectiveRecord`、`TheaterDirectiveEnvelope`、`ZoneDirective`、`Command`、命令执行、AI 决策、规则系统、日志结构、raw JSON 存储或 Codable schema。
+- 完整 VoiceOver 实机、截图布局、方面军令卡片、诏令朝议摘要块、CommandPanel 状态反馈、DiplomacyPanel 复合行、全项目玩家可见残留扫描、结构化 event payload、真 LLM 输出本地化和发布级 UI 验收仍未完成。
+
 ## v5.8ak - HUD 目标与下一步提示读屏硬化
 
 完成日期：2026-07-07

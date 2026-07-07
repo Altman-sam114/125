@@ -138,6 +138,9 @@ struct AgentPanelView: View {
                                 .foregroundStyle(result.executed ? .primary : .secondary)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(commandResultAccessibilityLabel(result))
+                        .accessibilityValue(commandResultAccessibilityValue(result))
                     }
                 }
             }
@@ -268,6 +271,18 @@ struct AgentPanelView: View {
             return orderType.displayName(isTangSongScenario: isTangSongScenario)
         }
         return isTangSongScenario ? "军令" : "Order"
+    }
+
+    private func commandResultAccessibilityLabel(_ result: CommandResultSummary) -> String {
+        let title = commandResultTitle(result)
+        if isTangSongScenario {
+            return "军令结果：\(title)"
+        }
+        return "Command result: \(title)"
+    }
+
+    private func commandResultAccessibilityValue(_ result: CommandResultSummary) -> String {
+        resultLine(result)
     }
 
     private func commandDisplayTitle(_ commandDisplayName: String) -> String {

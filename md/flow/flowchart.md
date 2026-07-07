@@ -67,6 +67,7 @@
   -> v5.8ai 起战报胜负和评分估算卡片读屏继续硬化
   -> v5.8aj 起战报胜利目标行标题、状态、摘要和详情读屏继续硬化
   -> v5.8ak 起 HUD 目标提示摘要和下一步提示卡片读屏继续硬化
+  -> v5.8al 起 AI 面板军令结果行标题和执行状态读屏继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -107,7 +108,7 @@ flowchart TD
     INSPECT["检查面板读法<br/>MapDisplayAdapter + UnitInspectorView + RegionInspectorView<br/>唐宋场景显示军队、州府、政权、粮道、编成、产出、围城摘要和运行态方面/防区名称"]:::ui
     GENPANELS["将领面板读法<br/>GeneralCommandPanelView + GeneralProfileView<br/>唐宋场景显示将领军令、档案、用兵、所属政权、辖下军队和 planned operation 目标名称"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示兵种、兵力、补给、退却和本回合"]:::ui
-    AIPANEL["AI 面板玩家态/开发态分层<br/>AgentPanelView + AgentDecisionRecord + WarDirectiveRecord<br/>玩家态显示军议摘要、方面军令和失败摘要<br/>唐宋 raw/Latin 文本使用中文兜底"]:::ui
+    AIPANEL["AI 面板玩家态/开发态分层<br/>AgentPanelView + AgentDecisionRecord + WarDirectiveRecord<br/>玩家态显示军议摘要、方面军令和失败摘要<br/>军令结果行合并标题和执行状态读屏<br/>唐宋 raw/Latin 文本使用中文兜底"]:::ui
     DIPPANEL["外交面板读法硬化<br/>DiplomacyPanelView + DiplomacyState + MandateState<br/>唐宋默认路径显示天命、诸国、关系和归附读法<br/>Latin 国家/集团名与 ASCII 连接符有中文兜底"]:::ui
     GOAL["统一目标锚点与读屏提示<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府<br/>目标摘要合并读屏，目标按钮保留独立焦点"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
@@ -477,7 +478,7 @@ flowchart TD
     PAC["AI 招抚辅助桥<br/>TurnManager.executePacificationTargets<br/>pacificationTargets -> Command.proposeSubmission<br/>不经过 WarCommandExecutor"]:::command
     RE["统一规则校验执行<br/>RuleEngine<br/>AI 和玩家共用同一套规则"]:::rules
     RECORD["指令复盘记录<br/>AgentDecisionRecord + WarDirectiveRecord<br/>保存诏令朝议摘要、tactic、target、结果、拒绝原因"]:::ui
-    PANEL["AI 面板<br/>AgentPanelView<br/>显示军议、诏令/朝议、招抚/转运和方面军令"]:::ui
+    PANEL["AI 面板<br/>AgentPanelView<br/>显示军议、诏令/朝议、招抚/转运和方面军令<br/>军令结果行合并读屏"]:::ui
     END["AI 自动结束回合<br/>RuleEngine.execute(.endTurn)<br/>切换 activeFaction / phase"]:::rules
 
     START --> CHECK
@@ -614,7 +615,7 @@ flowchart TD
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示选中军队摘要读法"]:::ui
     SESSIONHUD["亲征势力 / 观战 / 重开剧本<br/>RootGameView + HUDView + NewGameButton<br/>切换 legacy 亲征阵营，显示亲征/观战，确认后重置剧本"]:::ui
     LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类、每回合摘要和胜负后评分估算<br/>metadata 不展示内部 relatedRecordId；raw 英文兜底降级为中文提示<br/>列表行和摘要卡片合并读屏"]:::ui
-    AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
+    AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名<br/>军令结果行合并读屏"]:::ui
     BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette，绘制粮道虚线"]:::ui
     UNIT["军队棋子<br/>UnitNode<br/>legacy NATO；唐宋军旗 + 禁/骑/弩/械/守/军字标"]:::ui
     MARSHAL["模拟元帅 / MockAI<br/>MarshalAgent + SimulatedMarshalLLMClient"]:::ai
