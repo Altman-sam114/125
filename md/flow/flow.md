@@ -618,6 +618,14 @@ v5.8y 当前已落地：
 - `RegionInspectorView` 的英文 `FrontZone` 标签与 `MP/IC/SUP` 资源缩写改为自然读法；唐宋围城摘要改为攻方、守方、压力、城防和围城军队数量的结构化读法。
 - 该切片只改 tooltip 和检查面板显示/读屏语义，不改变 `Division`、`ComponentType`、`RegionInspectorState`、围城规则、补给规则、命令、AI 决策或 Codable schema；完整 VoiceOver 实机、截图和布局验收仍未完成。
 
+v5.8z 当前已落地：
+
+- `GeneralProfileView` 的关闭按钮补充“关闭将领档案 / Close General Profile” accessibility label 和返回提示，避免只读出通用关闭按钮。
+- 忠诚与军心 `metricBar` 合并为单个可访问元素，value 显示“满百 / out of 100”；技能项补“特长 / Skill”上下文，HQ 受压补警告读法。
+- 辖下军队行补完整 accessibility label/value，唐宋路径读作军队名与“兵力 x，满额 y”，避免只读数字比例。
+- 唐宋头像占位在 legacy Latin 名称下显示“将”，所辖方面名为空或含 Latin 时 fallback 为“未命名方面”，减少默认唐宋路径的 Latin 残留。
+- 该切片只改将领档案 SwiftUI 可读语义和缺名 fallback，不改变 `GeneralData`、`GeneralAssignment`、`FrontZone`、`Division`、将领分配、命令、规则、AI 决策或 Codable schema；完整 VoiceOver 实机、截图和布局验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

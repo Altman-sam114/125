@@ -11,6 +11,40 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8z - 将领档案 accessibility 与 fallback 硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 `GeneralProfileView` 的关闭按钮上下文、指标 value、技能/辖下军队读屏、HQ 警告读法和唐宋 fallback 仍可硬化；本轮选择低风险将领档案显示层小切片。
+- `GeneralProfileView` 的关闭按钮补“关闭将领档案 / Close General Profile” accessibility label 和返回提示。
+- 忠诚与军心 `metricBar` 合并为单个可访问元素，value 显示“满百 / out of 100”；技能项补“特长 / Skill”上下文，HQ 受压补警告读法。
+- 辖下军队行补完整 accessibility label/value，唐宋路径读作军队名与“兵力 x，满额 y”。
+- 唐宋头像占位遇到 legacy Latin 名称时显示“将”，所辖方面名为空或含 Latin 时 fallback 为“未命名方面”。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8z 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/GeneralProfileView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8z_general_profile_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改将领档案 SwiftUI 可读语义和缺名 fallback，不改变 `GeneralData`、`GeneralAssignment`、`FrontZone`、`Division`、将领分配、命令、规则、AI 决策或 Codable schema。
+- 完整逐地块/逐军队 VoiceOver focus order、实机读屏验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
+- MapEditor 画布 value、底图按钮/参数说明和更完整的 Dynamic Type 布局仍可继续拆成后续小切片。
+
 ## v5.8y - tooltip 与检查面板读法硬化
 
 完成日期：2026-07-07

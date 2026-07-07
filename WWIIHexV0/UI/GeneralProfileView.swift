@@ -34,6 +34,8 @@ struct GeneralProfileView: View {
                 Spacer()
                 Button(isTangSongScenario ? "关闭" : "Close", systemImage: "xmark", action: onClose)
                     .buttonStyle(.bordered)
+                    .accessibilityLabel(isTangSongScenario ? "关闭将领档案" : "Close General Profile")
+                    .accessibilityHint(isTangSongScenario ? "返回当前战局面板。" : "Returns to the current game panel.")
             }
             .padding(12)
             .background(PlatformStyles.systemBackground)
@@ -78,7 +80,7 @@ struct GeneralProfileView: View {
             }
             if let zone {
                 LabeledContent(isTangSongScenario ? "所辖方面" : "Assigned Zone") {
-                    Text(zone.name)
+                    Text(zoneDisplayName(for: zone))
                         .multilineTextAlignment(.trailing)
                 }
             }
@@ -86,6 +88,7 @@ struct GeneralProfileView: View {
                 Label(isTangSongScenario ? "本营州府受敌压迫" : "HQ region contested", systemImage: "exclamationmark.triangle.fill")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.orange)
+                    .accessibilityLabel(isTangSongScenario ? "警告：本营州府受敌压迫" : "Warning: HQ region contested")
             }
         }
     }
@@ -120,6 +123,8 @@ struct GeneralProfileView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(PlatformStyles.tertiarySystemBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(skillAccessibilityLabel(skill))
                     }
                 }
             }
@@ -140,6 +145,9 @@ struct GeneralProfileView: View {
                         Text(strengthText(for: division))
                     }
                     .font(.caption)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(unitAccessibilityLabel(for: division))
+                    .accessibilityValue(strengthAccessibilityText(for: division))
                 }
             }
         }
@@ -156,9 +164,19 @@ struct GeneralProfileView: View {
             ProgressView(value: Double(value), total: 100)
                 .tint(value >= 65 ? .green : value >= 40 ? .orange : .red)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(metricAccessibilityValue(value))
     }
 
     private var initials: String {
+        if isTangSongScenario {
+            let firstCharacter = general.localizedName.trimmingCharacters(in: .whitespacesAndNewlines).first
+            if let firstCharacter, !containsLatinLetters(String(firstCharacter)) {
+                return String(firstCharacter)
+            }
+            return "将"
+        }
         let words = general.localizedName.split(separator: " ")
         let letters = words.prefix(2).compactMap(\.first)
         return letters.isEmpty ? String(general.name.prefix(2)).uppercased() : String(letters).uppercased()
@@ -230,9 +248,38 @@ struct GeneralProfileView: View {
         text.range(of: #"[A-Za-z]"#, options: .regularExpression) != nil
     }
 
+    private func skillAccessibilityLabel(_ skill: String) -> String {
+        isTangSongScenario ? "特长：\(skillLabel(skill))" : "Skill: \(skillLabel(skill))"
+    }
+
+    private func zoneDisplayName(for zone: FrontZone) -> String {
+        guard isTangSongScenario else {
+            return zone.name
+        }
+        let trimmed = zone.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty || containsLatinLetters(trimmed) {
+            return "未命名方面"
+        }
+        return trimmed
+    }
+
+    private func metricAccessibilityValue(_ value: Int) -> String {
+        isTangSongScenario ? "\(value)，满百" : "\(value) out of 100"
+    }
+
+    private func unitAccessibilityLabel(for division: Division) -> String {
+        isTangSongScenario ? "\(division.name)，兵力" : "\(division.name), strength"
+    }
+
     private func strengthText(for division: Division) -> String {
         isTangSongScenario
             ? "\(division.strength)／\(division.maxStrength)"
             : "\(division.strength)/\(division.maxStrength)"
+    }
+
+    private func strengthAccessibilityText(for division: Division) -> String {
+        isTangSongScenario
+            ? "\(division.strength)，满额\(division.maxStrength)"
+            : "\(division.strength) out of \(division.maxStrength)"
     }
 }

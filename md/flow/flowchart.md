@@ -55,6 +55,7 @@
   -> v5.8w 起主棋盘 VoiceOver 自定义动作继续硬化，读屏动作仍复用 handleBoardTap 与规则链路
   -> v5.8x 起地图图层、紧凑面板、将领军令按钮和面板 fallback 继续硬化
   -> v5.8y 起常驻 tooltip 与军队/州府检查面板读法继续硬化
+  -> v5.8z 起将领档案关闭、指标、技能、辖下军队和缺名 fallback 继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -598,7 +599,7 @@ flowchart TD
     SPOTLIGHT["地图目标 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读标出统一目标州府"]:::ui
     HINT["下一步提示<br/>RootGameView.nextActionHint -> HUDView<br/>只读提示选军、围城、招抚、解围、修城、高亮数量和有限合法性预校验"]:::ui
     INSPECT["检查面板<br/>MapDisplayAdapter / UnitInspectorView / RegionInspectorView<br/>唐宋场景显示军队详情、州府详情、运行态方面/防区名称、编成、产出和围城摘要"]:::ui
-    GENPANELS["将领面板<br/>GeneralCommandPanelView / GeneralProfileView<br/>唐宋场景显示将领军令、将领档案、用兵和辖下军队"]:::ui
+    GENPANELS["将领面板<br/>GeneralCommandPanelView / GeneralProfileView<br/>唐宋场景显示将领军令、将领档案、用兵、指标、特长和辖下军队"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示选中军队摘要读法"]:::ui
     SESSIONHUD["亲征势力 / 观战 / 重开剧本<br/>RootGameView + HUDView + NewGameButton<br/>切换 legacy 亲征阵营，显示亲征/观战，确认后重置剧本"]:::ui
     LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类、每回合摘要和胜负后评分估算<br/>metadata 不展示内部 relatedRecordId；raw 英文兜底降级为中文提示"]:::ui
