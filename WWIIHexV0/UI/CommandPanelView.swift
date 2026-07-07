@@ -34,6 +34,8 @@ struct CommandPanelView: View {
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityLabel(commandStatusAccessibilityLabel)
+                .accessibilityValue(statusText)
 
             HStack(spacing: 8) {
                 Button(action: onHold) {
@@ -129,6 +131,7 @@ struct CommandPanelView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
+            .accessibilityValue(commandAccessibilityValue(isEnabled: true))
             .accessibilityHint(isTangSongScenario ? "结束当前军令阶段，推进各方军议和下一回合。" : "End the current turn and advance the game.")
 
             if let lastCommandMessage {
@@ -136,6 +139,8 @@ struct CommandPanelView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityLabel(commandFeedbackAccessibilityLabel)
+                    .accessibilityValue(commandMessageText(lastCommandMessage))
             }
         }
         .padding(12)
@@ -257,6 +262,14 @@ struct CommandPanelView: View {
             return isEnabled ? "可用" : "停用"
         }
         return isEnabled ? "Available" : "Unavailable"
+    }
+
+    private var commandStatusAccessibilityLabel: String {
+        isTangSongScenario ? "军令状态" : "Command status"
+    }
+
+    private var commandFeedbackAccessibilityLabel: String {
+        isTangSongScenario ? "军令反馈" : "Command feedback"
     }
 
     private var holdAccessibilityHint: String {

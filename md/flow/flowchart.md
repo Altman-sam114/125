@@ -68,6 +68,7 @@
   -> v5.8aj 起战报胜利目标行标题、状态、摘要和详情读屏继续硬化
   -> v5.8ak 起 HUD 目标提示摘要和下一步提示卡片读屏继续硬化
   -> v5.8al 起 AI 面板军令结果行标题和执行状态读屏继续硬化
+  -> v5.8am 起命令面板军令状态、结束回合状态和最近反馈读屏继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -105,6 +106,7 @@ flowchart TD
     VICT["胜负规则<br/>VictoryRules.updateVictoryState<br/>唐宋优先读取 victoryConditions 与天命；缺失时 fallback；非唐宋沿用阿登条件"]:::rules
     VICTEXT["胜负说明、目标进度与评分估算<br/>VictoryState.reason + VictoryRules.objectiveProgress<br/>HUD/战报只读显示原因、门槛和估算评分"]:::ui
     HINT["下一步提示与读屏卡片<br/>RootGameView.nextActionHint + AppContainer.selectedValidatedCommandHint<br/>只读派生选军、候选命令、移动/攻击数量与有限合法性预校验<br/>HUD 卡片合并标题和提示正文读屏"]:::ui
+    COMMANDPANEL["军令面板读屏<br/>CommandPanelView<br/>军令状态、结束回合状态和最近军令反馈补上下文"]:::ui
     INSPECT["检查面板读法<br/>MapDisplayAdapter + UnitInspectorView + RegionInspectorView<br/>唐宋场景显示军队、州府、政权、粮道、编成、产出、围城摘要和运行态方面/防区名称"]:::ui
     GENPANELS["将领面板读法<br/>GeneralCommandPanelView + GeneralProfileView<br/>唐宋场景显示将领军令、档案、用兵、所属政权、辖下军队和 planned operation 目标名称"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示兵种、兵力、补给、退却和本回合"]:::ui
@@ -170,6 +172,7 @@ flowchart TD
 
     GS --> UI
     GS --> HINT --> UI
+    GS --> COMMANDPANEL --> PLAYER
     GS --> INSPECT --> UI
     GS --> GENPANELS --> UI
     GS --> TOOLTIP --> UI

@@ -11,6 +11,40 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8am - 命令面板状态与反馈读屏硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描确认 v5.8al 后下一处低风险 UI 可读性切片是 `CommandPanelView` 的军令状态和最近反馈文本。
+- 军令状态文本补充 accessibility label/value，唐宋路径读作“军令状态”，value 复用既有 `statusText`。
+- 最近军令反馈文本补充 accessibility label/value，唐宋路径读作“军令反馈”，value 复用既有 `commandMessageText(_:)` 唐宋显示桥。
+- 结束回合按钮补充可用状态 value，与既有军令按钮读屏状态口径保持一致。
+- 本轮只处理 `CommandPanelView` 状态、结束回合和最近反馈，不扩大到外交面板复合行、AI 方面军令卡片、诏令朝议摘要块或主棋盘逐地块 focus tree。
+- 同步 README、md 大纲、flow 文档、流程图、mermaid 源图和 v5.8am 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/CommandPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/flow/01_overall_core_flow.mermaid`
+- `md/prompt/v5.0-唐宋迁移/v5.8am_command_panel_status_feedback_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 等待本轮 push 到 `origin/main` 后由 GitHub Actions `WWIIHexV0 CI Results` 云端重验证，并下载未加密 artifact 核对 manifest、JUnit、主构建日志和 failure summary。
+
+遗留事项：
+
+- 本轮只改命令面板 SwiftUI 可读语义，不改变 `Command`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、`lastCommandMessage` 写入端、按钮启停条件、命令反馈映射、AI 决策、规则系统、日志结构或 Codable schema。
+- 完整 VoiceOver 实机、截图布局、外交面板国家/关系/归附复合行、AI 方面军令卡片、诏令朝议摘要块、主棋盘逐地块/逐军队 focus tree、全项目玩家可见残留扫描、结构化 event payload、真 LLM 输出本地化和发布级 UI 验收仍未完成。
+
 ## v5.8al - AI 面板军令结果行读屏硬化
 
 完成日期：2026-07-07

@@ -23,6 +23,7 @@ flowchart TD
     TURNREPORT["EventLogView + TangSongEventLogMessage<br/>战报读法 / 每回合战报 / 胜负后评分估算 / 胜利目标行读屏<br/>只读显示 eventLog / AI 军议 / 方面军令 / VictoryState"]:::ui
     SESSIONHUD["RootGameView player picker + HUDView commandIdentity + NewGameButton<br/>亲征势力 / 观战 / 重开剧本确认<br/>切换 UI 亲征阵营，确认后调用 resetGame"]:::ui
     HINT["RootGameView.nextActionHint + AppContainer.selectedValidatedCommandHint<br/>HUD 下一步提示与读屏卡片<br/>只读派生选军/候选命令/移动攻击数量/有限合法性预校验<br/>卡片合并标题和提示正文读屏"]:::ui
+    COMMANDPANEL["CommandPanelView<br/>军令面板读屏<br/>状态、结束回合和最近反馈补上下文"]:::ui
     INSPECT["UnitInspectorView + RegionInspectorView<br/>军队/州府检查面板<br/>唐宋读法显示政权、粮道、编成、产出和围城摘要"]:::ui
     GENPANELS["GeneralCommandPanelView + GeneralProfileView<br/>将领军令/档案面板<br/>唐宋读法显示用兵、政权、辖军和计划摘要"]:::ui
     TOOLTIP["UnitTooltipView<br/>常驻军队提示<br/>唐宋读法显示兵种、补给、退却和本回合"]:::ui
@@ -89,6 +90,7 @@ flowchart TD
     FRONT --> UI
     DEPLOY --> UI
     ECO --> UI
+    GS --> COMMANDPANEL --> PLAYER
     DIP --> DIPPANEL --> UI
     VICT --> VICTEXT --> UI
     RE --> LOG
