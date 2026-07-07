@@ -193,7 +193,7 @@ struct MapEditorView: View {
                     .keyboardShortcut("m", modifiers: [])
                 Button("取消", systemImage: "xmark", action: viewModel.cancelEditing)
             }
-            Text("右侧地图：左键点击/拖拽编辑，右键/中键/Option+左键拖拽平移，滚轮缩放。快捷键 N 添加，M 完成。")
+            Text("右侧地图：点击或拖拽编辑地块；按住辅助键拖拽或用滚轮平移缩放。可用键盘快捷操作开始添加或完成当前编辑。")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -221,7 +221,11 @@ struct MapEditorView: View {
                 .font(.headline)
             HStack {
                 Button("导入底图", systemImage: "photo", action: importBackgroundImage)
+                    .accessibilityLabel("导入底图")
+                    .accessibilityHint("选择一张本机图片作为地图绘制参考，不会改变游戏规则数据。")
                 Button("移除", systemImage: "trash", action: viewModel.clearBackgroundImage)
+                    .accessibilityLabel("移除底图")
+                    .accessibilityHint("移除当前参考底图，保留已经编辑的地块和资源数据。")
             }
             Slider(value: $viewModel.backgroundOpacity, in: 0...1) {
                 Text("透明度")
@@ -234,14 +238,24 @@ struct MapEditorView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Stepper("缩放 \(viewModel.backgroundScale, format: .number.precision(.fractionLength(2)))", value: $viewModel.backgroundScale, in: 0.05...20, step: 0.05)
+                .accessibilityLabel("底图缩放")
+                .accessibilityValue(backgroundScaleAccessibilityValue)
+                .accessibilityHint("调整参考底图在画布中的大小。")
             HStack {
-                TextField("横向偏移 X", value: $viewModel.backgroundOffsetX, format: .number)
+                TextField("横向偏移", value: $viewModel.backgroundOffsetX, format: .number)
                     .accessibilityLabel("底图横向偏移")
-                TextField("纵向偏移 Y", value: $viewModel.backgroundOffsetY, format: .number)
+                    .accessibilityValue(backgroundOffsetXAccessibilityValue)
+                    .accessibilityHint("调整参考底图向左或向右的位置。")
+                TextField("纵向偏移", value: $viewModel.backgroundOffsetY, format: .number)
                     .accessibilityLabel("底图纵向偏移")
+                    .accessibilityValue(backgroundOffsetYAccessibilityValue)
+                    .accessibilityHint("调整参考底图向上或向下的位置。")
             }
             .textFieldStyle(.roundedBorder)
             Button("应用底图参数", systemImage: "checkmark.circle", action: viewModel.updateBackgroundImageSettings)
+                .accessibilityLabel("应用底图参数")
+                .accessibilityValue(backgroundSettingsAccessibilityValue)
+                .accessibilityHint("把当前透明度、缩放和偏移写入参考底图设置。")
             if let path = viewModel.document.backgroundImage?.filePath {
                 Text("底图文件：\(URL(fileURLWithPath: path).lastPathComponent)")
                     .font(.caption2)
@@ -311,6 +325,26 @@ struct MapEditorView: View {
         [.plain, .city, .forest, .mountain, .hill]
     }
 
+    private var backgroundScaleAccessibilityValue: String {
+        "当前 \(formattedNumber(viewModel.backgroundScale)) 倍"
+    }
+
+    private var backgroundOffsetXAccessibilityValue: String {
+        "当前 \(formattedNumber(viewModel.backgroundOffsetX))"
+    }
+
+    private var backgroundOffsetYAccessibilityValue: String {
+        "当前 \(formattedNumber(viewModel.backgroundOffsetY))"
+    }
+
+    private var backgroundSettingsAccessibilityValue: String {
+        "透明度 \(formattedNumber(viewModel.backgroundOpacity))，缩放 \(formattedNumber(viewModel.backgroundScale))，横向偏移 \(formattedNumber(viewModel.backgroundOffsetX))，纵向偏移 \(formattedNumber(viewModel.backgroundOffsetY))"
+    }
+
+    private func formattedNumber(_ value: Double) -> String {
+        value.formatted(.number.precision(.fractionLength(2)))
+    }
+
     private var controllerBinding: Binding<Faction?> {
         Binding(
             get: { viewModel.paintController },
@@ -372,7 +406,44 @@ private struct MapEditorSpriteView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("地图编辑画布")
-        .accessibilityHint("使用鼠标或触控编辑地块；左侧面板提供模式、州府、方面、单位和底图参数。")
+        .accessibilityValue(canvasAccessibilityValue)
+        .accessibilityHint("使用鼠标或触控编辑地块；左侧面板提供模式、州府、方面、单位和地图设置。")
+    }
+
+    private var canvasAccessibilityValue: String {
+        var parts: [String] = [
+            "模式 \(viewModel.mode.title)",
+            "状态 \(viewModel.editAction.title)",
+            "地块 \(viewModel.document.hexes.count)",
+            "州府 \(viewModel.document.regions.count)",
+            "方面 \(viewModel.document.theaters.count)",
+            "军队 \(viewModel.document.initialUnits.count)"
+        ]
+
+        if let inspectedCoord = viewModel.inspectedCoord {
+            parts.append("选中 \(inspectedCoord.mapEditorDisplayName)")
+        } else {
+            parts.append("未选中地块")
+        }
+
+        switch viewModel.mode {
+        case .hexPainter:
+            parts.append("地形 \(viewModel.selectedTerrain.chineseName)")
+        case .regionBuilder:
+            parts.append("待加入地块 \(viewModel.pendingRegionHexes.count)")
+        case .theaterAssignment:
+            parts.append("待加入州府 \(viewModel.pendingTheaterRegions.count)")
+        case .unitPlanner:
+            parts.append("待部署军队 \(viewModel.pendingUnitHexes.count)")
+        }
+
+        if viewModel.document.backgroundImage != nil {
+            parts.append("已载入底图")
+        } else {
+            parts.append("未载入底图")
+        }
+
+        return parts.joined(separator: "，")
     }
 }
 

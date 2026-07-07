@@ -626,6 +626,13 @@ v5.8z 当前已落地：
 - 唐宋头像占位在 legacy Latin 名称下显示“将”，所辖方面名为空或含 Latin 时 fallback 为“未命名方面”，减少默认唐宋路径的 Latin 残留。
 - 该切片只改将领档案 SwiftUI 可读语义和缺名 fallback，不改变 `GeneralData`、`GeneralAssignment`、`FrontZone`、`Division`、将领分配、命令、规则、AI 决策或 Codable schema；完整 VoiceOver 实机、截图和布局验收仍未完成。
 
+v5.8aa 当前已落地：
+
+- `MapEditorSpriteView` 的地图编辑画布补充 accessibility value，读出当前模式、编辑状态、地块/州府/方面/军队数量、选中地块、待加入/待部署数量和底图状态。
+- `MapEditorView` 的底图导入、移除、缩放、横向/纵向偏移和应用参数控件补充 accessibility label/value/hint，说明底图只是绘制参考，不改变游戏规则数据。
+- MapEditor 帮助文案去掉 `Option+左键`、`N`、`M` 这类 ASCII 快捷键表达，底图偏移输入框去掉可见 `X/Y` 轴字母。
+- 该切片只改 MapEditor SwiftUI 可读语义和说明文字，不改变 `MapEditorDocument`、导出 JSON schema、资源桥路径、SpriteKit 画布交互、快捷键处理、主游戏规则或 Codable raw 值；完整 VoiceOver 实机、截图和布局验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

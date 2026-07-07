@@ -11,6 +11,39 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8aa - MapEditor 画布 value 与底图控件硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 `MapEditorView` 的地图编辑画布缺少 accessibility value，底图导入/参数控件缺少读屏上下文，帮助文案仍有 `Option+左键`、`N`、`M` 和偏移输入框 `X/Y` 这类 ASCII 快捷键/轴字母表达；本轮选择低风险 MapEditor 显示层小切片。
+- `MapEditorSpriteView` 的地图编辑画布补充 accessibility value，读出当前模式、编辑状态、地块/州府/方面/军队数量、选中地块、待加入/待部署数量和底图状态。
+- `MapEditorView` 的底图导入、移除、缩放、横向/纵向偏移和应用参数控件补充 accessibility label/value/hint，说明底图只是绘制参考，不改变游戏规则数据。
+- MapEditor 帮助文案去掉 `Option+左键`、`N`、`M` 快捷键表达，底图偏移输入框去掉可见 `X/Y` 轴字母。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8aa 阶段记录。
+
+关键文件：
+
+- `MapEditor/MapEditorView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8aa_mapeditor_canvas_background_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 MapEditor SwiftUI 可读语义和说明文字，不改变 `MapEditorDocument`、导出 JSON schema、资源桥路径、SpriteKit 画布交互、快捷键处理、主游戏规则或 Codable raw 值。
+- 完整 MapEditor VoiceOver 实机、截图、macOS 编辑器布局和 v5.9 发布验收仍未完成。
+- 画布内“补”与军队短字标仍作为地图编辑符号保留；若后续需要发布级图标系统，应单独做视觉/符号设计切片。
+
 ## v5.8z - 将领档案 accessibility 与 fallback 硬化
 
 完成日期：2026-07-07
