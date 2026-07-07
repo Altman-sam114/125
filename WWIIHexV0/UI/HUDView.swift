@@ -93,14 +93,19 @@ struct HUDView: View {
                         .accessibilityHidden(true)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("目标")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.orange)
-                        Text(objectiveGuideText)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("目标")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.orange)
+                            Text(objectiveGuideText)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(objectiveGuideAccessibilityLabel())
+                        .accessibilityValue(objectiveGuideAccessibilityValue(objectiveGuideText))
 
                         if !objectiveGuideItems.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -154,6 +159,9 @@ struct HUDView: View {
                 .padding(8)
                 .background(.blue.opacity(0.10))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(nextActionAccessibilityLabel())
+                .accessibilityValue(nextActionAccessibilityValue(nextActionHint))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -184,6 +192,22 @@ struct HUDView: View {
             return String(value.dropFirst(duplicatedPrefix.count))
         }
         return value
+    }
+
+    private func objectiveGuideAccessibilityLabel() -> String {
+        gameState.isTangSongScenario ? "目标提示" : "Objective guide"
+    }
+
+    private func objectiveGuideAccessibilityValue(_ text: String) -> String {
+        text
+    }
+
+    private func nextActionAccessibilityLabel() -> String {
+        gameState.isTangSongScenario ? "下一步提示" : "Next action"
+    }
+
+    private func nextActionAccessibilityValue(_ text: String) -> String {
+        text
     }
 
     private var victoryText: String {

@@ -11,6 +11,39 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ak - HUD 目标与下一步提示读屏硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描确认 v5.8ae 已覆盖 HUD 库存/队列指标，v5.8ai/v5.8aj 已覆盖战报胜负/评分/胜利目标，下一处低风险切片是 HUD 目标摘要与下一步提示卡片。
+- HUD “目标”摘要文本补充合并后的 accessibility label/value，唐宋路径读作“目标提示”，value 复用既有 `objectiveGuideText`。
+- HUD 目标州府 chips / 按钮保持独立 accessibility label/value/hint 和独立焦点，不把整张目标卡合并，避免吞掉“查看目标”按钮。
+- HUD “下一步”提示卡片补充合并后的 accessibility label/value，唐宋路径读作“下一步提示”，value 复用既有 `nextActionHint`。
+- 同步 README、md 大纲、flow 文档、流程图、mermaid 源图和 v5.8ak 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/HUDView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/flow/01_overall_core_flow.mermaid`
+- `md/prompt/v5.0-唐宋迁移/v5.8ak_hud_objective_next_action_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 待推送到 `origin/main` 后由 GitHub Actions `WWIIHexV0 CI Results` 执行云端重验证，并下载未加密 artifact 核对 manifest、JUnit、主构建日志和失败摘要。
+
+遗留事项：
+
+- 本轮只改 HUD SwiftUI 可读语义，不改变 `VictoryRules.objectiveProgress(in:)`、`objectiveGuideItems` 生成、目标排序、`onFocusObjective`、地图 spotlight / focus、`RootGameView.nextActionHint` 派生、`CommandValidator`、命令执行、AI 决策、规则系统、日志结构或 Codable schema。
+- 完整 VoiceOver 实机、截图布局、主棋盘逐地块/逐军队 focus tree、全项目玩家可见残留扫描、结构化 event payload、真 LLM 输出本地化和发布级 UI 验收仍未完成。
+
 ## v5.8aj - 战报胜利目标行读屏硬化
 
 完成日期：2026-07-07

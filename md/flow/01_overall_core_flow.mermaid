@@ -17,12 +17,12 @@ flowchart TD
     RELCAND["WarRelationRules.canTarget<br/>UI / AI / 执行器战术候选"]:::rules
     VICT["VictoryRules<br/>唐宋读取 victoryConditions + MandateState<br/>缺失时 fallback"]:::rules
     VICTEXT["VictoryState.reason<br/>VictoryRules.objectiveProgress<br/>HUD / 战报只读胜负说明、目标进度与评分估算"]:::ui
-    GOAL["HUDView.objectiveGuideText<br/>统一目标锚点<br/>只读显示已据/待取关键州府"]:::ui
+    GOAL["HUDView.objectiveGuideText<br/>统一目标锚点与读屏提示<br/>只读显示已据/待取关键州府<br/>目标摘要合并读屏，目标按钮保留独立焦点"]:::ui
     FOCUS["AppContainer.focusObjective<br/>目标聚焦<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["MapDisplayAdapter.objectiveOverlays<br/>目标州府 spotlight<br/>只读绘制已据/待取目标"]:::ui
     TURNREPORT["EventLogView + TangSongEventLogMessage<br/>战报读法 / 每回合战报 / 胜负后评分估算 / 胜利目标行读屏<br/>只读显示 eventLog / AI 军议 / 方面军令 / VictoryState"]:::ui
     SESSIONHUD["RootGameView player picker + HUDView commandIdentity + NewGameButton<br/>亲征势力 / 观战 / 重开剧本确认<br/>切换 UI 亲征阵营，确认后调用 resetGame"]:::ui
-    HINT["RootGameView.nextActionHint + AppContainer.selectedValidatedCommandHint<br/>HUD 下一步提示<br/>只读派生选军/候选命令/移动攻击数量/有限合法性预校验"]:::ui
+    HINT["RootGameView.nextActionHint + AppContainer.selectedValidatedCommandHint<br/>HUD 下一步提示与读屏卡片<br/>只读派生选军/候选命令/移动攻击数量/有限合法性预校验<br/>卡片合并标题和提示正文读屏"]:::ui
     INSPECT["UnitInspectorView + RegionInspectorView<br/>军队/州府检查面板<br/>唐宋读法显示政权、粮道、编成、产出和围城摘要"]:::ui
     GENPANELS["GeneralCommandPanelView + GeneralProfileView<br/>将领军令/档案面板<br/>唐宋读法显示用兵、政权、辖军和计划摘要"]:::ui
     TOOLTIP["UnitTooltipView<br/>常驻军队提示<br/>唐宋读法显示兵种、补给、退却和本回合"]:::ui
