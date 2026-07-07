@@ -523,7 +523,7 @@ v5.8a 当前已落地：
 
 v5.8b 当前已落地：
 
-- `AgentPanelView` 在唐宋场景下把军议复盘拆为玩家态摘要和开发态调试信息：玩家态默认显示军议摘要、方面军令、命令执行/拒绝摘要和折叠的军议原文入口；diagnostics、错误原文和 raw JSON 放入折叠调试区。
+- `AgentPanelView` 在唐宋场景下把军议复盘拆为玩家态摘要和开发态调试信息：玩家态默认显示军议摘要、方面军令、命令执行/拒绝摘要和折叠的军议详文入口；diagnostics、错误原文和 raw JSON 放入折叠调试区。
 - `resultLine(_:)` 在唐宋场景下不再直接铺开规则/执行层 message 或 validation rawValue，而显示“已执行 / 规则拒绝 / 映射失败 / 未执行”等摘要。
 - `AgentPanelView` 的唐宋意图与战况优先读取 `theaterDirectiveSummary.summary / strategicIntent` 和本地化战况兜底，避免显示 `marshal directives`、`json` 等上游 fallback 字符串。
 - 运行态州府/防区名称缺失时，AI 面板唐宋路径显示“未命名州府 / 未命名方面”，不直接暴露 raw id。
@@ -639,6 +639,13 @@ v5.8ab 当前已落地：
 - MapEditor 军队模板画布标记从单字 `禁/骑/弩/械/守/州/军` 改为“禁军、骑军、弩兵、器械、守军、州军、军队”，减少过短调试符号。
 - 底图 SpriteKit 节点不再写 `name = "底图"`，避免保留无用的调试命名；SwiftUI 画布 accessibility value 仍由 `MapEditorSpriteView` 提供。
 - 该切片只改 MapEditor SpriteKit 画布显示标签，不改变 `MapEditorDocument`、单位模板 id、导出 JSON schema、资源桥路径、画布交互、快捷键处理、主游戏规则或 Codable raw 值；完整截图、布局和符号系统验收仍未完成。
+
+v5.8ac 当前已落地：
+
+- `AppContainer.playerDirectiveMessage` 在唐宋路径下把方面军令部分执行摘要从 `N/M` 改为“已执行 N 道，未执行 M 道”，避免默认玩家反馈继续露出 ASCII 比例。
+- `CommandPanelView.commandMessageText` 对旧式 `General order executed...` 反馈做完整中文兜底，能解析数量时显示已执行/未执行，解析失败时显示“方面军令已执行。”
+- `AgentPanelView` 唐宋玩家态把“军议原文”改称“军议详文”，raw JSON 仍只在 legacy/开发态路径按既有逻辑显示。
+- 该切片只改玩家可见反馈和显示桥，不改变 `Command`、`ZoneDirective`、`WarDirectiveRecord`、`AgentDecisionRecord.rawJSON`、命令执行、AI 决策、规则或 Codable schema；完整全项目写入端本地化和发布级 UI 验收仍未完成。
 
 v5.8c 当前已落地：
 
@@ -1112,7 +1119,7 @@ overwriteDefaultGameResources(document:)
   -> 写回 WWIIHexV0/Data
 ```
 
-v5.8e 当前编辑器可见术语继续硬化到唐宋口径：地块、州府、方面、军队、粮仓、关隘、宋、割据诸政权。新建草案默认显示为“唐宋地图草案”，城市 fallback 为“州城 q,r”，导出错误、数据注记和州府数据 displayName 使用中文；州府/方面选择器和检查面板默认显示名称，不直接暴露 raw id；编辑器棋盘单位短标改为禁、骑、弩、械、守、州、军。底层 `Faction.allies` / `Faction.germany`、`RegionId` / `TheaterId` 与 `Division` 类型名仍保留作兼容桥。
+v5.8e 当前编辑器可见术语继续硬化到唐宋口径：地块、州府、方面、军队、粮仓、关隘、宋、割据诸政权。新建草案默认显示为“唐宋地图草案”，城市 fallback 为“州城编号”，导出错误、数据注记和州府数据 displayName 使用中文；州府/方面选择器和检查面板默认显示名称，不直接暴露 raw id；编辑器棋盘单位标签显示为禁军、骑军、弩兵、器械、守军、州军、军队。底层 `Faction.allies` / `Faction.germany`、`RegionId` / `TheaterId` 与 `Division` 类型名仍保留作兼容桥。
 
 相关测试确认：
 

@@ -58,6 +58,7 @@
   -> v5.8z 起将领档案关闭、指标、技能、辖下军队和缺名 fallback 继续硬化
   -> v5.8aa 起 MapEditor 画布 value、底图控件和快捷说明继续硬化
   -> v5.8ab 起 MapEditor 画布粮源与军队符号继续硬化
+  -> v5.8ac 起军议与方面军令反馈继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -105,7 +106,7 @@ flowchart TD
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
     TURNREPORT["战报读法与每回合摘要<br/>EventLogView + TangSongEventLogMessage<br/>只读汇总并显示 eventLog / AI 军议 / 方面军令<br/>唐宋兜底不直出 raw 英文"]:::ui
     BOARDVO["主棋盘读屏动作<br/>RootGameView + BoardSceneView accessibility actions<br/>攻击/行军动作复用 handleBoardTap，仍经命令与规则链路"]:::ui
-    MAPEDITORUI["地图编辑器读法硬化<br/>MapEditorView + MapEditorExporter + MapEditorGameResourceBridge<br/>默认唐宋资源、中文错误、中文导出说明和军队短标"]:::ui
+    MAPEDITORUI["地图编辑器读法硬化<br/>MapEditorView + MapEditorExporter + MapEditorGameResourceBridge<br/>默认唐宋资源、中文错误、中文导出说明和军队标签"]:::ui
     SESSIONHUD["指挥身份 / 重开剧本<br/>HUDView + NewGameButton<br/>只读显示模式，确认后 resetGame"]:::ui
     PLAYER["玩家输入<br/>点击地图、移动、攻击、招抚、结束回合"]:::input
     AI["AI 元帅系统<br/>MarshalAgent + TheaterDirective JSON<br/>先做大战役级规划"]:::input

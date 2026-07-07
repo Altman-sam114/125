@@ -221,7 +221,7 @@ struct AgentPanelView: View {
     @ViewBuilder
     private var rawJSONSection: some View {
         if isTangSongScenario {
-            Text(displayText(record?.rawJSON) == nil ? "暂无军议原文" : "军议原文已记录")
+            Text(displayText(record?.rawJSON) == nil ? "暂无军议详文" : "军议详文已留存")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         } else {

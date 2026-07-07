@@ -311,9 +311,16 @@ struct CommandPanelView: View {
             return "方面军令未生成可执行命令。"
         }
         if message.hasPrefix("General order executed") {
-            return message
-                .replacingOccurrences(of: "General order executed", with: "方面军令已执行")
-                .replacingOccurrences(of: "command(s).", with: "道命令。")
+            let numbers = message.split { !$0.isNumber }.compactMap { Int($0) }
+            if numbers.count >= 2 {
+                let accepted = numbers[0]
+                let total = numbers[1]
+                return "方面军令已执行 \(accepted) 道，未执行 \(max(0, total - accepted)) 道。"
+            }
+            if let accepted = numbers.first {
+                return "方面军令已执行 \(accepted) 道命令。"
+            }
+            return "方面军令已执行。"
         }
         if message.contains("wrongPhase") {
             return "军令被拒：当前阶段不可下令。"

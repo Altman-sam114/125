@@ -1164,8 +1164,9 @@ final class AppContainer: ObservableObject {
                 ? "方面军令已执行 \(acceptedCount) 道命令。"
                 : "General order executed \(acceptedCount) command(s)."
         }
+        let rejectedCount = max(0, totalCount - acceptedCount)
         return isTangSong
-            ? "方面军令已执行 \(acceptedCount)/\(totalCount) 道命令。"
+            ? "方面军令已执行 \(acceptedCount) 道，未执行 \(rejectedCount) 道。"
             : "General order executed \(acceptedCount)/\(totalCount) command(s)."
     }
 

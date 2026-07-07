@@ -11,6 +11,40 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ac - 军议与方面军令反馈硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 `AppContainer`、`CommandPanelView` 和 `AgentPanelView` 仍有低风险玩家可见反馈可继续收口；另有 README、plan、flow、flowchart 旧版本口径需要同步。
+- `AppContainer.playerDirectiveMessage` 在唐宋路径下把方面军令部分执行摘要从 `N/M` 改为“已执行 N 道，未执行 M 道”。
+- `CommandPanelView.commandMessageText` 对旧式 `General order executed...` 反馈做完整中文兜底，避免留下半英文格式。
+- `AgentPanelView` 唐宋玩家态把“军议原文”改称“军议详文”，raw JSON 仍按既有 legacy/开发态路径留存。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8ac 阶段记录；顺手修正默认资源 fallback 与 MapEditor 军队标签旧口径。
+
+关键文件：
+
+- `WWIIHexV0/App/AppContainer.swift`
+- `WWIIHexV0/UI/CommandPanelView.swift`
+- `WWIIHexV0/UI/AgentPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8ac_command_feedback_readability_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改玩家可见反馈和显示桥，不改变 `Command`、`ZoneDirective`、`WarDirectiveRecord`、`AgentDecisionRecord.rawJSON`、`GameLogEntry`、命令执行、AI 决策、规则系统或 Codable schema。
+- 完整全项目写入端本地化、结构化 event payload、真 LLM 输出本地化、截图布局和发布级 UI 验收仍未完成。
+
 ## v5.8ab - MapEditor 画布符号硬化
 
 完成日期：2026-07-07
