@@ -64,6 +64,7 @@
   -> v5.8af 起将领军令面板指标、所属军队和已拟军令读屏继续硬化
   -> v5.8ag 起战报列表行分类、元数据和正文整行读屏继续硬化
   -> v5.8ah 起战报摘要卡片标题、回合、汇总和重点条目读屏继续硬化
+  -> v5.8ai 起战报胜负和评分估算卡片读屏继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -109,7 +110,7 @@ flowchart TD
     GOAL["统一目标锚点<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
-    TURNREPORT["战报读法、每回合摘要与读屏<br/>EventLogView + TangSongEventLogMessage<br/>只读汇总并显示 eventLog / AI 军议 / 方面军令<br/>唐宋兜底不直出 raw 英文；列表行和摘要卡片合并读屏"]:::ui
+    TURNREPORT["战报读法、每回合摘要与读屏<br/>EventLogView + TangSongEventLogMessage<br/>只读汇总并显示 eventLog / AI 军议 / 方面军令<br/>唐宋兜底不直出 raw 英文；列表行、摘要卡片、胜负/评分卡片合并读屏"]:::ui
     BOARDVO["主棋盘读屏动作<br/>RootGameView + BoardSceneView accessibility actions<br/>攻击/行军动作复用 handleBoardTap，仍经命令与规则链路"]:::ui
     MAPEDITORUI["地图编辑器读法硬化<br/>MapEditorView + MapEditorExporter + MapEditorGameResourceBridge<br/>默认唐宋资源、中文错误、中文导出说明和军队标签"]:::ui
     SESSIONHUD["指挥身份 / 重开剧本<br/>HUDView + NewGameButton<br/>只读显示模式，确认后 resetGame"]:::ui

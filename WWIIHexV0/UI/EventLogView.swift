@@ -29,6 +29,9 @@ struct EventLogView: View {
                 .padding(8)
                 .background(.blue.opacity(0.12))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(victorySummaryAccessibilityLabel())
+                .accessibilityValue(victorySummaryAccessibilityValue(victorySummary))
             }
 
             if let settlementSummary {
@@ -57,6 +60,9 @@ struct EventLogView: View {
                 .padding(8)
                 .background(.green.opacity(0.10))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(settlementAccessibilityLabel())
+                .accessibilityValue(settlementAccessibilityValue(for: settlementSummary))
             }
 
             if let turnReportSummary {
@@ -350,6 +356,27 @@ struct EventLogView: View {
         let highlights = summary.highlights
             .map { $0.text.replacingOccurrences(of: "• ", with: "") }
         let parts = [summary.turnText, summary.summaryText] + highlights
+        return parts.joined(separator: isTangSongScenario ? "。" : ". ")
+    }
+
+    private func victorySummaryAccessibilityLabel() -> String {
+        isTangSongScenario ? "胜负摘要" : "Victory summary"
+    }
+
+    private func victorySummaryAccessibilityValue(_ summary: String) -> String {
+        summary
+    }
+
+    private func settlementAccessibilityLabel() -> String {
+        isTangSongScenario ? "评分估算" : "Score estimate"
+    }
+
+    private func settlementAccessibilityValue(for summary: SettlementSummary) -> String {
+        let parts = [
+            settlementScoreText(summary.score),
+            summary.grade,
+            summary.detail
+        ]
         return parts.joined(separator: isTangSongScenario ? "。" : ". ")
     }
 

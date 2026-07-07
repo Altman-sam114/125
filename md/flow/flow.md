@@ -680,6 +680,12 @@ v5.8ah 当前已落地：
 - 唐宋路径下摘要卡片 label 读作“战报摘要：本回合战报 / 最近战报”，value 复用既有 `TurnReportSummary` 的 `turnText`、`summaryText` 和 highlights。
 - 该切片只改战报摘要卡片 SwiftUI accessibility 语义，不改变 `GameLogEntry`、`TurnReportSummary` 派生逻辑、`TangSongEventLogMessage` 映射、事件写入端、命令执行、AI 决策、规则系统或 Codable schema；完整 VoiceOver 实机、截图布局和发布级 UI 验收仍未完成。
 
+v5.8ai 当前已落地：
+
+- `EventLogView` 的胜负卡片补充合并 accessibility 语义，读屏时把“胜负”和胜负原因作为一个胜负摘要读出。
+- 唐宋评分估算卡片补充合并 accessibility 语义，读屏时把分数、档位和估算依据说明作为一个评分摘要读出。
+- 该切片只改战报顶部胜负/评分卡片 SwiftUI accessibility 语义，不改变 `VictoryState`、`VictoryReason`、`VictoryRules.objectiveProgress(in:)`、评分估算算法、`GameLogEntry`、事件写入端、命令执行、AI 决策、规则系统或 Codable schema；胜利目标行、完整 VoiceOver 实机、截图布局和发布级 UI 验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
@@ -690,7 +696,7 @@ v5.8d 当前已落地：
 
 - `EventLogView` 在唐宋场景下让战报正文 `GameLogEntry.message` 和本回合摘要 highlight 统一经过 `TangSongEventLogMessage` 显示桥，常见英文命令、交互、战斗、退却、补给、AI 执行和 validation rawValue 显示为唐宋读法。
 - 该显示桥覆盖 `Command accepted/rejected`、选中地块/州府/军队、`attacked/counterattacked`、`strength`、自动退却、整补、退却失败、AI command result 和常见 `CommandValidationError.rawValue`，减少默认战报主路径英文和内部枚举外露。
-- 该切片只改战报 UI 读法，不改变 `GameLogEntry.message`、`CommandResultLogEntry`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、事件写入职责、日志 Codable schema 或任何规则结果。v5.8q 已覆盖常见 AppContainer 交互反馈写入端；v5.8ag 进一步让最近战报列表行合并分类、元数据和正文读屏；v5.8ah 进一步让本回合/最近战报摘要卡片合并标题、回合、汇总和重点条目读屏；更完整的结构化 event payload、真 LLM 输出本地化和全项目写入端唐宋化仍留后续。
+- 该切片只改战报 UI 读法，不改变 `GameLogEntry.message`、`CommandResultLogEntry`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、事件写入职责、日志 Codable schema 或任何规则结果。v5.8q 已覆盖常见 AppContainer 交互反馈写入端；v5.8ag 进一步让最近战报列表行合并分类、元数据和正文读屏；v5.8ah 进一步让本回合/最近战报摘要卡片合并标题、回合、汇总和重点条目读屏；v5.8ai 进一步让胜负和评分估算卡片合并胜负原因、分数、档位和说明读屏；更完整的结构化 event payload、真 LLM 输出本地化和全项目写入端唐宋化仍留后续。
 
 v5.8k 当前已落地：
 
