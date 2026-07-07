@@ -96,7 +96,9 @@
 
 > **v5.8z 小切片：** 将领档案 accessibility 与缺名兜底继续硬化：`GeneralProfileView` 的关闭按钮补“关闭将领档案”上下文和返回提示，忠诚/军心指标补“满百 / out of 100”读屏 value，技能与辖下军队行补完整读屏 label/value，HQ 受压补警告读法；唐宋头像占位遇到 Latin 名称时改用“将”，唐宋所辖方面名缺失或含 Latin 时显示“未命名方面”。该切片只改将领档案 SwiftUI 可读语义和 fallback，不改变 `GeneralData`、`GeneralAssignment`、`FrontZone`、`Division`、将领分配、命令、规则、AI 决策或 Codable schema；完整 VoiceOver 实机、截图和布局验收仍未完成。
 
-> **v5.8aa 最新小切片：** MapEditor 画布 value 与底图控件继续硬化：地图编辑画布读屏 value 补当前模式、编辑状态、地块/州府/方面/军队数量、选中地块、待加入/待部署数量和底图状态；底图导入、移除、缩放、偏移和应用参数补 accessibility label/value/hint；可见帮助文案去掉 `Option+左键`、`N`、`M` 与偏移输入框 `X/Y` 这类 ASCII 快捷键/轴字母表达。该切片只改 MapEditor SwiftUI 可读语义和说明文字，不改变 `MapEditorDocument`、导出 JSON schema、资源桥路径、SpriteKit 画布交互、快捷键处理、主游戏规则或 Codable raw 值；完整 VoiceOver 实机、截图和布局验收仍未完成。
+> **v5.8aa 小切片：** MapEditor 画布 value 与底图控件继续硬化：地图编辑画布读屏 value 补当前模式、编辑状态、地块/州府/方面/军队数量、选中地块、待加入/待部署数量和底图状态；底图导入、移除、缩放、偏移和应用参数补 accessibility label/value/hint；可见帮助文案去掉 `Option+左键`、`N`、`M` 与偏移输入框 `X/Y` 这类 ASCII 快捷键/轴字母表达。该切片只改 MapEditor SwiftUI 可读语义和说明文字，不改变 `MapEditorDocument`、导出 JSON schema、资源桥路径、SpriteKit 画布交互、快捷键处理、主游戏规则或 Codable raw 值；完整 VoiceOver 实机、截图和布局验收仍未完成。
+
+> **v5.8ab 最新小切片：** MapEditor 画布符号继续硬化：画布粮源标记从“补”改为“粮”，军队模板标记从单字 `禁/骑/弩/械/守/州/军` 改为“禁军、骑军、弩兵、器械、守军、州军、军队”，底图 SpriteKit 节点不再写可见/调试名称。该切片只改 MapEditor SpriteKit 画布显示标签，不改变 `MapEditorDocument`、单位模板 id、导出 JSON schema、资源桥路径、画布交互、快捷键处理、主游戏规则或 Codable raw 值；完整截图、布局和符号系统验收仍未完成。
 
 ---
 
@@ -248,7 +250,7 @@ WWIIHexV0/
 | v5.5 | 已完成首轮 | HUD、图层、面板、战报、地图视觉 token、军旗棋子和只读粮道 overlay 已改为唐宋场景读法。 |
 | v5.6 | 已完成多轮首轮闭环 | 外交归附、天命、玩家招抚、AI 招抚辅助桥、关系投影、战术候选关系感知、数据驱动胜利条件、胜负原因和目标进度只读显示已接入。 |
 | v5.7 | 已完成多轮可玩性首轮 | 下一步提示、统一目标锚点/定位/spotlight、每回合战报摘要、新局确认、亲征/观战入口、结算预览、合法性提示、检查面板、将领面板和 tooltip 唐宋读法已接入。 |
-| v5.8a-v5.8aa | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI、外交 Latin/ASCII 显示、AI 面板原始文本兜底、将领/州府面板 ASCII 显示、兵力/粮道/地图数值标记、AppContainer 源头交互反馈、胜利/粮道/军议摘要、MapEditor raw UI、accessibility / VoiceOver 可读文案、控件状态提示、MapEditor 错误/输入可访问性、主棋盘 VoiceOver 自定义动作、面板控件 accessibility/fallback、tooltip 与检查面板读法、将领档案 accessibility/fallback、MapEditor 画布 value 与底图控件硬化已做默认主路径首轮。完整 RC 审计仍未完成。 |
+| v5.8a-v5.8ab | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI、外交 Latin/ASCII 显示、AI 面板原始文本兜底、将领/州府面板 ASCII 显示、兵力/粮道/地图数值标记、AppContainer 源头交互反馈、胜利/粮道/军议摘要、MapEditor raw UI、accessibility / VoiceOver 可读文案、控件状态提示、MapEditor 错误/输入可访问性、主棋盘 VoiceOver 自定义动作、面板控件 accessibility/fallback、tooltip 与检查面板读法、将领档案 accessibility/fallback、MapEditor 画布 value/底图控件和画布符号硬化已做默认主路径首轮。完整 RC 审计仍未完成。 |
 | v5.9 | 未开始 | 可发布验收、完整 artifact 审计、README/flow/update_log 统一发布口径仍待后续。 |
 
 ### 当前仍未完成
@@ -323,7 +325,7 @@ md/
 ## 给后续 Claude Code 的提示
 
 **你接手时的代码库状态：**
-- 当前主线是唐宋 v5.x 迁移，默认剧本为 `jianlong_960_unification`；v5.8r 已继续收口胜利/天命进度、粮道近源坐标、军备资源分隔符和战报军议摘要 fallback，等待本轮推送后的 GitHub Actions 云端验证。
+- 当前主线是唐宋 v5.x 迁移，默认剧本为 `jianlong_960_unification`；v5.8ab 已继续收口 MapEditor 画布粮源标记、军队模板标记和底图 SpriteKit 节点命名，等待本轮推送后的 GitHub Actions 云端验证。
 - v0.5 元帅层与模拟 LLM JSON/decoder/compiler 是仍在使用的历史架构地基；历史测试基线曾达到 v0.37 Probe 18/0、Stage Regression 69/0、Full 226/0。当前按用户要求不在本机测试，推送后由 GitHub Actions 云端验证。
 - 战斗模型：兵力伤害为主，`RetreatMode`（retreatable/hold）控制撤退，无 organization。
 - 默认战争 AI 管线：`MarshalAgent` 读取摘要并模拟输出 `TheaterDirectiveEnvelope` JSON，经 `TheaterDirectiveDecoder` 与 `TheaterDirectiveCompiler` 降级成 `ZoneDirective`，再走 `WarCommandExecutor`。`TheaterCommanderPool` / `ZoneCommanderAgent` 仍作为 fallback 和显式 `.zoneDirective` 路径。

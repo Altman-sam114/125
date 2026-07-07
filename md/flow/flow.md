@@ -633,6 +633,13 @@ v5.8aa 当前已落地：
 - MapEditor 帮助文案去掉 `Option+左键`、`N`、`M` 这类 ASCII 快捷键表达，底图偏移输入框去掉可见 `X/Y` 轴字母。
 - 该切片只改 MapEditor SwiftUI 可读语义和说明文字，不改变 `MapEditorDocument`、导出 JSON schema、资源桥路径、SpriteKit 画布交互、快捷键处理、主游戏规则或 Codable raw 值；完整 VoiceOver 实机、截图和布局验收仍未完成。
 
+v5.8ab 当前已落地：
+
+- `MapEditorCanvasScene` 的粮源画布标记从“补”改为“粮”，更贴近唐宋资源口径。
+- MapEditor 军队模板画布标记从单字 `禁/骑/弩/械/守/州/军` 改为“禁军、骑军、弩兵、器械、守军、州军、军队”，减少过短调试符号。
+- 底图 SpriteKit 节点不再写 `name = "底图"`，避免保留无用的调试命名；SwiftUI 画布 accessibility value 仍由 `MapEditorSpriteView` 提供。
+- 该切片只改 MapEditor SpriteKit 画布显示标签，不改变 `MapEditorDocument`、单位模板 id、导出 JSON schema、资源桥路径、画布交互、快捷键处理、主游戏规则或 Codable raw 值；完整截图、布局和符号系统验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

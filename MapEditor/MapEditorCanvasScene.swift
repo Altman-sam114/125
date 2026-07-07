@@ -68,7 +68,6 @@ final class MapEditorCanvasScene: SKScene {
 
         let texture = SKTexture(image: image)
         let node = SKSpriteNode(texture: texture)
-        node.name = "底图"
         node.zPosition = -100
         node.alpha = CGFloat(max(0, min(1, backgroundImage.opacity)))
         node.setScale(CGFloat(max(0.05, min(20, backgroundImage.scale))))
@@ -101,7 +100,7 @@ final class MapEditorCanvasScene: SKScene {
         }
 
         if viewModel.mode == .hexPainter, hex.isSupplySource {
-            let supply = SKLabelNode(text: "补")
+            let supply = SKLabelNode(text: "粮")
             supply.fontSize = 11
             supply.fontName = "Helvetica-Bold"
             supply.fontColor = .white
@@ -121,14 +120,14 @@ final class MapEditorCanvasScene: SKScene {
 
     private func draw(_ unit: MapEditorUnitDraft, at coord: HexCoord) {
         let center = layout.center(for: coord)
-        let marker = SKShapeNode(rectOf: CGSize(width: 22, height: 14), cornerRadius: 2)
+        let marker = SKShapeNode(rectOf: CGSize(width: 30, height: 16), cornerRadius: 3)
         marker.position = CGPoint(x: center.x, y: center.y + 11)
         marker.fillColor = TerrainStyle.unitFillColor(for: unit.faction)
         marker.strokeColor = TerrainStyle.unitStrokeColor(for: unit.faction)
         marker.lineWidth = 1
         addChild(marker)
 
-        let label = SKLabelNode(text: unit.templateId.mapEditorUnitAbbreviation)
+        let label = SKLabelNode(text: unit.templateId.mapEditorUnitCanvasLabel)
         label.fontSize = 7
         label.fontName = "Helvetica-Bold"
         label.fontColor = .white
@@ -432,25 +431,25 @@ private extension SKColor {
 }
 
 private extension String {
-    var mapEditorUnitAbbreviation: String {
+    var mapEditorUnitCanvasLabel: String {
         if localizedStandardContains("imperial_guard") || localizedStandardContains("禁军") {
-            return "禁"
+            return "禁军"
         }
         if localizedStandardContains("cavalry") || localizedStandardContains("骑") {
-            return "骑"
+            return "骑军"
         }
         if localizedStandardContains("crossbow") || localizedStandardContains("弓弩") {
-            return "弩"
+            return "弩兵"
         }
         if localizedStandardContains("siege") || localizedStandardContains("器械") {
-            return "械"
+            return "器械"
         }
         if localizedStandardContains("garrison") || localizedStandardContains("守") {
-            return "守"
+            return "守军"
         }
         if localizedStandardContains("prefecture") || localizedStandardContains("州府") {
-            return "州"
+            return "州军"
         }
-        return "军"
+        return "军队"
     }
 }

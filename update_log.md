@@ -11,6 +11,39 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ab - MapEditor 画布符号硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 `MapEditorCanvasScene` 画布内实际可见文字集中在粮源标记和军队模板标记；未发现坐标、raw id 或 `node.name` 调试命名直接绘制到画布。
+- `MapEditorCanvasScene` 的粮源画布标记从“补”改为“粮”，更贴近唐宋资源口径。
+- MapEditor 军队模板画布标记从单字 `禁/骑/弩/械/守/州/军` 改为“禁军、骑军、弩兵、器械、守军、州军、军队”，减少过短调试符号。
+- 底图 SpriteKit 节点不再写 `name = "底图"`；SwiftUI 画布 accessibility value 仍由 `MapEditorSpriteView` 提供。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8ab 阶段记录。
+
+关键文件：
+
+- `MapEditor/MapEditorCanvasScene.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8ab_mapeditor_canvas_symbol_hardening_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 MapEditor SpriteKit 画布显示标签，不改变 `MapEditorDocument`、单位模板 id、导出 JSON schema、资源桥路径、画布交互、快捷键处理、主游戏规则或 Codable raw 值。
+- 完整截图、布局、MapEditor 真实 VoiceOver 和发布级符号系统验收仍未完成。
+- 若后续要把画布文字彻底替换成图标/形状标记，应单独做视觉/符号设计切片。
+
 ## v5.8aa - MapEditor 画布 value 与底图控件硬化
 
 完成日期：2026-07-07
