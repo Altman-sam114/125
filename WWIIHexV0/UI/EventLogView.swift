@@ -164,6 +164,9 @@ struct EventLogView: View {
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(logEntryAccessibilityLabel(for: item))
+                            .accessibilityValue(logEntryAccessibilityValue(for: item))
                         }
                     }
                 }
@@ -314,6 +317,23 @@ struct EventLogView: View {
             return entry.message
         }
         return TangSongEventLogMessage.display(entry.message)
+    }
+
+    private func logEntryAccessibilityLabel(for item: LogDisplayEntry) -> String {
+        let category = item.category.displayName(isTangSongScenario: isTangSongScenario)
+        if isTangSongScenario {
+            return "战报：\(category)"
+        }
+        return "Event log entry: \(category)"
+    }
+
+    private func logEntryAccessibilityValue(for item: LogDisplayEntry) -> String {
+        let metadata = metadata(for: item.entry)
+        let message = displayMessage(for: item.entry)
+        if isTangSongScenario {
+            return "\(metadata)。\(message)"
+        }
+        return "\(metadata). \(message)"
     }
 
     private var turnReportSummary: TurnReportSummary? {

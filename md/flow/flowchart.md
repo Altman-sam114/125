@@ -62,6 +62,7 @@
   -> v5.8ad 起府库军备队列剩余回合、收入指标和读屏语义继续硬化
   -> v5.8ae 起 HUD 库存指标、军备队列数量和指标行读屏继续硬化
   -> v5.8af 起将领军令面板指标、所属军队和已拟军令读屏继续硬化
+  -> v5.8ag 起战报列表行分类、元数据和正文整行读屏继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -107,7 +108,7 @@ flowchart TD
     GOAL["统一目标锚点<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui
-    TURNREPORT["战报读法与每回合摘要<br/>EventLogView + TangSongEventLogMessage<br/>只读汇总并显示 eventLog / AI 军议 / 方面军令<br/>唐宋兜底不直出 raw 英文"]:::ui
+    TURNREPORT["战报读法、每回合摘要与行读屏<br/>EventLogView + TangSongEventLogMessage<br/>只读汇总并显示 eventLog / AI 军议 / 方面军令<br/>唐宋兜底不直出 raw 英文；列表行合并分类、元数据和正文读屏"]:::ui
     BOARDVO["主棋盘读屏动作<br/>RootGameView + BoardSceneView accessibility actions<br/>攻击/行军动作复用 handleBoardTap，仍经命令与规则链路"]:::ui
     MAPEDITORUI["地图编辑器读法硬化<br/>MapEditorView + MapEditorExporter + MapEditorGameResourceBridge<br/>默认唐宋资源、中文错误、中文导出说明和军队标签"]:::ui
     SESSIONHUD["指挥身份 / 重开剧本<br/>HUDView + NewGameButton<br/>只读显示模式，确认后 resetGame"]:::ui
@@ -608,7 +609,7 @@ flowchart TD
     GENPANELS["将领面板<br/>GeneralCommandPanelView / GeneralProfileView<br/>唐宋场景显示将领军令、将领档案、用兵、指标、特长和辖下军队"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示选中军队摘要读法"]:::ui
     SESSIONHUD["亲征势力 / 观战 / 重开剧本<br/>RootGameView + HUDView + NewGameButton<br/>切换 legacy 亲征阵营，显示亲征/观战，确认后重置剧本"]:::ui
-    LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类、每回合摘要和胜负后评分估算<br/>metadata 不展示内部 relatedRecordId；raw 英文兜底降级为中文提示"]:::ui
+    LOG["战报面板<br/>EventLogView<br/>唐宋场景显示战报分类、每回合摘要和胜负后评分估算<br/>metadata 不展示内部 relatedRecordId；raw 英文兜底降级为中文提示<br/>列表行合并分类、元数据和正文读屏"]:::ui
     AIUI["AI 面板<br/>AgentPanelView<br/>唐宋场景显示军议、诏令朝议、方面军令、唐宋战术名"]:::ui
     BOARD["地图场景<br/>BoardScene + TerrainStyle<br/>唐宋场景使用墨绿底、青绿/朱印/铜色 palette，绘制粮道虚线"]:::ui
     UNIT["军队棋子<br/>UnitNode<br/>legacy NATO；唐宋军旗 + 禁/骑/弩/械/守/军字标"]:::ui

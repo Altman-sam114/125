@@ -11,6 +11,37 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ag - 战报行整行读屏硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描确认 `EventLogView` 的最近战报列表行仍由分类、metadata 和正文多个 `Text` 拆开呈现，适合作为 v5.8af 后续低风险 accessibility 小切片。
+- 最近战报列表行补充合并后的 accessibility label/value，唐宋路径按“战报：战斗 / 粮道 / 州府”等分类读出。
+- 战报行读屏 value 复用既有 `metadata(for:)` 和 `displayMessage(for:)`，继续经过 `TangSongEventLogMessage` 显示桥，不重新解析日志。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8ag 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/EventLogView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8ag_event_log_row_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改战报列表行 SwiftUI 可读语义，不改变 `GameLogEntry`、`TangSongEventLogMessage` 显示桥、事件写入端、命令执行、AI 决策、规则系统、日志结构或 Codable schema。
+- 完整 VoiceOver 实机、截图布局、战报摘要卡片读屏、全项目玩家可见残留扫描、结构化 event payload、真 LLM 输出本地化和发布级 UI 验收仍未完成。
+
 ## v5.8af - 将领军令面板指标与列表读屏硬化
 
 完成日期：2026-07-07
@@ -36,7 +67,9 @@
 验证结果：
 
 - 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
-- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+- 已推送到 `origin/main`：commit `b5f3387319ec84ac40e60f3be955144da211be0b`。
+- GitHub Actions `WWIIHexV0 CI Results` run `28844637241` attempt `1` 已完成并通过；artifact `wwiihexv0-ci-cloud-main-ci-v1-main-b5f3387-run28844637241-attempt1` 已核对。
+- artifact manifest 匹配 `branch=main`、`commitSha=b5f3387319ec84ac40e60f3be955144da211be0b`、`runId=28844637241`、`runAttempt=1`；`staticChecksOutcome=success`、`buildOutcome=success`、`testOutcome=skipped`，JUnit 2 tests / 0 failures / 0 errors，`xcodebuild.log` 显示 `BUILD SUCCEEDED`。
 
 遗留事项：
 
