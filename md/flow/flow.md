@@ -604,6 +604,13 @@ v5.8w 当前已落地：
 - 攻击/行军读屏动作只调用既有 `AppContainer.handleBoardTap(_:)`，随后继续走玩家点击同一链路；若形成移动或攻击命令，仍由 `CommandValidator` / `RuleEngine` 决定合法性和状态修改。
 - 该切片不改变 `BoardScene`、`HexNode`、`UnitNode`、SpriteKit 命中测试、地图渲染、`Command`、`RuleEngine`、JSON schema 或 legacy `Faction` 桥；逐 hex / 逐军队 focus tree、VoiceOver 实机、截图和布局验收仍未完成。
 
+v5.8x 当前已落地：
+
+- `RootGameView` 的地图图层选择器和紧凑信息面板分页补充 accessibility label/value/hint，读屏可获知当前图层、当前面板和切换用途。
+- `RootGameView` 传给外交与军议面板的唐宋州府/方面缺名 fallback 改为“未知州府 / 未命名方面”，不再在缺名情况下回退显示 `RegionId` 或 `FrontZoneId` rawValue。
+- `GeneralCommandPanelView` 的将领档案入口、固守防线和进攻州府按钮补充可用/停用状态与提示；头像入口读屏名与“查看档案”按钮区分。
+- 该切片只改 SwiftUI 可读语义和缺名兜底，不改变棋盘 custom actions、SpriteKit 渲染、命令执行、将领计划、外交/AI 记录、JSON schema、规则系统或 legacy `Faction` 桥；完整 VoiceOver 实机、截图和布局验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

@@ -46,6 +46,9 @@ struct RootGameView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    .accessibilityLabel(isTangSongScenario ? "地图图层" : "Map layer")
+                    .accessibilityValue(container.mapDisplayLayer.displayName(isTangSongScenario: isTangSongScenario))
+                    .accessibilityHint(mapLayerAccessibilityHint)
                     .padding(8)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
                     .padding(.horizontal, 8)
@@ -275,6 +278,9 @@ struct RootGameView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .accessibilityLabel(container.gameState.isTangSongScenario ? "信息面板分页" : "Info panel tabs")
+            .accessibilityValue(selectedCompactPanel.displayName(isTangSongScenario: container.gameState.isTangSongScenario))
+            .accessibilityHint(compactPanelAccessibilityHint)
             .padding(8)
 
             compactPanel
@@ -405,10 +411,10 @@ struct RootGameView: View {
                         isTangSongScenario: container.gameState.isTangSongScenario,
                         factionDisplayName: { container.gameState.displayName(for: $0) },
                         regionDisplayName: { regionId in
-                            container.gameState.map.regions[regionId]?.name ?? regionId.rawValue
+                            tangSongRegionFallbackName(for: regionId)
                         },
                         zoneDisplayName: { zoneId in
-                            container.gameState.warDeploymentState.frontZones[zoneId]?.name ?? zoneId.rawValue
+                            tangSongZoneFallbackName(for: zoneId)
                         }
                     )
                 case .agent:
@@ -418,10 +424,10 @@ struct RootGameView: View {
                         directiveRecords: container.lastWarDirectiveRecords,
                         isTangSongScenario: container.gameState.isTangSongScenario,
                         regionDisplayName: { regionId in
-                            container.gameState.map.regions[regionId]?.name ?? regionId.rawValue
+                            tangSongRegionFallbackName(for: regionId)
                         },
                         zoneDisplayName: { zoneId in
-                            container.gameState.warDeploymentState.frontZones[zoneId]?.name ?? zoneId.rawValue
+                            tangSongZoneFallbackName(for: zoneId)
                         }
                     )
                 }
@@ -497,6 +503,32 @@ struct RootGameView: View {
 
     private var boardInfoAccessibilityActionName: String {
         container.gameState.isTangSongScenario ? "打开信息面板" : "Open info panel"
+    }
+
+    private var compactPanelAccessibilityHint: String {
+        container.gameState.isTangSongScenario
+            ? "切换军队、州府、将领、战报、府库、外交或军议面板。"
+            : "Switch between unit, region, general, log, economy, diplomacy, or AI panels."
+    }
+
+    private var mapLayerAccessibilityHint: String {
+        container.gameState.isTangSongScenario
+            ? "切换舆图显示层，用于查看地形、州府、方面、补给、围城或目标高亮。"
+            : "Switch the map display layer."
+    }
+
+    private func tangSongRegionFallbackName(for regionId: RegionId) -> String {
+        if let name = container.gameState.map.regions[regionId]?.name {
+            return name
+        }
+        return container.gameState.isTangSongScenario ? "未知州府" : regionId.rawValue
+    }
+
+    private func tangSongZoneFallbackName(for zoneId: FrontZoneId) -> String {
+        if let name = container.gameState.warDeploymentState.frontZones[zoneId]?.name {
+            return name
+        }
+        return container.gameState.isTangSongScenario ? "未命名方面" : zoneId.rawValue
     }
 
     private func boardActionSummaryText(prefix: String) -> String {

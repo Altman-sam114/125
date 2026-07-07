@@ -11,6 +11,41 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8x - 面板控件 accessibility 与 fallback 硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出地图图层选择器、紧凑信息面板分页、将领军令按钮和外交/军议面板缺名 fallback 仍有读屏上下文或 raw id 风险；本轮选择低风险 SwiftUI 面板显示层小切片。
+- `RootGameView` 的地图图层选择器补 accessibility label/value/hint，读屏可获知当前图层和切换用途。
+- `RootGameView` 的紧凑信息面板分页补 accessibility label/value/hint，读屏可获知当前军队/州府/将领/战报/府库/外交/军议分页。
+- `RootGameView` 传给外交面板与军议面板的唐宋州府/方面缺名 fallback 改为“未知州府 / 未命名方面”，不再回退显示 `RegionId` 或 `FrontZoneId` rawValue。
+- `GeneralCommandPanelView` 的头像入口、查看档案、固守防线和进攻州府按钮补充更明确的 accessibility label/value/hint；固守/进攻按钮会朗读可用/停用与缺少防区、将领或目标的原因。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8x 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/RootGameView.swift`
+- `WWIIHexV0/UI/GeneralCommandPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8x_panel_accessibility_fallback_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 SwiftUI 可读语义和缺名 fallback，不改变棋盘 custom actions、SpriteKit 渲染、命令执行、将领计划、外交/AI 记录、JSON schema、规则系统或 legacy `Faction` 桥。
+- 完整逐地块/逐军队 VoiceOver focus order、实机读屏验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
+- 子 Agent 另指出 Unit/Region inspector 英文 legacy 标签、MapEditor 底图按钮/画布 value 和 UnitTooltip accessibility value 仍可继续拆成后续小切片。
+
 ## v5.8w - 主棋盘 VoiceOver 自定义动作硬化
 
 完成日期：2026-07-06

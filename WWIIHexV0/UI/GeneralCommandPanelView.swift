@@ -40,7 +40,8 @@ struct GeneralCommandPanelView: View {
                         Button(action: onShowProfile) {
                             portraitBadge(for: general)
                         }
-                            .accessibilityLabel(profileAccessibilityLabel(for: general))
+                            .accessibilityLabel(portraitButtonAccessibilityLabel(for: general))
+                            .accessibilityHint(profileAccessibilityHint(for: general))
                             .buttonStyle(.plain)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(general.localizedName)
@@ -72,6 +73,8 @@ struct GeneralCommandPanelView: View {
 
                     Button(isTangSongScenario ? "查看档案" : "View Profile", systemImage: "person.text.rectangle", action: onShowProfile)
                         .buttonStyle(.bordered)
+                        .accessibilityLabel(profileAccessibilityLabel(for: general))
+                        .accessibilityHint(profileAccessibilityHint(for: general))
                 }
             } else if zone != nil {
                 Text(isTangSongScenario ? "该方面尚未委任将领。" : "No general assigned to this zone.")
@@ -107,8 +110,12 @@ struct GeneralCommandPanelView: View {
             HStack(spacing: 8) {
                 Button(isTangSongScenario ? "固守防线" : "Hold Line", systemImage: "shield.fill", action: onHoldLine)
                     .disabled(!canHoldLine)
+                    .accessibilityValue(commandAccessibilityValue(isEnabled: canHoldLine))
+                    .accessibilityHint(holdLineAccessibilityHint)
                 Button(isTangSongScenario ? "进攻州府" : "Attack Region", systemImage: "arrow.up.right.circle", action: onAttackRegion)
                     .disabled(!canAttackRegion)
+                    .accessibilityValue(commandAccessibilityValue(isEnabled: canAttackRegion))
+                    .accessibilityHint(attackRegionAccessibilityHint)
             }
             .buttonStyle(.bordered)
 
@@ -276,7 +283,65 @@ struct GeneralCommandPanelView: View {
         isTangSongScenario ? "打开\(general.localizedName)档案" : "Open profile for \(general.localizedName)"
     }
 
+    private func profileAccessibilityHint(for general: GeneralData) -> String {
+        isTangSongScenario
+            ? "查看\(general.localizedName)履历、用兵风格、朝廷关系和辖下军队。"
+            : "Show biography, command style, relationship metrics, and assigned units."
+    }
+
     private func portraitAccessibilityLabel(for general: GeneralData) -> String {
         isTangSongScenario ? "\(general.localizedName)头像占位" : "\(general.localizedName) portrait placeholder"
+    }
+
+    private func portraitButtonAccessibilityLabel(for general: GeneralData) -> String {
+        isTangSongScenario ? "\(general.localizedName)档案头像" : "\(general.localizedName) profile portrait"
+    }
+
+    private func commandAccessibilityValue(isEnabled: Bool) -> String {
+        if isTangSongScenario {
+            return isEnabled ? "可用" : "停用"
+        }
+        return isEnabled ? "Available" : "Unavailable"
+    }
+
+    private var holdLineAccessibilityHint: String {
+        if isTangSongScenario {
+            if canHoldLine {
+                return "让当前方面主将拟定固守防线军令。"
+            }
+            if zone == nil {
+                return "需先选择亲征方面防区。"
+            }
+            if general == nil {
+                return "该方面尚未委任将领。"
+            }
+            return "当前方面暂不可下达固守军令。"
+        }
+
+        return canHoldLine
+            ? "Order the selected general to hold the current line."
+            : "Select an eligible allied front zone and assigned general first."
+    }
+
+    private var attackRegionAccessibilityHint: String {
+        if isTangSongScenario {
+            if canAttackRegion, let targetRegion {
+                return "让当前方面主将拟定进攻\(targetRegion.name)的军令。"
+            }
+            if zone == nil {
+                return "需先选择亲征方面防区。"
+            }
+            if general == nil {
+                return "该方面尚未委任将领。"
+            }
+            if targetRegion == nil {
+                return "需先在地图选择可进攻的目标州府。"
+            }
+            return "当前目标暂不适合拟定进攻军令。"
+        }
+
+        return canAttackRegion
+            ? "Order the selected general to attack the current target region."
+            : "Select an eligible target region first."
     }
 }
