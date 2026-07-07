@@ -11,6 +11,41 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8y - tooltip 与检查面板读法硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出常驻军队 tooltip 的读屏 label 漏掉补给/退却/本回合状态，军队/州府检查面板仍有英文内部型标签、资源缩写和唐宋围城摘要可读性问题；本轮选择低风险 tooltip/inspector 显示层小切片。
+- `UnitTooltipView` 的合并 accessibility 内容拆成 label/value，value 补充兵力、补给、退却和本回合状态；英文 low supply tooltip 不再只显示 `Low`。
+- `UnitInspectorView` 的英文 `FrontZone` / `FrontLine` / `Deploy` 标签改为自然读法，英文部署状态不再直出 `FRONT` / `DEPTH` / `GARRISON`；唐宋编成比例从百分号改为“占 N／100”。
+- `RegionInspectorView` 的英文 `FrontZone` 标签与 `MP/IC/SUP` 资源缩写改为自然读法；唐宋围城摘要改为攻方、守方、压力、城防和围城军队数量的结构化读法。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8y 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/UnitTooltipView.swift`
+- `WWIIHexV0/UI/UnitInspectorView.swift`
+- `WWIIHexV0/UI/RegionInspectorView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8y_tooltip_inspector_readability_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改 tooltip 和检查面板显示/读屏语义，不改变 `Division`、`ComponentType`、`RegionInspectorState`、围城规则、补给规则、命令、AI 决策或 Codable schema。
+- 完整逐地块/逐军队 VoiceOver focus order、实机读屏验收、截图验收、iPhone/iPad 横竖屏布局验收和 v5.9 发布验收仍未完成。
+- 子 Agent 另指出 GeneralProfile 关闭按钮、档案指标 value、辖下军队读屏、MapEditor 画布 value 和底图说明仍可继续拆成后续小切片。
+
 ## v5.8x - 面板控件 accessibility 与 fallback 硬化
 
 完成日期：2026-07-07

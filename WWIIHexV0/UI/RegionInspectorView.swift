@@ -41,7 +41,7 @@ struct RegionInspectorView: View {
                     Text(selectedHexTheaterText(for: state))
                 }
 
-                LabeledContent(isTangSongScenario ? "防区" : "Hex FrontZone") {
+                LabeledContent(isTangSongScenario ? "防区" : "Hex Front Zone") {
                     Text(selectedHexFrontZoneText(for: state))
                 }
             }
@@ -88,7 +88,7 @@ struct RegionInspectorView: View {
                 Text(theaterText(for: state))
             }
 
-            LabeledContent(isTangSongScenario ? "防区" : "FrontZone") {
+            LabeledContent(isTangSongScenario ? "防区" : "Front Zone") {
                 Text(frontZoneText(for: state))
             }
 
@@ -168,7 +168,7 @@ struct RegionInspectorView: View {
         }
 
         if isTangSongScenario {
-            return "压力 \(record.pressure)，城防 \(record.fortification)／\(record.maxFortification)，\(factionDisplayName(record.attackerFaction))围\(factionDisplayName(record.defenderFaction))，\(record.besiegingDivisionIds.count) 支军队"
+            return "攻方 \(factionDisplayName(record.attackerFaction))，守方 \(factionDisplayName(record.defenderFaction))，压力 \(record.pressure)，城防 \(record.fortification)／\(record.maxFortification)，围城军队 \(record.besiegingDivisionIds.count) 支"
         }
 
         return "Pressure \(record.pressure), fortification \(record.fortification)/\(record.maxFortification), \(factionDisplayName(record.attackerFaction)) -> \(factionDisplayName(record.defenderFaction)), \(record.besiegingDivisionIds.count) unit(s)"
@@ -178,7 +178,7 @@ struct RegionInspectorView: View {
         if isTangSongScenario {
             return "丁口 \(output.manpower)，钱帛 \(output.industry)，粮草 \(output.supplies)"
         }
-        return "MP \(output.manpower), IC \(output.industry), SUP \(output.supplies)"
+        return "Manpower \(output.manpower), Industry \(output.industry), Supplies \(output.supplies)"
     }
 
     private func terrainName(_ terrain: BaseTerrain) -> String {

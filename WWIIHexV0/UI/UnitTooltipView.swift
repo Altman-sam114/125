@@ -44,6 +44,7 @@ struct UnitTooltipView: View {
             .padding(10)
             .accessibilityElement(children: .combine)
             .accessibilityLabel(accessibilityLabel(for: division))
+            .accessibilityValue(accessibilityValue(for: division))
         }
     }
 
@@ -75,9 +76,27 @@ struct UnitTooltipView: View {
 
     private func accessibilityLabel(for division: Division) -> String {
         if isTangSongScenario {
-            return "\(division.name)，\(division.tooltipTypeCode(isTangSongScenario: true))，兵力 \(strengthText(for: division))"
+            return "\(division.name)，\(division.tooltipTypeCode(isTangSongScenario: true))"
         }
-        return "\(division.name), \(division.tooltipTypeCode(isTangSongScenario: false)), strength \(division.strength) of \(division.maxStrength)"
+        return "\(division.name), \(division.tooltipTypeCode(isTangSongScenario: false))"
+    }
+
+    private func accessibilityValue(for division: Division) -> String {
+        if isTangSongScenario {
+            return [
+                "兵力 \(strengthText(for: division))",
+                "补给 \(division.supplyState.tooltipDisplayName(isTangSongScenario: true))",
+                "退却 \(division.retreatMode.tooltipDisplayName(isTangSongScenario: true))",
+                "本回合 \(actedText(for: division))"
+            ].joined(separator: "，")
+        }
+
+        return [
+            "strength \(division.strength) of \(division.maxStrength)",
+            "supply \(division.supplyState.tooltipDisplayName(isTangSongScenario: false))",
+            "retreat \(division.retreatMode.tooltipDisplayName(isTangSongScenario: false))",
+            "acted \(actedText(for: division))"
+        ].joined(separator: ", ")
     }
 }
 
@@ -131,7 +150,7 @@ private extension SupplyState {
         case .supplied:
             return "Supplied"
         case .lowSupply:
-            return "Low"
+            return "Low Supply"
         case .encircled:
             return "Encircled"
         }

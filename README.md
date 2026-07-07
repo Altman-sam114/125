@@ -90,7 +90,9 @@
 
 > **v5.8w 小切片：** 主棋盘 VoiceOver 自定义动作继续硬化：`RootGameView` 的 `BoardSceneView` 包装层新增“攻击下一处红色目标”“行军到下一处高亮地块”和“打开信息面板”读屏动作，读屏 value 补充选中地块、州府、控制政权、当前已选军队以及高亮攻击/行军数量；动作只复用既有 `AppContainer.handleBoardTap(_:)` 点击链路，真实命令仍由 `CommandValidator` / `RuleEngine` 判定。该切片不改变 SpriteKit 渲染、地图命中测试、规则、命令、JSON schema 或 legacy `Faction` 桥；完整逐 hex focus tree、VoiceOver 实机、截图和布局验收仍未完成。
 
-> **v5.8x 最新小切片：** 面板控件 accessibility 与 fallback 继续硬化：地图图层选择器和紧凑信息面板分页补当前值与用途提示；将领档案入口、固守防线和进攻州府按钮补可用/停用状态与停用原因；外交/军议面板在唐宋路径下缺少州府或方面名称时改用“未知州府 / 未命名方面”，不再回退显示 raw id。该切片只改 SwiftUI 可读语义和缺名兜底，不改变棋盘 custom actions、命令、规则、外交/AI 记录、JSON schema 或 legacy `Faction` 桥；完整 VoiceOver 实机、截图和布局验收仍未完成。
+> **v5.8x 小切片：** 面板控件 accessibility 与 fallback 继续硬化：地图图层选择器和紧凑信息面板分页补当前值与用途提示；将领档案入口、固守防线和进攻州府按钮补可用/停用状态与停用原因；外交/军议面板在唐宋路径下缺少州府或方面名称时改用“未知州府 / 未命名方面”，不再回退显示 raw id。该切片只改 SwiftUI 可读语义和缺名兜底，不改变棋盘 custom actions、命令、规则、外交/AI 记录、JSON schema 或 legacy `Faction` 桥；完整 VoiceOver 实机、截图和布局验收仍未完成。
+
+> **v5.8y 最新小切片：** tooltip 与检查面板读法继续硬化：常驻军队 tooltip 的读屏 value 补充兵力、补给、退却和本回合状态；军队检查面板收口英文 `FrontZone` / `FrontLine` / `Deploy` 标签与 `FRONT` / `DEPTH` / `GARRISON` 部署码，唐宋编成比例改为“占 N／100”；州府检查面板收口英文 `FrontZone`、`MP/IC/SUP` 资源缩写，并把唐宋围城摘要改成攻方/守方/压力/城防/围城军队口径。该切片只改 tooltip 和检查面板显示/读屏语义，不改变 `Division`、`ComponentType`、`RegionInspectorState`、围城规则、补给规则、命令、AI 决策或 Codable schema；完整 VoiceOver 实机、截图和布局验收仍未完成。
 
 ---
 
@@ -242,7 +244,7 @@ WWIIHexV0/
 | v5.5 | 已完成首轮 | HUD、图层、面板、战报、地图视觉 token、军旗棋子和只读粮道 overlay 已改为唐宋场景读法。 |
 | v5.6 | 已完成多轮首轮闭环 | 外交归附、天命、玩家招抚、AI 招抚辅助桥、关系投影、战术候选关系感知、数据驱动胜利条件、胜负原因和目标进度只读显示已接入。 |
 | v5.7 | 已完成多轮可玩性首轮 | 下一步提示、统一目标锚点/定位/spotlight、每回合战报摘要、新局确认、亲征/观战入口、结算预览、合法性提示、检查面板、将领面板和 tooltip 唐宋读法已接入。 |
-| v5.8a-v5.8x | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI、外交 Latin/ASCII 显示、AI 面板原始文本兜底、将领/州府面板 ASCII 显示、兵力/粮道/地图数值标记、AppContainer 源头交互反馈、胜利/粮道/军议摘要、MapEditor raw UI、accessibility / VoiceOver 可读文案、控件状态提示、MapEditor 错误/输入可访问性、主棋盘 VoiceOver 自定义动作和面板控件 accessibility/fallback 硬化已做默认主路径首轮。完整 RC 审计仍未完成。 |
+| v5.8a-v5.8y | 进行中 | AI 面板、外交面板、战报日志、MapEditor 默认路径、README/plan/flow 文档定位、主游戏 DataLoader 默认启动 fallback、唐宋将领注册表默认路径、命令反馈/战报元数据、检查面板 raw id / 目标状态、命令/战报 raw 英文兜底、将领计划摘要、固定英文 UI、外交 Latin/ASCII 显示、AI 面板原始文本兜底、将领/州府面板 ASCII 显示、兵力/粮道/地图数值标记、AppContainer 源头交互反馈、胜利/粮道/军议摘要、MapEditor raw UI、accessibility / VoiceOver 可读文案、控件状态提示、MapEditor 错误/输入可访问性、主棋盘 VoiceOver 自定义动作、面板控件 accessibility/fallback、tooltip 与检查面板读法硬化已做默认主路径首轮。完整 RC 审计仍未完成。 |
 | v5.9 | 未开始 | 可发布验收、完整 artifact 审计、README/flow/update_log 统一发布口径仍待后续。 |
 
 ### 当前仍未完成

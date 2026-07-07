@@ -611,6 +611,13 @@ v5.8x 当前已落地：
 - `GeneralCommandPanelView` 的将领档案入口、固守防线和进攻州府按钮补充可用/停用状态与提示；头像入口读屏名与“查看档案”按钮区分。
 - 该切片只改 SwiftUI 可读语义和缺名兜底，不改变棋盘 custom actions、SpriteKit 渲染、命令执行、将领计划、外交/AI 记录、JSON schema、规则系统或 legacy `Faction` 桥；完整 VoiceOver 实机、截图和布局验收仍未完成。
 
+v5.8y 当前已落地：
+
+- `UnitTooltipView` 的合并读屏内容拆分为 label/value，value 补充兵力、补给、退却和本回合状态；英文 low supply tooltip 不再只显示 `Low`。
+- `UnitInspectorView` 的英文 `FrontZone` / `FrontLine` / `Deploy` 标签改为自然读法，英文部署状态不再直出 `FRONT` / `DEPTH` / `GARRISON`；唐宋编成比例从百分号改为“占 N／100”。
+- `RegionInspectorView` 的英文 `FrontZone` 标签与 `MP/IC/SUP` 资源缩写改为自然读法；唐宋围城摘要改为攻方、守方、压力、城防和围城军队数量的结构化读法。
+- 该切片只改 tooltip 和检查面板显示/读屏语义，不改变 `Division`、`ComponentType`、`RegionInspectorState`、围城规则、补给规则、命令、AI 决策或 Codable schema；完整 VoiceOver 实机、截图和布局验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。

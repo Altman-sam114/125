@@ -51,15 +51,15 @@ struct UnitInspectorView: View {
                     Text(theaterText(for: strategicState))
                 }
 
-                LabeledContent(isTangSongScenario ? "防区" : "FrontZone") {
+                LabeledContent(isTangSongScenario ? "防区" : "Front Zone") {
                     Text(frontZoneText(for: strategicState))
                 }
 
-                LabeledContent(isTangSongScenario ? "部署" : "Deploy") {
+                LabeledContent(isTangSongScenario ? "部署" : "Deployment") {
                     Text(strategicState.deploymentRole.displayName(isTangSongScenario: isTangSongScenario))
                 }
 
-                LabeledContent(isTangSongScenario ? "战线" : "FrontLine") {
+                LabeledContent(isTangSongScenario ? "战线" : "Front Lines") {
                     Text(frontLineSummary(strategicState.frontLineIds))
                         .multilineTextAlignment(.trailing)
                 }
@@ -105,8 +105,16 @@ struct UnitInspectorView: View {
 
     private func componentSummary(for division: Division) -> String {
         division.components
-            .map { "\($0.type.displayCode(isTangSongScenario: isTangSongScenario)) \(Int(($0.weight * 100).rounded()))%" }
+            .map { componentText(type: $0.type, weight: $0.weight) }
             .joined(separator: isTangSongScenario ? "、" : " / ")
+    }
+
+    private func componentText(type: ComponentType, weight: Double) -> String {
+        let percentage = Int((weight * 100).rounded())
+        if isTangSongScenario {
+            return "\(type.displayCode(isTangSongScenario: true))占 \(percentage)／100"
+        }
+        return "\(type.displayCode(isTangSongScenario: false)) \(percentage)%"
     }
 
     private func frontLineSummary(_ ids: [FrontLineId]) -> String {
@@ -294,11 +302,11 @@ private extension UnitDeploymentRole {
 
         switch self {
         case .frontUnit:
-            return "FRONT"
+            return "Front"
         case .depthUnit:
-            return "DEPTH"
+            return "Depth"
         case .garrisonUnit:
-            return "GARRISON"
+            return "Garrison"
         }
     }
 }
