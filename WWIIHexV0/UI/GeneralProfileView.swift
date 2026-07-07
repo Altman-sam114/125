@@ -221,7 +221,7 @@ struct GeneralProfileView: View {
         if !containsLatinLetters(general.biography) {
             return general.biography
         }
-        return "\(general.localizedName)受命统辖本方面军务，按州府、粮道与战线形势调度军队。"
+        return "\(general.localizedName)受命统辖本方面军务，按州府、粮道与敌我接触形势调度军队。"
     }
 
     private func skillLabel(_ skill: String) -> String {

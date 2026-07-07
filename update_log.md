@@ -11,6 +11,40 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ap - 唐宋骑军追击与将领档案接触口径
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 按用户“古代作战不存在现代战线、骑兵强大、补给粮草重要、作战模式需继续研究”的方向，在 v5.8ao 已写入 README / AGENTS 的长期规则基础上，继续做一处小步规则落地。
+- 本轮并发子 Agent 已启动但长时间未返回；主线程关闭子 Agent 后继续完成整合。未使用多分支，也未合并外部子 Agent 文件改动。
+- `CommandExecutor.resolveCombatResult` 接收攻击方上下文；唐宋骑军造成敌军自动退却时，若防守者所在地是平原，或攻守相邻地格存在道路的丘陵环境，则通过 `tangSongPursuitDamage` 追加追击兵力损耗。
+- 城池、关隘、山林和山地不触发骑军追击；追击损耗按本次 `CombatDamage.strengthDamage` 的 35% 四舍五入计算，最少 1 点，并与既有被围撤退追加损耗累加到 combat log 的 extra strength loss。
+- `GeneralProfileView` 的唐宋旧英文履历 fallback 从“战线形势”改为“敌我接触形势”，继续避免玩家态现代连续战线口径。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8ap 阶段记录。`AGENTS.md` 已在 v5.8ao 写入古代/中古作战、骑兵、粮草、CK3 参考和接触带原则，本轮不在入口规则中重复堆阶段细节。
+
+关键文件：
+
+- `WWIIHexV0/Rules/CommandExecutor.swift`
+- `WWIIHexV0/UI/GeneralProfileView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8ap_cavalry_pursuit_contact_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 等待 commit / push 后由 GitHub Actions 云端重验证，并下载未加密 artifact 核对 manifest、JUnit、静态检查日志和 `xcodebuild.log`。
+
+遗留事项：
+
+- 本轮不是完整古代战争系统重构，不删除内部 `FrontLine` / `FrontZone` / `hexToFrontZone` schema，也不新增骑军 AI、粮队、漕运、仓储容量、会战窗口、自动破城或 CK3 式战争系统。
+- 追击系数与触发条件仍需云端构建后再结合实际手感、平衡和 AI 行为继续调参。
+
 ## v5.8ao - 唐宋骑兵冲击、断粮出击限制与接触带口径
 
 完成日期：2026-07-07

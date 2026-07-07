@@ -99,7 +99,7 @@ struct CommandExecutor {
         state.divisions[attackerIndex].facing = attackerFacing
         applyCombatDamage(damage, to: targetId, in: &state)
 
-        let attackOutcome = resolveCombatResult(for: defender, damage: damage, in: &state)
+        let attackOutcome = resolveCombatResult(for: defender, damage: damage, attacker: attacker, in: &state)
         state.appendEvent(
             combatLog(
                 prefix: "\(attacker.name) attacked \(defender.name)",
@@ -127,7 +127,7 @@ struct CommandExecutor {
             let counterDamage = combatRules.counterAttackDamage(defender: updatedDefender, attacker: updatedAttacker, in: state)
             applyCombatDamage(counterDamage, to: attackerId, in: &state)
 
-            let counterOutcome = resolveCombatResult(for: updatedAttacker, damage: counterDamage, in: &state)
+            let counterOutcome = resolveCombatResult(for: updatedAttacker, damage: counterDamage, attacker: updatedDefender, in: &state)
             state.appendEvent(
                 combatLog(
                     prefix: "\(updatedDefender.name) counterattacked \(updatedAttacker.name)",
@@ -519,6 +519,7 @@ struct CommandExecutor {
     private func resolveCombatResult(
         for originalDivision: Division,
         damage: CombatDamage,
+        attacker: Division?,
         in state: inout GameState
     ) -> CombatResultSummary {
         guard let index = state.divisionIndex(id: originalDivision.id) else {
@@ -536,8 +537,22 @@ struct CommandExecutor {
         }
 
         if shouldRetreat && state.divisions[index].supplyState == .encircled && !state.divisions[index].isDestroyed {
-            extraStrengthDamage = max(1, damage.strengthDamage / 2)
-            state.divisions[index].receiveStrengthDamage(extraStrengthDamage)
+            let encirclementLoss = max(1, damage.strengthDamage / 2)
+            extraStrengthDamage += encirclementLoss
+            state.divisions[index].receiveStrengthDamage(encirclementLoss)
+        }
+
+        if shouldRetreat,
+           let pursuitDamage = tangSongPursuitDamage(
+            attacker: attacker,
+            defender: state.divisions[index],
+            baseDamage: damage,
+            in: state
+           ),
+           pursuitDamage > 0,
+           !state.divisions[index].isDestroyed {
+            extraStrengthDamage += pursuitDamage
+            state.divisions[index].receiveStrengthDamage(pursuitDamage)
         }
 
         if state.divisions[index].isDestroyed {
@@ -558,6 +573,34 @@ struct CommandExecutor {
             wasDestroyed: false,
             extraStrengthDamage: extraStrengthDamage
         )
+    }
+
+    private func tangSongPursuitDamage(
+        attacker: Division?,
+        defender: Division,
+        baseDamage: CombatDamage,
+        in state: GameState
+    ) -> Int? {
+        guard state.isTangSongScenario,
+              let attacker,
+              attacker.isTangSongCavalry,
+              let attackerTile = state.map.tile(at: attacker.coord),
+              let defenderTile = state.map.tile(at: defender.coord) else {
+            return nil
+        }
+
+        switch defenderTile.baseTerrain {
+        case .city, .fortress, .forest, .mountain:
+            return nil
+        case .plain, .hill:
+            break
+        }
+
+        guard defenderTile.baseTerrain == .plain || defenderTile.hasRoad || attackerTile.hasRoad else {
+            return nil
+        }
+
+        return max(1, Int((Double(baseDamage.strengthDamage) * 0.35).rounded()))
     }
 
     private func eliminateDivision(_ division: Division, in state: inout GameState) {

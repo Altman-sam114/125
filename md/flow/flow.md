@@ -728,6 +728,13 @@ v5.8ao 当前已落地：
 - `MapDisplayLayer` 唐宋图层显示把 `frontLine` 从“前线”改为“接触带”，把 `deployment` 从“部署”改为“行营部署”；`UnitInspectorView`、`RegionInspectorView` 与 `GeneralCommandPanelView` 把防区、部署、战线、前线压力和固守防线等玩家态文案收束为行营辖区、军位、敌我接触、接触州府、接触压力和固守城关。
 - 该切片是古代作战模型方向首轮，不删除内部 `FrontLine` / `FrontZone` / `hexToFrontZone` schema，不改变动态战区、部署层或 AI 指令 raw case；后续仍需继续研究州府、关隘、行营、会战、袭扰、围城、粮道、仓储、漕运、士气、骑兵追击与将领调度，可参考《十字军之王3》等中古战略游戏，但必须继续经 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine` 落地。
 
+v5.8ap 当前已落地：
+
+- `CommandExecutor.resolveCombatResult` 接收攻击方上下文；唐宋骑军造成敌军自动退却时，若防守者所在地是平原，或攻守相邻地格存在道路的丘陵条件，会通过 `tangSongPursuitDamage` 追加追击兵力损耗。城池、关隘、山林和山地不触发追击。
+- 追击损耗按本次 `CombatDamage.strengthDamage` 的 35% 四舍五入计算，最少 1 点，并与既有被围撤退追加损耗累加到同一条 combat log 的 extra strength loss 中。
+- `GeneralProfileView` 的唐宋旧英文履历 fallback 从“战线形势”改为“敌我接触形势”，继续避免玩家态把唐宋战争理解成现代连续战线。
+- 该切片不新增骑军 AI、粮队、会战窗口、真实 CK3 式战争系统或新的 Codable schema；仍只是古代作战模型在既有 `Command` / `RuleEngine` 管线内的规则小步。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
@@ -1588,6 +1595,7 @@ resolveCombatResult
   -> retreatable 且 lossRatio >= 0.35 时 shouldRetreat
   -> hold 模式追加损失
   -> encircled 且撤退触发追加损失
+  -> 唐宋骑军使敌军自动退却且地形/道路允许时追加追击损失
   -> destroyed 则 removeDivision + victory record
 如果 defender 没撤退且可反击:
   defender counterattack
@@ -1599,6 +1607,7 @@ v5.3 唐宋场景下，`CombatRules` 在不改底层 `ComponentType` Codable sch
 ```text
 cavalry
   -> 进攻平原或道路目标 +30%（v5.8ao 起）
+  -> v5.8ap 起，自动退却发生在平原，或攻守相邻地格存在道路的丘陵条件时追加追击损耗
   -> 进攻城池、关隘、森林、山地 -15%
 
 siegeEngine
@@ -1612,7 +1621,7 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地；v5.6a 另行新增 `Command.proposeSubmission` 作为外交归附规则合同首轮，但它只写外交记录和天命，不交割地图控制权；v5.6g 已把唐宋胜利评价桥推进为优先读取场景 JSON `victoryConditions`。v5.8ao 起，唐宋 `CommandValidator` 会拒绝被围断粮军主动攻击或围城，拒绝原因是 `supplyBlocked`。自动破城、完整外交归附、完整漕运、治理评分、完整统一结算和 CK3 式战争系统仍未实现。
+这只是战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地；v5.6a 另行新增 `Command.proposeSubmission` 作为外交归附规则合同首轮，但它只写外交记录和天命，不交割地图控制权；v5.6g 已把唐宋胜利评价桥推进为优先读取场景 JSON `victoryConditions`。v5.8ao 起，唐宋 `CommandValidator` 会拒绝被围断粮军主动攻击或围城，拒绝原因是 `supplyBlocked`。v5.8ap 起，唐宋骑军使敌军在平原，或攻守相邻地格存在道路的丘陵条件自动退却时会追加追击兵力损耗；城池、关隘、山林和山地不触发该追击。自动破城、完整外交归附、完整漕运、粮队、治理评分、完整统一结算和 CK3 式战争系统仍未实现。
 
 v5.3 围城城防、修城、解围与招降首轮：
 

@@ -71,6 +71,7 @@
   -> v5.8am 起命令面板军令状态、结束回合状态和最近反馈读屏继续硬化
   -> v5.8an 起外交面板诸国、关系和归附记录行读屏继续硬化
   -> v5.8ao 起唐宋骑兵开阔地/道路冲击增强，被围断粮军不可主动进攻/围城，前线显示改为接触带/行营口径
+  -> v5.8ap 起唐宋骑军使敌军自动退却时按平原/道路条件追加追击损耗，将领档案 fallback 改用敌我接触口径
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -330,7 +331,7 @@ flowchart TD
     DIV["军队角色推导<br/>Division.tangSongCombatRoles<br/>id + production kind + 组件权重"]:::state
     SCENE{"唐宋场景?<br/>GameState.isTangSongScenario"}:::decision
     LEGACY["Legacy 战斗修正<br/>装甲平原加成 / 地形减速"]:::rules
-    CAV["骑军<br/>平原/道路进攻 +15%<br/>攻城关/山林 -15%"]:::rules
+    CAV["骑军<br/>平原/道路进攻 +30%<br/>自动退却追击损耗<br/>攻城关/山林 -15%"]:::rules
     SIEGE["攻城器械<br/>攻城池/关隘 +35%<br/>野战攻击 -25%，防御 -1"]:::rules
     GARRISON["弓弩守军 / 守军<br/>守城池/关隘 +2 / +1 防御"]:::rules
     DAMAGE["伤害结算<br/>CombatRules.damage<br/>攻防、侧翼、河流、固守"]:::rules
