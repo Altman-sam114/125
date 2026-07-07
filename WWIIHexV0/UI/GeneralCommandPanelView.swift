@@ -114,7 +114,7 @@ struct GeneralCommandPanelView: View {
             }
 
             HStack(spacing: 8) {
-                Button(isTangSongScenario ? "固守防线" : "Hold Line", systemImage: "shield.fill", action: onHoldLine)
+                Button(isTangSongScenario ? "固守城关" : "Hold Line", systemImage: "shield.fill", action: onHoldLine)
                     .disabled(!canHoldLine)
                     .accessibilityValue(commandAccessibilityValue(isEnabled: canHoldLine))
                     .accessibilityHint(holdLineAccessibilityHint)
@@ -222,7 +222,7 @@ struct GeneralCommandPanelView: View {
         if !containsLatinLetters(general.biography) {
             return general.biography
         }
-        return "\(general.localizedName)受命统辖本方面军务，按州府、粮道与战线形势调度军队。"
+        return "\(general.localizedName)受命统辖本方面军务，按州府、粮道与敌我接触形势调度军队。"
     }
 
     private func skillLabel(_ skill: String) -> String {

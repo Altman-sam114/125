@@ -341,6 +341,9 @@ struct CommandPanelView: View {
         if message.contains("wrongFaction") {
             return "军令被拒：不可指挥该政权军队。"
         }
+        if message.contains("supplyBlocked") {
+            return "军令被拒：粮道断绝，不可主动出击。"
+        }
         return TangSongEventLogMessage.display(message)
     }
 }

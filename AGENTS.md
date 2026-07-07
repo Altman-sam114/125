@@ -17,12 +17,16 @@
 若文档、源码、轻量检查结果冲突，以当前源码和真实检查结果为准，并在本轮结束时同步修正文档。
 ## 2. 项目基本规则
 - 本项目是 Swift + SwiftUI + SpriteKit 的 iOS 二战回合制 hex 战棋。
+- 当前产品主线是唐宋古代/中古战争迁移；底层 WWIIHexV0、FrontLine、FrontZone 等 legacy 命名可保留兼容，但玩家态和新设计不得把唐宋战争直接套成现代连续战线。
+- 唐宋作战模型优先研究州府、关隘、行营、会战、袭扰、围城、粮道、仓储、漕运、士气、骑兵冲击与将领调度；可参考《十字军之王3》等中古战略游戏的集结、行军、围城和补给思路，但所有落地仍必须适配本项目 hex / region / command / rule 架构。
+- 骑兵在开阔地、道路、追击和机动作战中应有明显价值；山地、林地、城池、关隘和围城环境应抑制骑兵优势。
+- 补给、粮草和粮道是唐宋主线的核心规则，不是附属 UI 文案；断粮、被围、粮源、道路、山林、跨河、州府粮仓和围城压力会影响可行动作、战斗、退却和 attrition。
 - Hex 是战术权威：单位位置、移动、攻击、真实占领、视野、补给落点以 hex 为准。
 - Region 是战略聚合层：资源、人力、补给、胜利点、控制比例从 hex 状态聚合，不替代 hex。
 - `regionToTheater` 是初始/基础战区归属和地图编辑器种子，不是运行时推进层。
 - `hexToTheater` 是运行时动态战区权威；突破一个 hex 只能推进该 hex 的动态归属。
 - `hexToFrontZone` 是部署层动态归属权威；`regionToFrontZone` 只能作 dominant / fallback。
-- 前线来自双方动态战区的真实 hex 邻接，不等于 region 边界或静态 theater 边界。
+- legacy 前线数据来自双方动态战区的真实 hex 邻接，不等于 region 边界或静态 theater 边界；唐宋玩家态应优先称为“接触带 / 敌我接触 / 行营部署”，避免暗示现代连续战线。
 - 玩家、AI、聊天命令和 MockAI 都必须落到 `Command` / `ZoneDirective`，再经 `WarCommandExecutor`、`CommandValidator`、`RuleEngine` 执行；禁止绕过规则系统直接改 `GameState`。
 - Legacy Agent D 管线保留作回归参考，默认战争 AI 主路径不得退回旧管线。
 - 不恢复 organization；当前战斗核心是 strength、retreat、supply、encirclement。

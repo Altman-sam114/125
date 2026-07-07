@@ -70,6 +70,7 @@
   -> v5.8al 起 AI 面板军令结果行标题和执行状态读屏继续硬化
   -> v5.8am 起命令面板军令状态、结束回合状态和最近反馈读屏继续硬化
   -> v5.8an 起外交面板诸国、关系和归附记录行读屏继续硬化
+  -> v5.8ao 起唐宋骑兵开阔地/道路冲击增强，被围断粮军不可主动进攻/围城，前线显示改为接触带/行营口径
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -98,8 +99,8 @@ flowchart TD
     INIT["开局方面快照<br/>TheaterInitialSnapshot<br/>记录地图编辑器给的初始方面"]:::snapshot
     R2T["基础战区映射<br/>regionToTheater<br/>只作初始/基准，不表示战线推进"]:::snapshot
     H2T["动态战区权威<br/>hexToTheater<br/>运行时推进只改具体 hex"]:::authority
-    FRONT["前线层<br/>FrontLine / FrontSegment<br/>按双方动态战区的真实相邻 hex 生成"]:::derived
-    DEPLOY["部署层<br/>WarDeploymentState<br/>用 hexToFrontZone 把单位分成前线/纵深/驻军"]:::derived
+    FRONT["接触带层<br/>FrontLine / FrontSegment<br/>按双方动态战区的真实相邻 hex 生成<br/>唐宋玩家态不按现代连续战线理解"]:::derived
+    DEPLOY["行营部署层<br/>WarDeploymentState<br/>用 hexToFrontZone 把单位分成前锋/后备/州府守备"]:::derived
     ECO["经济总账<br/>EconomyState / EconomyRules<br/>收入、维护费、生产队列、自动补员"]:::economy
     DIP["外交与天命<br/>DiplomacyState + MandateState<br/>国家关系、归附记录、天命分数"]:::state
     TURN["回合与势力桥<br/>TurnOrderState / PowerProfile<br/>power order、active power、控制模式、关系表"]:::state

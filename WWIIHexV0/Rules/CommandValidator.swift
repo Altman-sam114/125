@@ -215,6 +215,10 @@ struct CommandValidator {
             return .invalid(.targetNotFound)
         }
 
+        guard canLaunchOffensive(attacker, in: state) else {
+            return .invalid(.supplyBlocked)
+        }
+
         guard warRelationRules.canTarget(attacker: attacker.faction, target: target.faction, in: state) else {
             return .invalid(.invalidTargetFaction)
         }
@@ -235,6 +239,10 @@ struct CommandValidator {
 
         guard let region = state.map.region(id: targetRegionId) else {
             return .invalid(.regionNotFound)
+        }
+
+        guard canLaunchOffensive(attacker, in: state) else {
+            return .invalid(.supplyBlocked)
         }
 
         guard region.isPassable,
@@ -291,6 +299,14 @@ struct CommandValidator {
         }
 
         return .valid
+    }
+
+    private func canLaunchOffensive(_ division: Division, in state: GameState) -> Bool {
+        guard state.isTangSongScenario else {
+            return true
+        }
+
+        return division.supplyState != .encircled
     }
 
     private func validateUnitCommand(divisionId: String, in state: GameState) -> CommandValidation {

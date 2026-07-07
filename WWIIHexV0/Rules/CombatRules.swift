@@ -135,7 +135,7 @@ struct CombatRules {
 
         if attacker.isTangSongCavalry {
             if defenderTile.baseTerrain == .plain || defenderTile.hasRoad || attackerTile?.hasRoad == true {
-                multiplier += 0.15
+                multiplier += 0.30
             }
             if defenderTile.baseTerrain == .city ||
                 defenderTile.baseTerrain == .fortress ||

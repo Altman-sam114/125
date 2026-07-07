@@ -11,6 +11,50 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ao - 唐宋骑兵冲击、断粮出击限制与接触带口径
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 按用户要求把“古代作战不存在现代连续战线、骑兵强大、补给粮草重要、作战模式需继续参考 CK3 等中古战争模型研究修改”的长期方向写入 `README.md` 和 `AGENTS.md`。
+- 并发子 Agent 只读扫描后确认本轮做小步安全落地：不删除内部 `FrontLine` / `FrontZone` schema，只先强化骑军、断粮与玩家态接触带口径。
+- `CombatRules` 把唐宋骑军在开阔地或道路条件下进攻的冲击加成从 `+0.15` 提高到 `+0.30`，保留攻城、攻关、攻林地和攻山地的抑制。
+- `CommandValidator` 在唐宋场景下阻止 `SupplyState.encircled` 军队主动攻击或围城，新增 `CommandValidationError.supplyBlocked`，命令面板与战报显示“粮道断绝，不可主动出击”。
+- `MapDisplayLayer`、`UnitInspectorView`、`RegionInspectorView` 和 `GeneralCommandPanelView` 把唐宋“前线/部署/防区/固守防线”玩家态文案收束为接触带、敌我接触、接触州府、接触压力、行营部署、行营辖区和固守城关。
+- 同步 README、AGENTS、md 大纲、flow 文档、流程图、mermaid 源图和 v5.8ao 阶段记录。
+
+关键文件：
+
+- `AGENTS.md`
+- `README.md`
+- `WWIIHexV0/Rules/CombatRules.swift`
+- `WWIIHexV0/Rules/CommandValidator.swift`
+- `WWIIHexV0/Commands/CommandValidation.swift`
+- `WWIIHexV0/Core/MapDisplayLayer.swift`
+- `WWIIHexV0/UI/CommandPanelView.swift`
+- `WWIIHexV0/UI/EventLogView.swift`
+- `WWIIHexV0/UI/GeneralCommandPanelView.swift`
+- `WWIIHexV0/UI/RegionInspectorView.swift`
+- `WWIIHexV0/UI/UnitInspectorView.swift`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/flow/01_overall_core_flow.mermaid`
+- `md/prompt/v5.0-唐宋迁移/v5.8ao_ancient_combat_supply_contact_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 等待 push 到 `origin/main` 后由 GitHub Actions `WWIIHexV0 CI Results` 云端重验证并下载 artifact 核对。
+
+遗留事项：
+
+- 本轮不是完整古代战争系统重构，不删除内部 `FrontLine` / `FrontZone` / `hexToFrontZone` schema，也不改变动态战区、部署层、AI 指令 raw case 或 Codable schema。
+- 仍需继续研究州府、关隘、行营、会战、袭扰、围城、粮道、仓储、漕运、士气、骑兵追击与将领调度，并把可落地点继续收口到 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine`。
+- 完整 CK3 式战争节奏、骑军平衡、粮草运输队、仓储容量、自动破城、AI 真实围城/粮道策略、截图布局和实机手感验收仍未完成。
+
 ## v5.8an - 外交面板复合行读屏硬化
 
 完成日期：2026-07-07

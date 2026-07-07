@@ -9,8 +9,8 @@ flowchart TD
     INIT["Initial Theater Snapshot<br/>只读初始战区"]:::snapshot
     R2T["regionToTheater<br/>基础战区映射<br/>不是动态推进层"]:::snapshot
     H2T["hexToTheater<br/>运行时动态战区权威"]:::authority
-    FRONT["FrontLine / FrontSegment<br/>按动态 theater 的真实 hex 邻接生成"]:::derived
-    DEPLOY["WarDeploymentState<br/>hexToFrontZone 权威<br/>FRONT / DEPTH / GARRISON"]:::derived
+    FRONT["FrontLine / FrontSegment<br/>接触带派生层<br/>按动态 theater 的真实 hex 邻接生成"]:::derived
+    DEPLOY["WarDeploymentState<br/>行营部署派生层<br/>hexToFrontZone 权威"]:::derived
     ECO["EconomyState / EconomyRules<br/>收入 / 生产 / 补员"]:::economy
     DIP["DiplomacyState + MandateState<br/>国家关系 / 归附记录 / 天命"]:::state
     TURN["TurnOrderState / PowerRelation<br/>回合 / 控制权 / 关系表"]:::state

@@ -23,6 +23,7 @@ enum CommandValidationError: String, Codable, Equatable {
     case submissionNotReady
     case mandateTooLow
     case insufficientResources
+    case supplyBlocked
 }
 
 extension CommandValidationError {
@@ -76,6 +77,8 @@ extension CommandValidationError {
             return "天命不足"
         case .insufficientResources:
             return "府库资源不足"
+        case .supplyBlocked:
+            return "粮道断绝，不可主动出击"
         }
     }
 }

@@ -28,9 +28,9 @@ enum MapDisplayLayer: String, Codable, Equatable, CaseIterable, Identifiable {
             case .dynamicTheater:
                 return "动态方面"
             case .frontLine:
-                return "前线"
+                return "接触带"
             case .deployment:
-                return "部署"
+                return "行营部署"
             }
         }
 

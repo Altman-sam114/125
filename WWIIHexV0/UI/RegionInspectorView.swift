@@ -88,11 +88,11 @@ struct RegionInspectorView: View {
                 Text(theaterText(for: state))
             }
 
-            LabeledContent(isTangSongScenario ? "防区" : "Front Zone") {
+            LabeledContent(isTangSongScenario ? "行营辖区" : "Front Zone") {
                 Text(frontZoneText(for: state))
             }
 
-            LabeledContent(isTangSongScenario ? "前线压力" : "Front Pressure") {
+            LabeledContent(isTangSongScenario ? "接触压力" : "Front Pressure") {
                 Text(state.frontPressure, format: .number.precision(.fractionLength(2)))
             }
 

@@ -883,7 +883,8 @@ enum TangSongEventLogMessage {
         ("invalidDiplomaticRelation", "外交关系不合法"),
         ("submissionNotReady", "尚未满足归附条件"),
         ("mandateTooLow", "天命不足"),
-        ("insufficientResources", "资源不足")
+        ("insufficientResources", "资源不足"),
+        ("supplyBlocked", "粮道断绝，不可主动出击")
     ]
 
     private static func stripped(_ message: String, prefix: String, suffix: String) -> String {

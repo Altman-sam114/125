@@ -51,15 +51,15 @@ struct UnitInspectorView: View {
                     Text(theaterText(for: strategicState))
                 }
 
-                LabeledContent(isTangSongScenario ? "防区" : "Front Zone") {
+                LabeledContent(isTangSongScenario ? "行营辖区" : "Front Zone") {
                     Text(frontZoneText(for: strategicState))
                 }
 
-                LabeledContent(isTangSongScenario ? "部署" : "Deployment") {
+                LabeledContent(isTangSongScenario ? "军位" : "Deployment") {
                     Text(strategicState.deploymentRole.displayName(isTangSongScenario: isTangSongScenario))
                 }
 
-                LabeledContent(isTangSongScenario ? "战线" : "Front Lines") {
+                LabeledContent(isTangSongScenario ? "敌我接触" : "Front Lines") {
                     Text(frontLineSummary(strategicState.frontLineIds))
                         .multilineTextAlignment(.trailing)
                 }
@@ -119,7 +119,7 @@ struct UnitInspectorView: View {
 
     private func frontLineSummary(_ ids: [FrontLineId]) -> String {
         if isTangSongScenario {
-            return ids.isEmpty ? noneText : "相关战线 \(ids.count) 条"
+            return ids.isEmpty ? noneText : "接触州府 \(ids.count) 处"
         }
         return ids.isEmpty ? noneText : ids.map(\.rawValue).joined(separator: ", ")
     }
@@ -294,9 +294,9 @@ private extension UnitDeploymentRole {
             case .frontUnit:
                 return "前锋"
             case .depthUnit:
-                return "纵深"
+                return "行营后备"
             case .garrisonUnit:
-                return "守备"
+                return "州府守备"
             }
         }
 

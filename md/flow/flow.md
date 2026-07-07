@@ -20,7 +20,7 @@ MapEditor / JSON 数据
   -> DiplomacyState / MandateState 外交归附记录与天命总账
   -> TurnOrderState / PowerProfile 回合与控制权桥
   -> Initial Theater snapshot + runtime hexToTheater
-  -> FrontLine 动态 hex 接触
+  -> FrontLine 动态 hex 接触（唐宋玩家态称接触带）
   -> WarDeployment hexToFrontZone + FRONT/DEPTH/GARRISON
   -> MarshalAgent / TheaterDirective JSON
   -> TheaterDirectiveDecoder
@@ -40,6 +40,7 @@ MapEditor / JSON 数据
 - `regionToTheater` 是初始/基础战区归属，不是运行时推进层。
 - `hexToTheater` 是运行时动态战区权威。
 - `hexToFrontZone` 是部署层动态归属权威。
+- 唐宋主线不应把古代战争直接设计成现代连续战线；内部 `FrontLine` / `FrontZone` 可保留兼容，但玩家态和后续设计应优先按接触带、敌我接触、行营部署、州府、关隘、粮道、会战和围城理解。
 - `EconomyState` 是 faction 级经济总账；收入来自受控 region、城市、工厂、基础设施和补给值，但战术占领仍以 hex 为准。
 - `DiplomacyState` 是国家级外交投影，v5.6a 起保存 `PacificationRecord`；`MandateState` 是 faction 级天命/合法性总账。
 - v5.1 新增 `TurnOrderState`，用于保存 power order、active power、控制模式和 power relations；`activeFaction` / `phase` 仍保留为 legacy 执行桥。
@@ -283,6 +284,7 @@ isEncirclementCandidate
 - 前线不是 initial theater 边界。
 - 前线不是 `regionToTheater` 的邻接。
 - 前线是真实动态战区 hex 接触。
+- 唐宋主线不应把古代战争设计成现代连续战线；当前 `FrontLine` / `FrontZone` 仍是内部 legacy 派生层，玩家态和新文档应优先解释为接触带、敌我接触、行营部署和接触州府。
 - 同一个 region 被两个动态战区切开时，允许出现 `regionA == regionB` 的突破前线。这是 v0.358 后确认的合法状态。
 - `FrontLine.type == .breakthrough` 的一个来源是：segment 的 `regionA` 仍由敌方 region controller 控制，但已有我方动态 theater hex 突入。
 
@@ -717,6 +719,14 @@ v5.8an 当前已落地：
 - 外交关系列表行补充合并 accessibility 语义，读屏时以两国关系标题作为 label，并把盟好、称臣、协战、中立、敌对、交战、归附中或议和等状态作为 value。
 - 最近归附记录行补充合并 accessibility 语义，读屏时把归附目标标题、结果状态、回合、天命变化和归附州府作为一条归附记录读出。
 - 该切片只改外交面板 SwiftUI accessibility 语义，不改变 `DiplomacyState`、`MandateState`、`PacificationRecord`、`Command.proposeSubmission`、外交关系投影、命令、规则、AI 决策、控制权交割或 Codable schema；完整 VoiceOver 实机、截图布局、AI 方面军令卡片、诏令朝议摘要块和发布级 UI 验收仍未完成。
+
+v5.8ao 当前已落地：
+
+- `CombatRules.tangSongAttackMultiplier` 把唐宋骑军在开阔地或道路条件下进攻的冲击加成从 `+0.15` 提高到 `+0.30`，继续保留骑军攻城、攻关、攻林地和攻山地的 `-0.15` 抑制。
+- `CommandValidator.validateAttack` 与 `validateBesiege` 在唐宋场景下会阻止 `SupplyState.encircled` 的军队主动攻击或围城，返回 `CommandValidationError.supplyBlocked`；低补给军仍可行动但受既有补给惩罚，被围断粮军不可主动出击。
+- `CommandValidationError.supplyBlocked` 的唐宋显示为“粮道断绝，不可主动出击”，`CommandPanelView` 和 `EventLogView` 也补同口径中文拒绝原因。
+- `MapDisplayLayer` 唐宋图层显示把 `frontLine` 从“前线”改为“接触带”，把 `deployment` 从“部署”改为“行营部署”；`UnitInspectorView`、`RegionInspectorView` 与 `GeneralCommandPanelView` 把防区、部署、战线、前线压力和固守防线等玩家态文案收束为行营辖区、军位、敌我接触、接触州府、接触压力和固守城关。
+- 该切片是古代作战模型方向首轮，不删除内部 `FrontLine` / `FrontZone` / `hexToFrontZone` schema，不改变动态战区、部署层或 AI 指令 raw case；后续仍需继续研究州府、关隘、行营、会战、袭扰、围城、粮道、仓储、漕运、士气、骑兵追击与将领调度，可参考《十字军之王3》等中古战略游戏，但必须继续经 `Command` / `ZoneDirective -> WarCommandExecutor -> RuleEngine` 落地。
 
 v5.8c 当前已落地：
 
@@ -1267,7 +1277,7 @@ handleBoardTap(coord)
 - `HUDView`：剧本、回合、当前政权、阶段、胜负、资源、队列、结束回合、新局。
 - `MapDisplayLayer` segmented picker：
   - legacy 显示：`Hex` / `Province` / `Initial` / `Dynamic` / `Front` / `Deploy`
-  - 唐宋显示：`地块` / `州府` / `初始方面` / `动态方面` / `前线` / `部署`
+  - 唐宋显示：`地块` / `州府` / `初始方面` / `动态方面` / `接触带` / `行营部署`
 - `Observer` toggle；唐宋场景显示为 `观战`。
 - Info / 面板按钮，内含 compact panel：
   - legacy tabs：`Unit` / `Region` / `General` / `Log` / `Economy` / `Diplomacy` / `AI`
@@ -1588,7 +1598,7 @@ v5.3 唐宋场景下，`CombatRules` 在不改底层 `ComponentType` Codable sch
 
 ```text
 cavalry
-  -> 进攻平原或道路目标 +15%
+  -> 进攻平原或道路目标 +30%（v5.8ao 起）
   -> 进攻城池、关隘、森林、山地 -15%
 
 siegeEngine
@@ -1602,13 +1612,14 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是 v5.3 的战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地；v5.6a 另行新增 `Command.proposeSubmission` 作为外交归附规则合同首轮，但它只写外交记录和天命，不交割地图控制权；v5.6g 已把唐宋胜利评价桥推进为优先读取场景 JSON `victoryConditions`。自动破城、完整外交归附、完整漕运、治理评分和完整统一结算仍未实现。
+这只是战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地；v5.6a 另行新增 `Command.proposeSubmission` 作为外交归附规则合同首轮，但它只写外交记录和天命，不交割地图控制权；v5.6g 已把唐宋胜利评价桥推进为优先读取场景 JSON `victoryConditions`。v5.8ao 起，唐宋 `CommandValidator` 会拒绝被围断粮军主动攻击或围城，拒绝原因是 `supplyBlocked`。自动破城、完整外交归附、完整漕运、治理评分、完整统一结算和 CK3 式战争系统仍未实现。
 
 v5.3 围城城防、修城、解围与招降首轮：
 
 ```text
 Command.besiege(attackerId, targetRegionId)
   -> CommandValidator.validateBesiege
+  -> 唐宋场景下，被围断粮军返回 supplyBlocked，不可主动围城
   -> 只允许围困敌对控制的城池 / 关隘 / 高 supplyValue 粮仓州府
   -> 攻击军队必须在目标 region 覆盖 hex 的 range 距离内
   -> CommandExecutor.executeBesiege
@@ -1792,7 +1803,7 @@ canSupplyPass / RegionSupplyRules
   -> 不再依赖二元 Faction.opponent
 ```
 
-这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。单位面板已有粮道读法，地图已有只读抽象粮道虚线；完整漕运、粮草运输队、仓储容量、自动破城和逐 hex 粮道路径仍未实现。
+这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。v5.8ao 起，被围断粮军不可主动攻击或围城，让粮道和围困不只是显示读法。单位面板已有粮道读法，地图已有只读抽象粮道虚线；完整漕运、粮草运输队、仓储容量、自动破城和逐 hex 粮道路径仍未实现。
 
 ---
 
@@ -2259,7 +2270,7 @@ frontLine
 deployment
 ```
 
-`MapDisplayLayer.displayName(isTangSongScenario:)` 只提供显示桥，raw case 和存档/图层逻辑不变。唐宋主路径把 `province` 读作州府，把 `initialTheater` / `dynamicTheater` 读作初始方面 / 动态方面。
+`MapDisplayLayer.displayName(isTangSongScenario:)` 只提供显示桥，raw case 和存档/图层逻辑不变。唐宋主路径把 `province` 读作州府，把 `initialTheater` / `dynamicTheater` 读作初始方面 / 动态方面，v5.8ao 起把 `frontLine` / `deployment` 读作接触带 / 行营部署。
 
 唐宋场景下 overlay 颜色来自 `MapLayerOverlayNode` 的 Tang Song strategic palette，覆盖朱印、青绿、石青、铜、玉、赭等多组颜色，避免州府/方面/部署图层读成单一米色或单一暗蓝。该 palette 只影响显示，不影响 bucket 归类、前线计算或部署归属。
 
