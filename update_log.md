@@ -11,6 +11,37 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ah - 战报摘要卡片读屏硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描确认 v5.8ag 只处理最近战报列表行，`EventLogView` 顶部“本回合战报 / 最近战报”摘要卡片仍由标题、回合、汇总和 highlight 多段 `Text` 拆开朗读。
+- 战报摘要卡片补充合并后的 accessibility label/value，唐宋路径读作“战报摘要：本回合战报 / 最近战报”。
+- 摘要卡片读屏 value 复用既有 `TurnReportSummary.turnText`、`summaryText` 和 highlights，不改变摘要生成或日志解析。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8ah 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/EventLogView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8ah_event_log_summary_card_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改战报摘要卡片 SwiftUI 可读语义，不改变 `GameLogEntry`、`TurnReportSummary` 派生逻辑、`TangSongEventLogMessage` 显示桥、事件写入端、命令执行、AI 决策、规则系统、日志结构或 Codable schema。
+- 完整 VoiceOver 实机、截图布局、胜负/评分/胜利目标卡片读屏、全项目玩家可见残留扫描、结构化 event payload、真 LLM 输出本地化和发布级 UI 验收仍未完成。
+
 ## v5.8ag - 战报行整行读屏硬化
 
 完成日期：2026-07-07
@@ -38,6 +69,7 @@
 - 已推送到 `origin/main`：commit `0db6a836c003a096f10f0875ac5d5e60f4be036a`。
 - GitHub Actions `WWIIHexV0 CI Results` run `28845234610` attempt `1` 已完成并通过；artifact `wwiihexv0-ci-cloud-main-ci-v1-main-0db6a83-run28845234610-attempt1` 已核对。
 - artifact manifest 匹配 `branch=main`、`commitSha=0db6a836c003a096f10f0875ac5d5e60f4be036a`、`runId=28845234610`、`runAttempt=1`；`staticChecksOutcome=success`、`buildOutcome=success`、`testOutcome=skipped`，JUnit 2 tests / 0 failures / 0 errors，`xcodebuild.log` 显示 `BUILD SUCCEEDED`。
+- 最终文档补记提交 `97d97b4cee10100117c70cb84091308d2fdd7c59` 也已推送到 `origin/main`；GitHub Actions run `28845385787` attempt `1` 已完成并通过，artifact `wwiihexv0-ci-cloud-main-ci-v1-main-97d97b4-run28845385787-attempt1` 已核对，manifest / JUnit / `xcodebuild.log` 均匹配最新 main 且 `BUILD SUCCEEDED`。
 
 遗留事项：
 

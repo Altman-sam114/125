@@ -93,6 +93,9 @@ struct EventLogView: View {
                 .padding(8)
                 .background(.orange.opacity(0.10))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(turnReportAccessibilityLabel(for: turnReportSummary))
+                .accessibilityValue(turnReportAccessibilityValue(for: turnReportSummary))
             }
 
             if !progressItems.isEmpty {
@@ -334,6 +337,20 @@ struct EventLogView: View {
             return "\(metadata)。\(message)"
         }
         return "\(metadata). \(message)"
+    }
+
+    private func turnReportAccessibilityLabel(for summary: TurnReportSummary) -> String {
+        if isTangSongScenario {
+            return "战报摘要：\(summary.title)"
+        }
+        return summary.title
+    }
+
+    private func turnReportAccessibilityValue(for summary: TurnReportSummary) -> String {
+        let highlights = summary.highlights
+            .map { $0.text.replacingOccurrences(of: "• ", with: "") }
+        let parts = [summary.turnText, summary.summaryText] + highlights
+        return parts.joined(separator: isTangSongScenario ? "。" : ". ")
     }
 
     private var turnReportSummary: TurnReportSummary? {
