@@ -67,8 +67,11 @@ struct GeneralCommandPanelView: View {
                         metricBar(title: isTangSongScenario ? "忠诚" : "Loyalty", value: assignment.loyalty)
                         metricBar(title: isTangSongScenario ? "军心" : "Satisfaction", value: assignment.satisfaction)
                         LabeledContent(isTangSongScenario ? "亲征干预" : "Interventions") {
-                            Text("\(assignment.interventionCount)")
+                            Text(interventionCountText(assignment.interventionCount))
                         }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(isTangSongScenario ? "亲征干预" : "Interventions")
+                        .accessibilityValue(interventionAccessibilityValue(assignment.interventionCount))
                     }
 
                     Button(isTangSongScenario ? "查看档案" : "View Profile", systemImage: "person.text.rectangle", action: onShowProfile)
@@ -97,6 +100,9 @@ struct GeneralCommandPanelView: View {
                         Label(division.name, systemImage: unitIcon(for: division))
                             .font(.caption)
                             .lineLimit(1)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(unitAccessibilityLabel(for: division))
+                            .accessibilityValue(strengthAccessibilityText(for: division))
                     }
                 }
             }
@@ -128,6 +134,9 @@ struct GeneralCommandPanelView: View {
                         Label(operationSummary(operation), systemImage: operationIcon(operation))
                             .font(.caption)
                             .lineLimit(2)
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel(operationAccessibilityLabel(operation))
+                            .accessibilityValue(operationAccessibilityValue(operation))
                     }
                 }
             }
@@ -157,6 +166,9 @@ struct GeneralCommandPanelView: View {
             ProgressView(value: Double(value), total: 100)
                 .tint(value >= 65 ? .green : value >= 40 ? .orange : .red)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
+        .accessibilityValue(metricAccessibilityValue(value))
     }
 
     private func initials(for general: GeneralData) -> String {
@@ -237,6 +249,28 @@ struct GeneralCommandPanelView: View {
         text.range(of: #"[A-Za-z]"#, options: .regularExpression) != nil
     }
 
+    private func metricAccessibilityValue(_ value: Int) -> String {
+        isTangSongScenario ? "\(value)，满百" : "\(value) out of 100"
+    }
+
+    private func interventionCountText(_ count: Int) -> String {
+        isTangSongScenario ? "\(count) 次" : "\(count)"
+    }
+
+    private func interventionAccessibilityValue(_ count: Int) -> String {
+        isTangSongScenario ? "\(count) 次" : "\(count)"
+    }
+
+    private func unitAccessibilityLabel(for division: Division) -> String {
+        isTangSongScenario ? "\(division.name)，兵力" : "\(division.name), strength"
+    }
+
+    private func strengthAccessibilityText(for division: Division) -> String {
+        isTangSongScenario
+            ? "\(division.strength)，满额\(division.maxStrength)"
+            : "\(division.strength) out of \(division.maxStrength)"
+    }
+
     private func unitIcon(for division: Division) -> String {
         if division.isArmor {
             return "shield.lefthalf.filled"
@@ -258,6 +292,21 @@ struct GeneralCommandPanelView: View {
         }
         let target = operation.targetRegionId?.rawValue ?? operation.sourceRegionId?.rawValue ?? operation.zoneId.rawValue
         return "\(operation.directiveType.rawValue) / \(target)"
+    }
+
+    private func operationAccessibilityLabel(_ operation: PlayerPlannedOperation) -> String {
+        if isTangSongScenario {
+            return "已拟军令：\(directiveLabel(operation.directiveType))"
+        }
+        return "Planned operation: \(operation.directiveType.rawValue)"
+    }
+
+    private func operationAccessibilityValue(_ operation: PlayerPlannedOperation) -> String {
+        isTangSongScenario ? operationTargetName(operation) : operationRawTarget(operation)
+    }
+
+    private func operationRawTarget(_ operation: PlayerPlannedOperation) -> String {
+        operation.targetRegionId?.rawValue ?? operation.sourceRegionId?.rawValue ?? operation.zoneId.rawValue
     }
 
     private func operationTargetName(_ operation: PlayerPlannedOperation) -> String {

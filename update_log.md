@@ -11,6 +11,38 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8af - 将领军令面板指标与列表读屏硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出 `GeneralCommandPanelView` 仍有裸数字和拆散读屏问题；该切片不与 v5.8z 将领档案页重复。
+- 忠诚/军心指标补合并 accessibility 语义，唐宋路径读作“数值，满百”。
+- 亲征干预显示为“N 次”，所属军队行补兵力与满额读屏值。
+- 已拟军令行补“已拟军令：进攻/固守”和目标值，减少图标与摘要被拆散朗读。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8af 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/GeneralCommandPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8af_general_command_panel_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改将领军令面板显示和 SwiftUI 可读语义，不改变 `GeneralData`、`GeneralAssignment`、`Division`、`PlayerPlannedOperation`、命令按钮、AI 决策、规则系统、日志结构或 Codable schema。
+- 战报行整行读屏、完整 VoiceOver 实机、截图布局、全项目玩家可见残留扫描和发布级 UI 验收仍未完成。
+
 ## v5.8ae - HUD 指标与队列读法硬化
 
 完成日期：2026-07-07
@@ -35,13 +67,15 @@
 
 验证结果：
 
-- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
-- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+- 按当前规范和用户要求，本机未运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 已推送到 `origin/main`：commit `92713e075e9f52cbf5f7fe0c956c6773037ef452`。
+- GitHub Actions `WWIIHexV0 CI Results` run `28843991712` attempt `1` 已完成并通过；artifact `wwiihexv0-ci-cloud-main-ci-v1-main-92713e0-run28843991712-attempt1` 已核对。
+- artifact manifest 匹配 `branch=main`、`commitSha=92713e075e9f52cbf5f7fe0c956c6773037ef452`、`runId=28843991712`、`runAttempt=1`；`staticChecksOutcome=success`、`buildOutcome=success`、`testOutcome=skipped`，JUnit 2 tests / 0 failures / 0 errors，`xcodebuild.log` 显示 `BUILD SUCCEEDED`。
 
 遗留事项：
 
 - 本轮只改 HUD 显示和 SwiftUI 可读语义，不改变 `EconomyState`、生产队列、资源规则、命令、胜利规则、日志结构或 Codable schema。
-- 将领军令面板指标、战报行整行读屏、完整 VoiceOver 实机、截图布局、全项目玩家可见残留扫描和发布级 UI 验收仍未完成。
+- 战报行整行读屏、完整 VoiceOver 实机、截图布局、全项目玩家可见残留扫描和发布级 UI 验收仍未完成。
 
 ## v5.8ad - 府库军备队列可读性硬化
 

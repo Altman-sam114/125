@@ -661,6 +661,13 @@ v5.8ae 当前已落地：
 - HUD 指标行补充合并后的 accessibility label/value，读屏时按单个指标读出当前标签和值。
 - 该切片只改 HUD 显示和 SwiftUI accessibility 语义，不改变 `EconomyState`、生产队列、资源规则、胜利规则、命令执行、日志结构或 Codable schema；完整 VoiceOver 实机、截图布局和发布级 UI 验收仍未完成。
 
+v5.8af 当前已落地：
+
+- `GeneralCommandPanelView` 的忠诚/军心指标补充合并 accessibility 语义，唐宋路径读作“数值，满百”。
+- 亲征干预不再显示裸数字，唐宋路径显示“N 次”并读出次数。
+- 所属军队行保留简洁名称显示，同时读屏补充兵力与满额；已拟军令行补“已拟军令：进攻/固守”和目标值。
+- 该切片只改将领军令面板显示和 SwiftUI accessibility 语义，不改变 `GeneralData`、`GeneralAssignment`、`Division`、`PlayerPlannedOperation`、命令按钮、AI 决策、规则系统或 Codable schema；完整 VoiceOver 实机、截图布局和发布级 UI 验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
