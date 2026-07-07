@@ -38,7 +38,9 @@
 验证结果：
 
 - 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
-- 等待本轮 push 到 `origin/main` 后由 GitHub Actions `WWIIHexV0 CI Results` 云端重验证，并下载未加密 artifact 核对 manifest、JUnit、主构建日志和 failure summary。
+- 已推送到 `origin/main`：commit `38fac8f01927bde2151a9eca378284029a504f09`。
+- GitHub Actions `WWIIHexV0 CI Results` run `28854791987` attempt `1` 已完成并通过；artifact `wwiihexv0-ci-cloud-main-ci-v1-main-38fac8f-run28854791987-attempt1` 已核对。
+- artifact manifest 匹配 `branch=main`、`commitSha=38fac8f01927bde2151a9eca378284029a504f09`、`runId=28854791987`、`runAttempt=1`；`staticChecksOutcome=success`、`buildOutcome=success`、`testOutcome=skipped`，JUnit 2 tests / 0 failures / 0 errors，`xcodebuild.log` 显示 `BUILD SUCCEEDED`。
 
 遗留事项：
 
