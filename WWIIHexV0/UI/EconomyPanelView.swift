@@ -63,6 +63,7 @@ struct EconomyPanelView: View {
                 }
                 .buttonStyle(.bordered)
                 .disabled(!canQueue(kind))
+                .accessibilityLabel(productionAccessibilityLabel(for: kind))
                 .accessibilityValue(productionAccessibilityValue(for: kind))
                 .accessibilityHint(productionAccessibilityHint(for: kind))
 
@@ -89,10 +90,13 @@ struct EconomyPanelView: View {
                         Text(productionName(for: order.kind))
                             .lineLimit(1)
                         Spacer()
-                        Text(order.isReady ? readyLabel : "\(order.remainingTurns)")
+                        Text(queueStatusText(for: order))
                             .foregroundStyle(order.isReady ? .green : .secondary)
                     }
                     .font(.caption)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel(queueAccessibilityLabel(for: order))
+                    .accessibilityValue(queueStatusText(for: order))
                 }
             }
         }
@@ -107,6 +111,9 @@ struct EconomyPanelView: View {
                 .font(.subheadline.weight(.semibold))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(label)
+        .accessibilityValue("\(value)")
     }
 
     private func canQueue(_ kind: ProductionKind) -> Bool {
@@ -132,6 +139,13 @@ struct EconomyPanelView: View {
         }
 
         return "Cost \(resourceSummary(kind.cost)) | \(kind.buildTurns) turn(s)"
+    }
+
+    private func productionAccessibilityLabel(for kind: ProductionKind) -> String {
+        if gameState.isTangSongScenario {
+            return "下达军备令：\(productionName(for: kind))"
+        }
+        return productionName(for: kind)
     }
 
     private func productionAccessibilityValue(for kind: ProductionKind) -> String {
@@ -170,6 +184,22 @@ struct EconomyPanelView: View {
             : "\(costLine). Insufficient resources."
     }
 
+    private func queueStatusText(for order: ProductionOrder) -> String {
+        if order.isReady {
+            return readyLabel
+        }
+        return gameState.isTangSongScenario
+            ? "尚需 \(order.remainingTurns) 回合"
+            : "\(order.remainingTurns)"
+    }
+
+    private func queueAccessibilityLabel(for order: ProductionOrder) -> String {
+        if gameState.isTangSongScenario {
+            return "军备队列：\(productionName(for: order.kind))"
+        }
+        return productionName(for: order.kind)
+    }
+
     private func iconName(for kind: ProductionKind) -> String {
         switch kind {
         case .infantryDivision:
@@ -198,15 +228,15 @@ struct EconomyPanelView: View {
     }
 
     private var incomeManpowerLabel: String {
-        gameState.isTangSongScenario ? "入丁" : "Income MP"
+        gameState.isTangSongScenario ? "本回合丁口" : "Income MP"
     }
 
     private var incomeIndustryLabel: String {
-        gameState.isTangSongScenario ? "入帛" : "Income IC"
+        gameState.isTangSongScenario ? "本回合钱帛" : "Income IC"
     }
 
     private var upkeepLabel: String {
-        gameState.isTangSongScenario ? "耗粮" : "Upkeep"
+        gameState.isTangSongScenario ? "本回合耗粮" : "Upkeep"
     }
 
     private var readyLabel: String {

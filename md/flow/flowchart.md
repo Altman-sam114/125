@@ -59,6 +59,7 @@
   -> v5.8aa 起 MapEditor 画布 value、底图控件和快捷说明继续硬化
   -> v5.8ab 起 MapEditor 画布粮源与军队符号继续硬化
   -> v5.8ac 起军议与方面军令反馈继续硬化
+  -> v5.8ad 起府库军备队列剩余回合、收入指标和读屏语义继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -261,7 +262,7 @@ flowchart TD
     INCOME["收入计算<br/>EconomyRules.income<br/>manpower / industry / supplies<br/>唐宋显示为丁口 / 钱帛 / 粮草"]:::economy
     LEDGER["政权府库总账<br/>FactionEconomyLedger<br/>库存、上回合收入、维护费、补员消耗、队列"]:::economy
 
-    UI["府库面板<br/>EconomyPanelView<br/>展示资源和军备按钮"]:::ui
+    UI["府库面板<br/>EconomyPanelView<br/>展示资源、军备按钮、队列剩余回合和读屏语义"]:::ui
     QUEUE["生产命令<br/>Command.queueProduction<br/>玩家/未来 AI 共用底层命令"]:::command
     VALIDATE["生产校验<br/>CommandValidator.validateProduction<br/>检查 phase 与资源是否足够"]:::rules
     PAY["预付成本并入队<br/>EconomyRules.queueProduction<br/>扣资源，追加 ProductionOrder<br/>唐宋日志使用军备/粮草口径"]:::economy

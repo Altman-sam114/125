@@ -11,6 +11,38 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8ad - 府库军备队列可读性硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描指出主游戏府库面板仍有更高产品价值的可读性切片：队列剩余回合裸数字、收入/耗粮短标签和军备按钮动作语义可继续收口。
+- `EconomyPanelView` 唐宋路径的军备队列未就绪项改为“尚需 N 回合”，就绪项继续显示“就绪”。
+- 府库指标从“入丁 / 入帛 / 耗粮”改为“本回合丁口 / 本回合钱帛 / 本回合耗粮”，指标行补合并后的 accessibility label/value。
+- 军备按钮补“下达军备令：军备名”读屏动作名，队列行补“军备队列：军备名”和剩余回合 accessibility value。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8ad 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/EconomyPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8ad_economy_queue_readability_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 本轮完成后推送到 `origin/main`，等待 GitHub Actions `WWIIHexV0 CI Results` 云端验证和 artifact 核对。
+
+遗留事项：
+
+- 本轮只改府库面板显示和 SwiftUI 可读语义，不改变 `ProductionOrder`、`ProductionKind`、经济规则、队列执行、资源扣除、命令、日志结构或 Codable schema。
+- 完整 VoiceOver 实机、截图布局、全项目玩家可见残留扫描和发布级 UI 验收仍未完成。
+
 ## v5.8ac - 军议与方面军令反馈硬化
 
 完成日期：2026-07-07

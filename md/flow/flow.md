@@ -647,6 +647,13 @@ v5.8ac 当前已落地：
 - `AgentPanelView` 唐宋玩家态把“军议原文”改称“军议详文”，raw JSON 仍只在 legacy/开发态路径按既有逻辑显示。
 - 该切片只改玩家可见反馈和显示桥，不改变 `Command`、`ZoneDirective`、`WarDirectiveRecord`、`AgentDecisionRecord.rawJSON`、命令执行、AI 决策、规则或 Codable schema；完整全项目写入端本地化和发布级 UI 验收仍未完成。
 
+v5.8ad 当前已落地：
+
+- `EconomyPanelView` 在唐宋路径下把军备队列未就绪项从裸数字改为“尚需 N 回合”，就绪项继续显示“就绪”，减少府库队列里的调试式数字残留。
+- 府库本回合指标从“入丁 / 入帛 / 耗粮”改为“本回合丁口 / 本回合钱帛 / 本回合耗粮”，并为指标行补充合并后的 accessibility label/value。
+- 军备按钮补充“下达军备令：军备名”读屏动作名，队列行补充“军备队列：军备名”和剩余回合 accessibility value。
+- 该切片只改府库面板显示和 SwiftUI accessibility 语义，不改变 `ProductionOrder`、`ProductionKind`、`EconomyRules`、`Command.queueProduction`、资源扣除、队列执行、日志结构或 Codable schema；完整 VoiceOver 实机、截图布局和发布级 UI 验收仍未完成。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
