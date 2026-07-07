@@ -11,6 +11,42 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8aq - 唐宋整补粮道门槛
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 按用户“古代作战不存在现代战线、骑兵强大、补给粮草很重要、作战模式需继续研究”的方向，继续做一处粮草规则小切片。
+- 本轮并发子 Agent 已用于扫描候选方向：低补给 attrition、围城破防 encircled、玩家态“前线/防区”残留和整补粮道门槛。主线程选择最小安全落点：唐宋整补必须先接通粮道。
+- `CommandValidator.validateRecoveryCommand` 在唐宋场景下要求目标军队 `SupplyState.supplied`；缺粮或被围军队返回 `CommandValidationError.supplyRecoveryBlocked`。
+- 新增“粮道不通，不可整补”唐宋显示桥，命令面板和战报 raw fallback 都能显示中文拒绝原因。
+- legacy 阿登路径保持原有整补校验，不改变非唐宋场景行为。
+- 同步 README、md 大纲、flow 文档、流程图和 v5.8aq 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/Rules/CommandValidator.swift`
+- `WWIIHexV0/Commands/CommandValidation.swift`
+- `WWIIHexV0/UI/CommandPanelView.swift`
+- `WWIIHexV0/UI/EventLogView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/prompt/v5.0-唐宋迁移/v5.8aq_supply_recovery_gate_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 待推送到 `origin/main` 后由 GitHub Actions `WWIIHexV0 CI Results` 云端验证，并下载未加密 artifact 核对 manifest、JUnit、静态检查日志、failure summary 和 `xcodebuild.log`。
+
+遗留事项：
+
+- 本轮不是完整古代战争系统重构，不新增低补给 attrition、粮队、漕运、仓储容量、自动破城、围城破防 encircled、骑军 AI、会战窗口或 CK3 式战争系统。
+- UI 与文档中仍有部分 legacy `FrontLine` / `FrontZone` / 防区口径需要后续小切片继续收口；内部 schema 暂不重命名。
+
 ## v5.8ap - 唐宋骑军追击与将领档案接触口径
 
 完成日期：2026-07-07

@@ -735,6 +735,12 @@ v5.8ap 当前已落地：
 - `GeneralProfileView` 的唐宋旧英文履历 fallback 从“战线形势”改为“敌我接触形势”，继续避免玩家态把唐宋战争理解成现代连续战线。
 - 该切片不新增骑军 AI、粮队、会战窗口、真实 CK3 式战争系统或新的 Codable schema；仍只是古代作战模型在既有 `Command` / `RuleEngine` 管线内的规则小步。
 
+v5.8aq 当前已落地：
+
+- `CommandValidator.validateRecoveryCommand` 在唐宋场景下要求整补军队处于 `SupplyState.supplied`；缺粮或被围军队返回 `CommandValidationError.supplyRecoveryBlocked`。
+- `CommandValidationError.supplyRecoveryBlocked` 的唐宋显示为“粮道不通，不可整补”，`CommandPanelView` 与 `EventLogView` 也补 raw fallback 显示桥。
+- 该切片让粮道从 UI、供给状态、攻势限制继续推进为整补前置条件；legacy 阿登路径保持原有整补校验，不新增 `SupplyState`、粮队、仓储容量、低补给 attrition、围城破城自动 encircled 或新 Codable schema。
+
 v5.8c 当前已落地：
 
 - `DiplomacyPanelView` 在唐宋场景下把外交状态、国家/集团副标题、君主主事、国策、重点方面、归附状态和归附目标州府 fallback 做显示桥，关系状态显示为盟好、称臣、协战、中立、敌对、交战、归附中或议和。
@@ -1621,7 +1627,7 @@ garrison
   -> 守 city / fortress / 具名城市或关隘 +1 防御
 ```
 
-这只是战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地；v5.6a 另行新增 `Command.proposeSubmission` 作为外交归附规则合同首轮，但它只写外交记录和天命，不交割地图控制权；v5.6g 已把唐宋胜利评价桥推进为优先读取场景 JSON `victoryConditions`。v5.8ao 起，唐宋 `CommandValidator` 会拒绝被围断粮军主动攻击或围城，拒绝原因是 `supplyBlocked`。v5.8ap 起，唐宋骑军使敌军在平原，或攻守相邻地格存在道路的丘陵条件自动退却时会追加追击兵力损耗；城池、关隘、山林和山地不触发该追击。自动破城、完整外交归附、完整漕运、粮队、治理评分、完整统一结算和 CK3 式战争系统仍未实现。
+这只是战斗数值切片：攻击、反击、撤退、消灭仍由 `CommandExecutor` / `RuleEngine` 执行；攻击不会直接占领 hex。围城状态、城防耐久、修城、解围、招降、地图围城 overlay 和 AI 围城/招降指令首轮已通过 `Command.besiege` / `Command.repairFortification` / `Command.relieveSiege` / `Command.demandSurrender`、`SiegeState`、只读 `SiegeOverlayState`、`WarCommandExecutor.siegeCommand` 和 `WarCommandExecutor.demandSurrenderCommand` 落地；v5.6a 另行新增 `Command.proposeSubmission` 作为外交归附规则合同首轮，但它只写外交记录和天命，不交割地图控制权；v5.6g 已把唐宋胜利评价桥推进为优先读取场景 JSON `victoryConditions`。v5.8ao 起，唐宋 `CommandValidator` 会拒绝被围断粮军主动攻击或围城，拒绝原因是 `supplyBlocked`。v5.8ap 起，唐宋骑军使敌军在平原，或攻守相邻地格存在道路的丘陵条件自动退却时会追加追击兵力损耗；城池、关隘、山林和山地不触发该追击。v5.8aq 起，唐宋缺粮或被围军队也不能通过 `Command.resupply` 整补恢复，拒绝原因是 `supplyRecoveryBlocked`。自动破城、完整外交归附、完整漕运、粮队、治理评分、完整统一结算和 CK3 式战争系统仍未实现。
 
 v5.3 围城城防、修城、解围与招降首轮：
 
@@ -1812,7 +1818,7 @@ canSupplyPass / RegionSupplyRules
   -> 不再依赖二元 Faction.opponent
 ```
 
-这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。v5.8ao 起，被围断粮军不可主动攻击或围城，让粮道和围困不只是显示读法。单位面板已有粮道读法，地图已有只读抽象粮道虚线；完整漕运、粮草运输队、仓储容量、自动破城和逐 hex 粮道路径仍未实现。
+这让唐宋路径下开封、洛阳、太原、扬州、金陵、成都、杭州等高 `supplyValue` 且己控的州府可作为粮仓源影响补给；缺粮、包围和围城效果仍通过既有 `lowSupply` / `encircled` 影响攻击、防御、移动和 attrition。v5.8ao 起，被围断粮军不可主动攻击或围城，让粮道和围困不只是显示读法。v5.8aq 起，唐宋缺粮或被围军队也不可整补恢复，必须先重新接通粮道。单位面板已有粮道读法，地图已有只读抽象粮道虚线；完整漕运、粮草运输队、仓储容量、低补给 attrition、自动破城和逐 hex 粮道路径仍未实现。
 
 ---
 

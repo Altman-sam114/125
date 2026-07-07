@@ -344,6 +344,9 @@ struct CommandPanelView: View {
         if message.contains("supplyBlocked") {
             return "军令被拒：粮道断绝，不可主动出击。"
         }
+        if message.contains("supplyRecoveryBlocked") {
+            return "军令被拒：粮道不通，不可整补。"
+        }
         return TangSongEventLogMessage.display(message)
     }
 }

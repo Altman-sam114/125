@@ -350,7 +350,19 @@ struct CommandValidator {
             return .invalid(.alreadyActed)
         }
 
+        guard canRecover(division, in: state) else {
+            return .invalid(.supplyRecoveryBlocked)
+        }
+
         return .valid
+    }
+
+    private func canRecover(_ division: Division, in state: GameState) -> Bool {
+        guard state.isTangSongScenario else {
+            return true
+        }
+
+        return division.supplyState == .supplied
     }
 
     private func validateEndTurn(in state: GameState) -> CommandValidation {
