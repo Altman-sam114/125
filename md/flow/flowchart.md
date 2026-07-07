@@ -69,6 +69,7 @@
   -> v5.8ak 起 HUD 目标提示摘要和下一步提示卡片读屏继续硬化
   -> v5.8al 起 AI 面板军令结果行标题和执行状态读屏继续硬化
   -> v5.8am 起命令面板军令状态、结束回合状态和最近反馈读屏继续硬化
+  -> v5.8an 起外交面板诸国、关系和归附记录行读屏继续硬化
   -> v0.5 元帅层是战略意图层，不替代战术权威
   -> 玩家和 AI 都必须把命令交给 RuleEngine
   -> 命令执行后再同步刷新战略层和 UI
@@ -111,7 +112,7 @@ flowchart TD
     GENPANELS["将领面板读法<br/>GeneralCommandPanelView + GeneralProfileView<br/>唐宋场景显示将领军令、档案、用兵、所属政权、辖下军队和 planned operation 目标名称"]:::ui
     TOOLTIP["常驻军队提示<br/>UnitTooltipView<br/>唐宋场景显示兵种、兵力、补给、退却和本回合"]:::ui
     AIPANEL["AI 面板玩家态/开发态分层<br/>AgentPanelView + AgentDecisionRecord + WarDirectiveRecord<br/>玩家态显示军议摘要、方面军令和失败摘要<br/>军令结果行合并标题和执行状态读屏<br/>唐宋 raw/Latin 文本使用中文兜底"]:::ui
-    DIPPANEL["外交面板读法硬化<br/>DiplomacyPanelView + DiplomacyState + MandateState<br/>唐宋默认路径显示天命、诸国、关系和归附读法<br/>Latin 国家/集团名与 ASCII 连接符有中文兜底"]:::ui
+    DIPPANEL["外交面板读法硬化<br/>DiplomacyPanelView + DiplomacyState + MandateState<br/>唐宋默认路径显示天命、诸国、关系和归附读法<br/>诸国、关系和归附记录行合并读屏<br/>Latin 国家/集团名与 ASCII 连接符有中文兜底"]:::ui
     GOAL["统一目标锚点与读屏提示<br/>HUDView.objectiveGuideText<br/>按 objective 控制方只读显示已据/待取关键州府<br/>目标摘要合并读屏，目标按钮保留独立焦点"]:::ui
     FOCUS["目标聚焦<br/>AppContainer.focusObjective<br/>只更新 selectedHex / selectedRegionId"]:::ui
     SPOTLIGHT["目标州府 spotlight<br/>MapDisplayAdapter.objectiveOverlays + BoardScene<br/>只读绘制已据/待取目标"]:::ui

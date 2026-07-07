@@ -11,6 +11,40 @@
 
 当前制度：唐宋 v5.x 迁移默认使用 `main` 直推和 GitHub Actions 云端重验证；下方 v0.x 分支、阿登、Guderian、Bastogne 等记录保留为历史事实和 legacy 回归参考，不代表当前默认产品主线。
 
+## v5.8an - 外交面板复合行读屏硬化
+
+完成日期：2026-07-07
+
+核心更新：
+
+- 并发子 Agent 只读扫描确认 v5.8am 后下一处低风险 UI 可读性切片是 `DiplomacyPanelView` 的诸国、关系和最近归附记录复合行。
+- 诸国列表行补充合并后的 accessibility label/value，唐宋路径读出国家名、所属政权、集团和战意。
+- 外交关系列表行补充合并后的 accessibility label/value，唐宋路径读出两国关系标题和关系状态。
+- 最近归附记录行补充合并后的 accessibility label/value，唐宋路径读出归附目标、结果状态、回合、天命变化和归附州府。
+- 本轮只处理 `DiplomacyPanelView` 复合行读屏语义，不扩大到外交状态规则、归附控制权交割、AI 方面军令卡片、诏令朝议摘要块或主棋盘逐地块 focus tree。
+- 同步 README、md 大纲、flow 文档、流程图、mermaid 源图和 v5.8an 阶段记录。
+
+关键文件：
+
+- `WWIIHexV0/UI/DiplomacyPanelView.swift`
+- `README.md`
+- `md/plan/plan.md`
+- `md/flow/flow.md`
+- `md/flow/flowchart.md`
+- `md/flow/01_overall_core_flow.mermaid`
+- `md/prompt/v5.0-唐宋迁移/v5.8an_diplomacy_row_accessibility_record.md`
+- `update_log.md`
+
+验证结果：
+
+- 按当前规范和用户要求，本机不运行测试、build、Swift parse、Markdown 检查、`git diff --check`、模拟器、截图或 VoiceOver 实机验收。
+- 等待 push 到 `origin/main` 后由 GitHub Actions `WWIIHexV0 CI Results` 云端重验证并下载未加密 artifact 核对。
+
+遗留事项：
+
+- 本轮只改外交面板 SwiftUI 可读语义，不改变 `DiplomacyState`、`MandateState`、`PacificationRecord`、`Command.proposeSubmission`、关系投影、命令执行、AI 决策、控制权交割、日志结构或 Codable schema。
+- 完整 VoiceOver 实机、截图布局、AI 方面军令卡片、诏令朝议摘要块、主棋盘逐地块/逐军队 focus tree、全项目玩家可见残留扫描、结构化 event payload、真 LLM 输出本地化和发布级 UI 验收仍未完成。
+
 ## v5.8am - 命令面板状态与反馈读屏硬化
 
 完成日期：2026-07-07

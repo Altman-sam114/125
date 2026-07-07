@@ -709,7 +709,14 @@ v5.8am 当前已落地：
 
 - `CommandPanelView` 的军令状态文本补充 accessibility label/value，读屏时以“军令状态”读出当前可下令、观战、阶段不可下令、非亲征军队或已行动等状态。
 - 结束回合按钮补充可用状态 value；最近军令反馈文本补充“军令反馈” label，并复用 `commandMessageText(_:)` 的唐宋显示桥作为读屏 value。
-- 该切片只改命令面板 SwiftUI accessibility 语义，不改变 `Command`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、`lastCommandMessage` 写入端、按钮启停条件、命令反馈映射、AI 决策、规则系统、日志结构或 Codable schema；完整 VoiceOver 实机、截图布局、外交面板复合行、AI 方面军令卡片和发布级 UI 验收仍未完成。
+- 该切片只改命令面板 SwiftUI accessibility 语义，不改变 `Command`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、`lastCommandMessage` 写入端、按钮启停条件、命令反馈映射、AI 决策、规则系统、日志结构或 Codable schema；完整 VoiceOver 实机、截图布局、AI 方面军令卡片和发布级 UI 验收仍未完成。
+
+v5.8an 当前已落地：
+
+- `DiplomacyPanelView` 的诸国列表行补充合并 accessibility 语义，读屏时把国家名、所属政权、集团和战意作为一个国家条目读出。
+- 外交关系列表行补充合并 accessibility 语义，读屏时以两国关系标题作为 label，并把盟好、称臣、协战、中立、敌对、交战、归附中或议和等状态作为 value。
+- 最近归附记录行补充合并 accessibility 语义，读屏时把归附目标标题、结果状态、回合、天命变化和归附州府作为一条归附记录读出。
+- 该切片只改外交面板 SwiftUI accessibility 语义，不改变 `DiplomacyState`、`MandateState`、`PacificationRecord`、`Command.proposeSubmission`、外交关系投影、命令、规则、AI 决策、控制权交割或 Codable schema；完整 VoiceOver 实机、截图布局、AI 方面军令卡片、诏令朝议摘要块和发布级 UI 验收仍未完成。
 
 v5.8c 当前已落地：
 
@@ -721,7 +728,7 @@ v5.8d 当前已落地：
 
 - `EventLogView` 在唐宋场景下让战报正文 `GameLogEntry.message` 和本回合摘要 highlight 统一经过 `TangSongEventLogMessage` 显示桥，常见英文命令、交互、战斗、退却、补给、AI 执行和 validation rawValue 显示为唐宋读法。
 - 该显示桥覆盖 `Command accepted/rejected`、选中地块/州府/军队、`attacked/counterattacked`、`strength`、自动退却、整补、退却失败、AI command result 和常见 `CommandValidationError.rawValue`，减少默认战报主路径英文和内部枚举外露。
-- 该切片只改战报 UI 读法，不改变 `GameLogEntry.message`、`CommandResultLogEntry`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、事件写入职责、日志 Codable schema 或任何规则结果。v5.8q 已覆盖常见 AppContainer 交互反馈写入端；v5.8ag 进一步让最近战报列表行合并分类、元数据和正文读屏；v5.8ah 进一步让本回合/最近战报摘要卡片合并标题、回合、汇总和重点条目读屏；v5.8ai 进一步让胜负和评分估算卡片合并胜负原因、分数、档位和说明读屏；v5.8aj 进一步让胜利目标行合并标题、状态、摘要和详情读屏；v5.8ak 进一步让 HUD 目标摘要和下一步提示合并读屏；v5.8al 进一步让 AI 面板军令结果行合并命令标题和执行状态读屏；v5.8am 进一步让命令面板军令状态、结束回合状态和最近军令反馈补读屏上下文；更完整的结构化 event payload、真 LLM 输出本地化和全项目写入端唐宋化仍留后续。
+- 该切片只改战报 UI 读法，不改变 `GameLogEntry.message`、`CommandResultLogEntry`、`CommandValidator`、`CommandExecutor`、`RuleEngine`、事件写入职责、日志 Codable schema 或任何规则结果。v5.8q 已覆盖常见 AppContainer 交互反馈写入端；v5.8ag 进一步让最近战报列表行合并分类、元数据和正文读屏；v5.8ah 进一步让本回合/最近战报摘要卡片合并标题、回合、汇总和重点条目读屏；v5.8ai 进一步让胜负和评分估算卡片合并胜负原因、分数、档位和说明读屏；v5.8aj 进一步让胜利目标行合并标题、状态、摘要和详情读屏；v5.8ak 进一步让 HUD 目标摘要和下一步提示合并读屏；v5.8al 进一步让 AI 面板军令结果行合并命令标题和执行状态读屏；v5.8am 进一步让命令面板军令状态、结束回合状态和最近军令反馈补读屏上下文；v5.8an 进一步让外交面板诸国、关系和归附记录行合并读屏；更完整的结构化 event payload、真 LLM 输出本地化和全项目写入端唐宋化仍留后续。
 
 v5.8k 当前已落地：
 

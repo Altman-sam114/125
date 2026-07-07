@@ -87,6 +87,9 @@ struct DiplomacyPanelView: View {
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(country.faction == activeFaction ? .primary : .secondary)
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(countryDisplayName(country))
+                .accessibilityValue(countryAccessibilityValue(country))
             }
         }
     }
@@ -126,6 +129,9 @@ struct DiplomacyPanelView: View {
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(relation.status.isHostile ? .red : .secondary)
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(relationTitle(relation))
+                    .accessibilityValue(relationAccessibilityValue(relation))
                 }
             }
         }
@@ -157,6 +163,9 @@ struct DiplomacyPanelView: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(pacificationTitle(record))
+                    .accessibilityValue(pacificationAccessibilityValue(record))
                 }
             }
         }
@@ -210,6 +219,18 @@ struct DiplomacyPanelView: View {
         isTangSongScenario ? "战意 \(warSupport)" : "\(warSupport)"
     }
 
+    private func countryAccessibilityValue(_ country: CountryProfile) -> String {
+        if isTangSongScenario {
+            return "\(displayName(for: country.faction))；\(blocDisplayName(country.blocId, faction: country.faction))；战意 \(country.warSupport)"
+        }
+        return "\(displayName(for: country.faction)); \(blocDisplayName(country.blocId, faction: country.faction)); war support \(country.warSupport)"
+    }
+
+    private func relationAccessibilityValue(_ relation: DiplomaticRelation) -> String {
+        let status = relation.status.displayName(isTangSongScenario: isTangSongScenario)
+        return isTangSongScenario ? "关系状态：\(status)" : "Status: \(status)"
+    }
+
     private func pacificationDetail(_ record: PacificationRecord) -> String {
         let regions = record.targetRegionIds
             .map { displayName(for: $0) }
@@ -218,6 +239,12 @@ struct DiplomacyPanelView: View {
             return "回合 \(record.turn)；天命 \(record.mandateDelta >= 0 ? "+" : "")\(record.mandateDelta)；州府 \(regions)"
         }
         return "Turn \(record.turn); mandate \(record.mandateDelta >= 0 ? "+" : "")\(record.mandateDelta); regions \(regions)"
+    }
+
+    private func pacificationAccessibilityValue(_ record: PacificationRecord) -> String {
+        let status = record.resultStatus.displayName(isTangSongScenario: isTangSongScenario)
+        let detail = pacificationDetail(record)
+        return isTangSongScenario ? "结果：\(status)；\(detail)" : "Result: \(status); \(detail)"
     }
 
     private func relationTitle(_ relation: DiplomaticRelation) -> String {
